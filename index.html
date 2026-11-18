@@ -67,7 +67,7 @@
 <div id="top">
   <select id="mkt" title="Data source"><option value="spot">Binance Spot</option><option value="fut">Binance Futures</option><option value="bys">Bybit Spot</option><option value="byl">Bybit Futures</option></select>
   <input id="sym" list="syms" value="BTCUSDT" title="Symbol">
-  <datalist id="syms"><option>BTCUSDT</option><option>ETHUSDT</option><option>SOLUSDT</option><option>BNBUSDT</option><option>XRPUSDT</option><option>PAXGUSDT</option><option>XAUUSDT</option></datalist>
+  <datalist id="syms"><option>BTCUSDT</option><option>ETHUSDT</option><option>SOLUSDT</option><option>BNBUSDT</option><option>XRPUSDT</option><option>XAUUSDT</option><option>XAGUSDT</option><option>PAXGUSDT</option></datalist>
   <select id="tf"><option value="60" selected>1m</option><option value="180">3m</option><option value="300">5m</option><option value="900">15m</option><option value="1800">30m</option><option value="3600">1h</option></select>
   <button id="indBtn">Indicators<span id="indCount">4</span></button>
   <button id="setBtn" title="Settings">⚙</button>
@@ -226,35 +226,50 @@ function pushBy(t){
   if (seen.size > 60000){ const it = seen.values(); for (let i = 0; i < 30000; i++) seen.delete(it.next().value); }
   pushRaw(t.T, t.p, t.q, t.sell);
 }
+async function initSource(src, sym){
+  let px, tick = 0;
+  if (src.kind === 'bn'){
+    px = +(await getJSON(src, `${src.pre}/ticker/price?symbol=${sym}`)).price;
+    try{ const ex = await getJSON(src, `${src.pre}/exchangeInfo?symbol=${sym}`); tick = +ex.symbols[0].filters.find(f => f.filterType === 'PRICE_FILTER').tickSize; }catch(e){}
+  } else {
+    const j = await getJSON(src, `/v5/market/tickers?category=${src.cat}&symbol=${sym}`);
+    if (!j.result || !j.result.list || !j.result.list.length) throw Object.assign(new Error(sym + ' not found on ' + src.name), {fatal:true});
+    px = +j.result.list[0].lastPrice;
+    try{ const ins = await getJSON(src, `/v5/market/instruments-info?category=${src.cat}&symbol=${sym}`); tick = +ins.result.list[0].priceFilter.tickSize; }catch(e){}
+  }
+  if (!(px > 0)) throw Object.assign(new Error(sym + ' not found on ' + src.name), {fatal:true});
+  return {px, tick};
+}
+const ALT = {spot:'bys', fut:'byl', bys:'spot', byl:'fut'};
 async function connect(){
   const my = ++S.sess;
   if (S.ws){ S.ws.onclose = null; S.ws.close(); S.ws = null; }
   S.trades = []; S.candles = []; S.wsBuf = []; S.lastId = -1; seen.clear(); lens = null; pinned = null; setFollow(true);
-  const sym = $('sym').value.trim().toUpperCase(), src = SRC[$('mkt').value];
-  S.push = src.kind === 'bn' ? pushBn : pushBy;
+  // fix common symbol names: XAUUSD -> XAUUSDT, BTC/USDT -> BTCUSDT
+  let sym = $('sym').value.trim().toUpperCase().replace(/[\/\-\s_.]/g, '');
+  if (/USD$/.test(sym)) sym += 'T';
+  $('sym').value = sym;
+  // gold & silver only trade on futures
+  if (/^(XAU|XAG)USDT$/.test(sym)){ if ($('mkt').value === 'spot') $('mkt').value = 'fut'; if ($('mkt').value === 'bys') $('mkt').value = 'byl'; }
   S.tfMs = +$('tf').value*1000;
-  setStatus(`connecting to ${src.name}…`, COL.gold);
-  try{
-    let px, tick = 0;
-    if (src.kind === 'bn'){
-      px = +(await getJSON(src, `${src.pre}/ticker/price?symbol=${sym}`)).price;
-      try{ const ex = await getJSON(src, `${src.pre}/exchangeInfo?symbol=${sym}`); tick = +ex.symbols[0].filters.find(f => f.filterType === 'PRICE_FILTER').tickSize; }catch(e){}
-    } else {
-      const j = await getJSON(src, `/v5/market/tickers?category=${src.cat}&symbol=${sym}`);
-      if (!j.result || !j.result.list || !j.result.list.length) throw Object.assign(new Error(sym + ' not found on ' + src.name), {fatal:true});
-      px = +j.result.list[0].lastPrice;
-      try{ const ins = await getJSON(src, `/v5/market/instruments-info?category=${src.cat}&symbol=${sym}`); tick = +ins.result.list[0].priceFilter.tickSize; }catch(e){}
+  let key = $('mkt').value, src = SRC[key], info = null;
+  for (const k of [key, ALT[key]]){
+    src = SRC[k]; setStatus(`connecting to ${src.name}…`, COL.gold);
+    try{ info = await initSource(src, sym); key = k; break; }
+    catch(e){
+      if (my !== S.sess) return;
+      if (!e.net){ setStatus('error: ' + e.message, COL.sell); return; }
     }
-    if (!(px > 0)) throw Object.assign(new Error(sym + ' not found'), {fatal:true});
-    const user = parseFloat($('row').value);
-    S.row = user > 0 ? user : Math.max(niceStep(px*0.00006), tick || 0);
-    if (tick && S.row < tick) S.row = tick;
-    S.dec = Math.max(decFor(S.row), tick ? decFor(tick) : 0, 2);
-    $('row').placeholder = 'auto ' + S.row;
-  }catch(e){
-    setStatus(e.net ? `can't reach ${src.name} — tap ⚙ and change Market, or turn on a VPN` : 'error: ' + e.message, COL.sell);
-    return;
   }
+  if (my !== S.sess) return;
+  if (!info){ setStatus(`can't reach Binance or Bybit on this network — turn on a VPN and press Connect`, COL.sell); return; }
+  $('mkt').value = key;
+  S.push = src.kind === 'bn' ? pushBn : pushBy;
+  const user = parseFloat($('row').value);
+  S.row = user > 0 ? user : Math.max(niceStep(info.px*0.00006), info.tick || 0);
+  if (info.tick && S.row < info.tick) S.row = info.tick;
+  S.dec = Math.max(decFor(S.row), info.tick ? decFor(info.tick) : 0, 2);
+  $('row').placeholder = 'auto ' + S.row;
   S.back = true; openWS(src, sym, my);
   const mins = Math.max(0, +$('hist').value || 0);
   try{
