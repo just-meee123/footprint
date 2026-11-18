@@ -61,20 +61,51 @@
   #fol button{background:#111827;color:var(--txt);border:1px solid #263043;border-radius:6px;padding:4px 10px;font-size:12px}
   #fol button{min-width:34px}
   #fol button.on{background:var(--acc);color:#03121f;border-color:var(--acc);font-weight:700}
+  /* symbol search */
+  #sym{cursor:pointer}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:none;align-items:flex-start;justify-content:center;padding-top:6vh}
+  .modal.open{display:flex}
+  .mbox{width:min(560px,96vw);max-height:84vh;display:flex;flex-direction:column;background:#0f141d;border:1px solid #263043;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.7)}
+  .mhd{display:flex;gap:6px;padding:10px;border-bottom:1px solid #1d2533}
+  .mhd input{flex:1;background:#0a0e15;color:var(--txt);border:1px solid #263043;border-radius:8px;padding:9px 10px;font:inherit;font-size:15px;text-transform:uppercase}
+  .mhd button{background:#1a2333;color:var(--txt);border:0;border-radius:8px;width:40px;font-size:16px}
+  .mtabs{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid #1d2533;overflow-x:auto}
+  .mtabs button{background:#151c28;color:var(--dim);border:1px solid #222c3d;border-radius:16px;padding:5px 12px;font:inherit;font-size:12px;white-space:nowrap}
+  .mtabs button.on{background:var(--acc);color:#03121f;border-color:var(--acc);font-weight:700}
+  #symList{overflow:auto;flex:1}
+  .si{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #141b27;cursor:pointer}
+  .si:hover{background:#151d2b}
+  .si b{min-width:96px;font-family:ui-monospace,Menlo,monospace}
+  .si span{flex:1;color:var(--dim);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .si i{font-style:normal;font-size:10px;color:#9fb3cf;background:#1a2333;border-radius:5px;padding:2px 6px}
+  /* drawing toolbar */
+  #dtb{position:absolute;left:6px;top:8px;z-index:9;display:flex;flex-direction:column;gap:2px;background:rgba(13,18,27,.95);border:1px solid #222c3d;border-radius:10px;padding:3px;max-height:calc(100% - 80px);overflow-y:auto;scrollbar-width:none}
+  #dtb.hide>*:not(#dtT){display:none}
+  #dtb button{width:32px;height:30px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:7px;color:#b8c4d6;padding:0}
+  #dtb button:hover{background:#1a2333}
+  #dtb button.on{background:var(--acc);color:#03121f}
+  #dtb svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  #dtb hr{border:0;border-top:1px solid #222c3d;margin:2px 3px}
+  #dtb input[type=color]{width:26px;height:24px;border:0;padding:0;background:none;margin:3px auto}
   @media (max-width:600px){#kl{width:148px;right:76px;top:4px;font-size:10px;padding:5px 7px}#kl .row .p{width:56px}#kl .h{margin:3px 0 2px}}
 </style>
 </head>
 <body>
 <div id="top">
-  <select id="mkt" title="Data source"><option value="spot">Binance Spot</option><option value="fut">Binance Futures</option><option value="bys">Bybit Spot</option><option value="byl">Bybit Futures</option></select>
-  <input id="sym" list="syms" value="BTCUSDT" title="Symbol">
-  <datalist id="syms"><option>BTCUSDT</option><option>ETHUSDT</option><option>SOLUSDT</option><option>BNBUSDT</option><option>XRPUSDT</option><option>XAUUSDT</option><option>XAGUSDT</option><option>PAXGUSDT</option></datalist>
+  <select id="mkt" title="Data source"><option value="spot">Binance Spot</option><option value="fut">Binance Futures</option><option value="bys">Bybit Spot</option><option value="byl">Bybit Futures</option><option value="fx">Forex (Dukascopy)</option></select>
+  <input id="sym" value="BTCUSDT" title="Search symbol" readonly>
   <select id="tf"><option value="60" selected>1m</option><option value="180">3m</option><option value="300">5m</option><option value="900">15m</option><option value="1800">30m</option><option value="3600">1h</option></select>
   <button id="indBtn">Indicators<span id="indCount">4</span></button>
   <button id="setBtn" title="Settings">⚙</button>
   <button id="go" class="pri">Connect</button>
   <div id="status"><div id="dot"></div><span id="stxt">idle</span></div>
 </div>
+
+<div id="symModal" class="modal"><div class="mbox">
+  <div class="mhd"><input id="symQ" placeholder="Search: EURUSD, BTC, gold…" autocomplete="off"><button id="symX">✕</button></div>
+  <div class="mtabs"><button data-g="all" class="on">All</button><button data-g="crypto">Crypto</button><button data-g="forex">Forex</button><button data-g="metals">Metals</button></div>
+  <div id="symList"></div>
+</div></div>
 
 <div id="indMenu" class="menu">
   <div class="t">★ PRO</div>
@@ -96,11 +127,37 @@
   <label style="flex-direction:column;align-items:stretch;gap:4px">Relay URL <input id="dukaUrl" type="text" placeholder="https://….workers.dev" style="width:100%"></label>
   <label>History days <input id="dDays" type="number" value="7" min="1" max="60"></label>
   <label>Tick detail (last hours) <input id="dHours" type="number" value="12" min="0" max="72"></label>
+  <div class="t" style="margin-top:8px">Forex live (optional)</div>
+  <label style="flex-direction:column;align-items:stretch;gap:4px">Finnhub API key (free at finnhub.io) <input id="fhKey" type="text" placeholder="paste key for live forex ticks" style="width:100%"></label>
   <label>Trade history, Binance (min) <input id="hist" type="number" value="60" min="0" max="720"></label>
 </div>
 
 <div id="wrap">
   <canvas id="cv"></canvas>
+<div id="dtb">
+  <button id="dtT" title="Show / hide drawing tools"><svg viewBox="0 0 20 20"><path d="M13 3l4 4-9 9H4v-4z"/></svg></button>
+  <hr>
+  <button data-t="cursor" title="Cursor" class="on"><svg viewBox="0 0 20 20"><path d="M5 3l11 7-5 1-2 5z"/></svg></button>
+  <button data-t="trend" title="Trend line"><svg viewBox="0 0 20 20"><path d="M4 16L16 4"/><circle cx="4" cy="16" r="1.6"/><circle cx="16" cy="4" r="1.6"/></svg></button>
+  <button data-t="ray" title="Ray"><svg viewBox="0 0 20 20"><path d="M4 16L18 2"/><circle cx="4" cy="16" r="1.6"/><circle cx="10" cy="10" r="1.6"/></svg></button>
+  <button data-t="ext" title="Extended line"><svg viewBox="0 0 20 20"><path d="M1 19L19 1"/><circle cx="7" cy="13" r="1.6"/><circle cx="13" cy="7" r="1.6"/></svg></button>
+  <button data-t="hline" title="Horizontal line"><svg viewBox="0 0 20 20"><path d="M1 10h18"/><circle cx="10" cy="10" r="1.6"/></svg></button>
+  <button data-t="hray" title="Horizontal ray"><svg viewBox="0 0 20 20"><path d="M5 10h14"/><circle cx="5" cy="10" r="1.6"/></svg></button>
+  <button data-t="vline" title="Vertical line"><svg viewBox="0 0 20 20"><path d="M10 1v18"/><circle cx="10" cy="10" r="1.6"/></svg></button>
+  <button data-t="rect" title="Rectangle"><svg viewBox="0 0 20 20"><rect x="3" y="5" width="14" height="10" rx="1"/></svg></button>
+  <button data-t="fib" title="Fib retracement"><svg viewBox="0 0 20 20"><path d="M2 4h16M2 8h16M2 12h16M2 16h16"/><path d="M4 16L16 4" stroke-dasharray="2 2"/></svg></button>
+  <button data-t="range" title="Price range / measure"><svg viewBox="0 0 20 20"><path d="M10 2v16M6 5l4-3 4 3M6 15l4 3 4-3"/></svg></button>
+  <button data-t="long" title="Long position"><svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="7" fill="rgba(31,211,138,.5)"/><rect x="3" y="10" width="14" height="5" fill="rgba(255,77,94,.5)"/></svg></button>
+  <button data-t="short" title="Short position"><svg viewBox="0 0 20 20"><rect x="3" y="5" width="14" height="5" fill="rgba(31,211,138,.5)" transform="translate(0,7)"/><rect x="3" y="3" width="14" height="7" fill="rgba(255,77,94,.5)"/></svg></button>
+  <button data-t="text" title="Text"><svg viewBox="0 0 20 20"><path d="M4 4h12M10 4v13"/></svg></button>
+  <button data-t="brush" title="Brush"><svg viewBox="0 0 20 20"><path d="M3 15c3-1 3-5 6-6s4 3 8-4"/></svg></button>
+  <hr>
+  <button id="dMag" class="on" title="Magnet: snap to candle open/high/low/close"><svg viewBox="0 0 20 20"><path d="M5 3v7a5 5 0 0010 0V3M5 6h3M12 6h3"/></svg></button>
+  <input id="dCol" type="color" value="#4fb3ff" title="Drawing colour">
+  <button id="dHide" title="Hide / show drawings"><svg viewBox="0 0 20 20"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="10" cy="10" r="2.5"/></svg></button>
+  <button id="dDel" title="Delete selected drawing"><svg viewBox="0 0 20 20"><path d="M4 6h12M8 6V4h4v2M6 6l1 11h6l1-11"/></svg></button>
+  <button id="dClr" title="Remove all drawings"><svg viewBox="0 0 20 20"><path d="M4 4l12 12M16 4L4 16"/></svg></button>
+</div>
   <div id="kl"></div>
   <div id="xp">
     <div class="hd mono"><span id="xpT">XRay</span><span id="xpZ">1.0x</span></div>
@@ -123,7 +180,7 @@ const COL = {buy:'#1fd38a', sell:'#ff4d5e', acc:'#4fb3ff', dim:'#6b7689', txt:'#
 
 // ───────── state ─────────
 const S = {trades:[], k1:[], dk:[], dt:[], off:0, duka:false, candles:[], tfMs:60000, row:0, dec:2, mode:'delta', bigTh:250000, nPrints:6,
-           ws:null, wsBuf:[], back:false, lastId:-1, sess:0};
+           ws:null, wsBuf:[], back:false, lastId:-1, sess:0, unit:'$'};
 const V = {cw:9, panX:0, follow:true, auto:true, W:0, H:0, dpr:1, lo:0, hi:1};
 const ON = {xray:true, prints:true, levels:true, senti:true};
 let lens = null, prints = [], keyLv = [], buyPct = 50;
@@ -359,7 +416,7 @@ async function pool(tasks, n, onDone){
     try{ res[k] = await tasks[k](); }catch(e){ res[k] = {err:e}; } if (onDone) onDone(++done, tasks.length); } }));
   return res;
 }
-async function loadDuka(dsym, refPx, my){
+async function loadDuka(dsym, refPx, my, divHint){
   const days = clamp(+$('dDays').value || 7, 1, 60), hours = clamp(+$('dHours').value || 12, 0, 72);
   const now = Date.now(), today0 = Math.floor(now/86400000)*86400000, h0 = Math.floor(now/3600000)*3600000;
   const tasks = [];
@@ -369,7 +426,7 @@ async function loadDuka(dsym, refPx, my){
   for (let h = hours; h >= 1; h--){ const t0 = h0 - h*3600000, D = new Date(t0);
     const path = `${dsym}/${D.getUTCFullYear()}/${z2(D.getUTCMonth())}/${z2(D.getUTCDate())}/${z2(D.getUTCHours())}h_ticks.bi5`;
     tasks.push(async () => ({kind:'h', t0, raw: await dukaFile(path)})); }
-  const res = await pool(tasks, 6, (a, b) => { if (my === S.sess) setStatus(`LIVE · loading Dukascopy ${a}/${b}…`, COL.gold); });
+  const res = await pool(tasks, 6, (a, b) => { if (my === S.sess) setStatus(`${S.src && S.src.kind === 'fx' ? '' : 'LIVE · '}loading Dukascopy ${a}/${b}…`, COL.gold); });
   if (my !== S.sess) return null;
   const errs = res.filter(r => r && r.err);
   if (errs.length === res.length) throw errs[0].err;
@@ -389,13 +446,13 @@ async function loadDuka(dsym, refPx, my){
   for (const [, a, b, c, d] of rows){ if (c <= Math.min(a, b) && d >= Math.max(a, b)) oclh++; if (b >= Math.max(a, d) && c <= Math.min(a, d)) ohlc++; }
   // price scale: pick the divisor that lands next to the live price
   const sample = ticks.length ? ticks[ticks.length-1][1] : rows[rows.length-1][1];
-  let div = 1000, best = Infinity;
-  for (const x of [1, 10, 100, 1000, 10000, 100000]){ const e = Math.abs(Math.log(sample/x/refPx)); if (e < best){ best = e; div = x; } }
+  let div = divHint || 1000, best = Infinity;
+  if (refPx) for (const x of [1, 10, 100, 1000, 10000, 100000]){ const e = Math.abs(Math.log(sample/x/refPx)); if (e < best){ best = e; div = x; } }
   const k1 = rows.map(([t, a, b, c, d, v]) => oclh >= ohlc ? [t, a/div, d/div, c/div, b/div, v] : [t, a/div, b/div, c/div, d/div, v]);
   // tick rule: price ticking up = buying, ticking down = selling
   let prev = 0, sell = false; const tk = [];
   for (const [T, m, v] of ticks){ const p = m/div; if (p > prev) sell = false; else if (p < prev) sell = true; prev = p; tk.push([T, p, v > 0 ? v : 1, sell]); }
-  return {k1, tk};
+  return {k1, tk, div};
 }
 // line Dukascopy up with the exchange: price gap and volume units
 function calibrate(D){
@@ -461,12 +518,87 @@ async function initSource(src, sym){
   return {px, tick};
 }
 const ALT = {spot:'bys', fut:'byl', bys:'spot', byl:'fut'};
+SRC.fx = {kind:'fx', name:'Finnhub', rest:[], ws:['wss://ws.finnhub.io']};
+// ───────── forex & metals list (Dukascopy names) ─────────
+const CUR = {EUR:'Euro', USD:'US Dollar', GBP:'British Pound', JPY:'Japanese Yen', CHF:'Swiss Franc', AUD:'Australian Dollar', CAD:'Canadian Dollar', NZD:'New Zealand Dollar',
+  TRY:'Turkish Lira', ZAR:'South African Rand', MXN:'Mexican Peso', SGD:'Singapore Dollar', HKD:'Hong Kong Dollar', NOK:'Norwegian Krone', SEK:'Swedish Krona', DKK:'Danish Krone',
+  PLN:'Polish Zloty', HUF:'Hungarian Forint', CZK:'Czech Koruna', CNH:'Chinese Yuan (offshore)', XAU:'Gold', XAG:'Silver'};
+const FX_LIST = ['EURUSD','GBPUSD','USDJPY','USDCHF','AUDUSD','USDCAD','NZDUSD',
+  'EURGBP','EURJPY','EURCHF','EURAUD','EURCAD','EURNZD','GBPJPY','GBPCHF','GBPAUD','GBPCAD','GBPNZD','AUDJPY','AUDCHF','AUDCAD','AUDNZD',
+  'CADJPY','CADCHF','CHFJPY','NZDJPY','NZDCHF','NZDCAD',
+  'USDTRY','USDZAR','USDMXN','USDSGD','USDHKD','USDNOK','USDSEK','USDDKK','USDPLN','USDHUF','USDCZK','USDCNH','EURTRY','EURNOK','EURSEK','EURPLN','EURHUF','EURCZK','EURDKK'];
+const FX_SET = new Set([...FX_LIST, 'XAUUSD', 'XAGUSD']);
+const fxName = s => `${CUR[s.slice(0, 3)] || s.slice(0, 3)} / ${CUR[s.slice(3)] || s.slice(3)}`;
+const finnhubKey = () => ($('fhKey').value || '').trim();
+async function refRate(sym){
+  const m = c => c === 'CNH' ? 'CNY' : c, b = m(sym.slice(0, 3)), q = m(sym.slice(3));
+  if (/^X(AU|AG)/.test(sym)) return null;
+  try{ const r = await fetch(`https://api.frankfurter.app/latest?from=${b}&to=${q}`); const j = await r.json(); return (j.rates && j.rates[q]) || null; }catch(e){ return null; }
+}
+const fxDivGuess = sym => /^X(AU|AG)/.test(sym) || /(JPY|HUF)$/.test(sym) ? 1000 : 100000;
+function pushFx(t){
+  if (t.p > S.fxPrev) S.fxSell = false; else if (t.p < S.fxPrev) S.fxSell = true;
+  S.fxPrev = t.p; pushRaw(t.T, t.p, 1/t.p, S.fxSell);   // each tick counts as 1
+}
+async function connectFx(sym, my){
+  S.src = SRC.fx; S.sym = sym; S.unit = ''; S.push = pushFx; S.fxPrev = 0; S.fxSell = false; S.k1 = []; S.back = false;
+  loadDraw();
+  if (!dukaRelay()){ setStatus('Forex needs your Dukascopy relay — paste its URL in ⚙', COL.sell); return; }
+  setStatus(`loading ${sym}…`, COL.gold);
+  const ref = await refRate(sym);
+  let D;
+  try{ D = await loadDuka(sym, ref, my, fxDivGuess(sym)); }
+  catch(e){ if (my === S.sess) setStatus('Dukascopy relay not reachable — check the URL in ⚙', COL.sell); return; }
+  if (my !== S.sess) return;
+  if (!D){ setStatus(`no Dukascopy data for ${sym}`, COL.sell); return; }
+  S.fxDiv = D.div;
+  const last = D.tk.length ? D.tk[D.tk.length-1][1] : D.k1[D.k1.length-1][4];
+  const user = parseFloat($('row').value);
+  S.row = user > 0 ? user : niceStep(last*0.00004);
+  S.dec = Math.max(decFor(S.row), last < 20 ? 5 : last < 300 ? 3 : 2);
+  $('row').placeholder = 'auto ' + S.row;
+  const med = a => { if (!a.length) return 0; const z = [...a].sort((x, y) => x - y); return z[z.length >> 1]; };
+  const perMin = new Map(); for (const t of D.tk){ const m = Math.floor(t[0]/60000); perMin.set(m, (perMin.get(m) || 0) + 1); }
+  const tkMed = med([...perMin.values()]), dkMed = med(D.k1.map(r => r[5]).filter(v => v > 0)), sc = tkMed && dkMed ? tkMed/dkMed : 1;
+  S.dk = D.k1.map(r => [r[0], r[1], r[2], r[3], r[4], r[5]*sc]);
+  S.dt = D.tk.map(t => [t[0], t[1], 1, t[3]]);
+  if (S.dt.length) S.fxPrev = S.dt[S.dt.length-1][1];
+  S.duka = true; rebuild(); lens = null;
+  if (finnhubKey()){ setStatus(`${sym} · connecting live (Finnhub)…`, COL.gold); openWS(SRC.fx, sym, my); }
+  else setStatus(`${sym} · Dukascopy (updates hourly) — add a Finnhub key in ⚙ for live`, COL.gold);
+}
+// pull Dukascopy hours published since the last load
+async function fxRefresh(){
+  if (!S.src || S.src.kind !== 'fx' || !S.fxDiv) return;
+  const my = S.sess, sym = S.sym, h0 = Math.floor(Date.now()/3600000)*3600000;
+  let from = S.dt.length ? Math.floor(S.dt[S.dt.length-1][0]/3600000)*3600000 + 3600000 : h0 - 3*3600000;
+  from = Math.max(from, h0 - 6*3600000);
+  let added = 0;
+  for (let t0 = from; t0 < h0; t0 += 3600000){
+    const D = new Date(t0);
+    let raw; try{ raw = await dukaFile(`${sym}/${D.getUTCFullYear()}/${z2(D.getUTCMonth())}/${z2(D.getUTCDate())}/${z2(D.getUTCHours())}h_ticks.bi5`); }catch(e){ return; }
+    if (my !== S.sess || !raw) continue;
+    const dv = new DataView(raw.buffer, raw.byteOffset, raw.byteLength);
+    let prev = S.dt.length ? S.dt[S.dt.length-1][1] : 0, sell = false;
+    for (let i = 0, n = Math.floor(raw.length/20); i < n; i++){ const o = i*20;
+      const p = (dv.getUint32(o + 4) + dv.getUint32(o + 8))/2/S.fxDiv;
+      if (p > prev) sell = false; else if (p < prev) sell = true; prev = p;
+      S.dt.push([t0 + dv.getUint32(o), p, 1, sell]); added++; }
+  }
+  if (added && my === S.sess) rebuild();
+}
+setInterval(() => { if (S.src && S.src.kind === 'fx' && !document.hidden) fxRefresh(); }, 5*60000);
+const fhSym = s => 'OANDA:' + s.slice(0, 3) + '_' + s.slice(3);
 async function connect(){
   const my = ++S.sess;
   if (S.ws){ S.ws.onclose = null; S.ws.close(); S.ws = null; }
   S.trades = []; S.candles = []; S.dk = []; S.dt = []; S.off = 0; S.duka = false; S.wsBuf = []; S.lastId = -1; seen.clear(); lens = null; pinned = null; setFollow(true);
-  // fix common symbol names: XAUUSD -> XAUUSDT, BTC/USDT -> BTCUSDT
+  S.tfMs = +$('tf').value*1000;
   let sym = $('sym').value.trim().toUpperCase().replace(/[\/\-\s_.]/g, '');
+  if (FX_SET.has(sym) && ($('mkt').value === 'fx' || !/^X(AU|AG)/.test(sym))){ $('mkt').value = 'fx'; $('sym').value = sym; return connectFx(sym, my); }
+  if ($('mkt').value === 'fx') $('mkt').value = 'byl';
+  S.unit = '$';
+  // fix common symbol names: XAUUSD -> XAUUSDT, BTC/USDT -> BTCUSDT
   if (/USD$/.test(sym)) sym += 'T';
   $('sym').value = sym;
   // gold & silver only trade on futures
@@ -490,7 +622,7 @@ async function connect(){
   if (info.tick && S.row < info.tick) S.row = info.tick;
   S.dec = Math.max(decFor(S.row), info.tick ? decFor(info.tick) : 0, 2);
   $('row').placeholder = 'auto ' + S.row;
-  S.k1 = []; S.src = src; S.sym = sym;
+  S.k1 = []; S.src = src; S.sym = sym; loadDraw();
   S.back = true; openWS(src, sym, my);
   const mins = Math.max(0, +$('hist').value || 0);
   // 1) quick start: last ~16 hours of 1-minute candles + recent trades, then go LIVE
@@ -579,6 +711,7 @@ function reopenWS(){
 let catching = false;
 async function catchUp(){
   if (!S.src || S.back || catching) return;
+  if (S.src.kind === 'fx'){ catching = true; if (finnhubKey()){ S.lastMsg = Date.now(); reopenWS(); } await fxRefresh(); catching = false; return; }
   catching = true; const my = S.sess, src = S.src, sym = S.sym;
   setStatus('syncing…', COL.gold);
   S.lastMsg = Date.now(); reopenWS();
@@ -599,23 +732,32 @@ window.addEventListener('pageshow', e => { if (e.persisted) catchUp(); });
 window.addEventListener('online', () => catchUp());
 setInterval(() => {   // watchdog: no data for a while = dead connection
   if (!S.src || S.back || document.hidden) return;
-  const limit = S.src.kind === 'by' ? 30000 : 60000;
+  if (S.src.kind === 'fx' && !finnhubKey()) return;
+  const limit = S.src.kind === 'by' ? 30000 : S.src.kind === 'fx' ? 90000 : 60000;
   if (Date.now() - S.lastMsg > limit) catchUp();
 }, 5000);
-const liveLabel = (sym, src) => S.duka ? `LIVE · ${DUKA_MAP[sym]} · Dukascopy + ${src.name}` : `LIVE · ${sym} · ${src.name}`;
+const liveLabel = (sym, src) => src.kind === 'fx' ? `LIVE · ${sym} · Dukascopy + Finnhub` : S.duka ? `LIVE · ${DUKA_MAP[sym]} · Dukascopy + ${src.name}` : `LIVE · ${sym} · ${src.name}`;
 function openWS(src, sym, my, hostIdx = 0, retry = 0){
-  const url = src.kind === 'bn' ? `${src.ws[hostIdx]}/ws/${sym.toLowerCase()}@aggTrade` : src.ws[hostIdx];
+  const url = src.kind === 'bn' ? `${src.ws[hostIdx]}/ws/${sym.toLowerCase()}@aggTrade`
+            : src.kind === 'fx' ? `${src.ws[0]}?token=${encodeURIComponent(finnhubKey())}` : src.ws[hostIdx];
   const s = new WebSocket(url); S.ws = s; let opened = false, ping = null; S.lastMsg = Date.now();
   const handle = x => S.back ? S.wsBuf.push(x) : S.push(x);
   s.onopen = () => {
     opened = true; retry = 0;
+    if (src.kind === 'fx') s.send(JSON.stringify({type:'subscribe', symbol:fhSym(sym)}));
     if (src.kind === 'by'){ s.send(JSON.stringify({op:'subscribe', args:['publicTrade.' + sym]})); ping = setInterval(() => s.readyState === 1 && s.send('{"op":"ping"}'), 20000); s._ping = ping; }
-    if (!S.back) setStatus(liveLabel(sym, src), COL.buy);
+    if (!S.back && src.kind !== 'fx') setStatus(liveLabel(sym, src), COL.buy);
+    if (src.kind === 'fx'){ S.fxLive = false; setStatus(`${sym} · live connected, waiting for ticks…`, COL.gold); }
   };
   s.onmessage = ev => {
+    if (my !== S.sess || S.ws !== s) return;   // ignore an old connection after switching symbol
     S.lastMsg = Date.now();
     const m = JSON.parse(ev.data);
-    if (src.kind === 'bn'){ if (m.e === 'aggTrade') handle(m); }
+    if (src.kind === 'fx'){
+      if (m.type === 'trade' && Array.isArray(m.data)){ for (const t of m.data) handle({T:+t.t, p:+t.p}); if (!S.fxLive){ S.fxLive = true; setStatus(liveLabel(sym, src), COL.buy); } }
+      else if (m.type === 'error') setStatus('Finnhub: ' + (m.msg || 'error') + ' — check your key in ⚙', COL.sell);
+    }
+    else if (src.kind === 'bn'){ if (m.e === 'aggTrade') handle(m); }
     else if (m.topic && Array.isArray(m.data)) for (const t of m.data) handle({id:t.i, T:+t.T, p:+t.p, q:+t.v, sell:t.S === 'Sell'});
   };
   s.onclose = () => {
@@ -659,7 +801,7 @@ function layout(){
   cv.width = V.W*V.dpr; cv.height = V.H*V.dpr; ctx.setTransform(V.dpr, 0, 0, V.dpr, 0, 0);
   if (!xp.dataset.placed){
     const w = Math.min(360, V.W*0.62), h = Math.min(380, V.H*0.5);
-    Object.assign(xp.style, {width:w + 'px', height:h + 'px', left:'8px', top:(V.H - h - 60) + 'px'});
+    Object.assign(xp.style, {width:w + 'px', height:h + 'px', left:'46px', top:(V.H - h - 60) + 'px'});
     xp.dataset.placed = 1;
   }
   dirty = true;
@@ -724,6 +866,8 @@ function draw(){
     }
   }
 
+  drawDrawings(PW, PH);
+
   // last price line
   const last = C[N-1], ly = yOf(last.c), lc = last.c >= last.o ? COL.buy : COL.sell;
   ctx.setLineDash([4, 4]); ctx.strokeStyle = lc; ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(PW, ly); ctx.stroke(); ctx.setLineDash([]);
@@ -746,6 +890,7 @@ function draw(){
 
   // axis tags
   ctx.font = 'bold 11px ui-monospace,monospace'; ctx.textAlign = 'left';
+  drawTags(PW); ctx.font = 'bold 11px ui-monospace,monospace'; ctx.textAlign = 'left';
   ctx.fillStyle = lc; ctx.fillRect(PW, ly - 9, AX, 18); ctx.fillStyle = '#03121f'; ctx.fillText(P(last.c), PW + 6, ly);
   { const now = Date.now(), left = Math.max(0, (Math.floor(now/S.tfMs) + 1)*S.tfMs - now), sec = Math.floor(left/1000);
     const hh = Math.floor(sec/3600), mm = Math.floor(sec%3600/60), ss = sec%60, z = n => String(n).padStart(2, '0');
@@ -823,10 +968,10 @@ function drawPanel(){
     if (hv){
       const pHi = (kHi + 1 - hv.r*G)*row, pLo = Math.max(kLo, kHi + 1 - (hv.r + 1)*G)*row, cl = hv.cl, d = cl.b - cl.s, tot = cl.b + cl.s;
       showTip(`<div class="h">${tStr(hv.cd.t)} · ${P(pLo)} – ${P(pHi)}</div>
-        <div class="r"><span>Buy (ask)</span><span class="g">$${fmt(cl.b)}</span></div>
-        <div class="r"><span>Sell (bid)</span><span class="s">$${fmt(cl.s)}</span></div>
+        <div class="r"><span>Buy (ask)</span><span class="g">${S.unit}${fmt(cl.b)}</span></div>
+        <div class="r"><span>Sell (bid)</span><span class="s">${S.unit}${fmt(cl.s)}</span></div>
         <div class="r"><span>Delta</span><span class="${d>=0?'g':'s'}">${sgn(d)}</span></div>
-        <div class="r"><span>Total</span><span>$${fmt(tot)}</span></div>
+        <div class="r"><span>Total</span><span>${S.unit}${fmt(tot)}</span></div>
         <div class="r"><span>% of candle</span><span>${(100*tot/Math.max(1, hv.cd.buy + hv.cd.sell)).toFixed(1)}%</span></div>
         <div class="r"><span>Trades</span><span>${cl.n}</span></div>
         ${hv.cd.est ? '<div class="r"><span style="color:#ffb02e">Estimated (history, not live trades)</span><span></span></div>' : `<div class="r"><span>Biggest trade</span><span>$${fmt(cl.big)}</span></div>`}`, panelHover.cx, panelHover.cy);
@@ -852,7 +997,7 @@ function showPop(pr, x, y, pin){
   const zone = pr.d < 0 ? 'Sell pressure zone' : 'Buy pressure zone';
   pop.style.borderColor = pr.d < 0 ? COL.gold : COL.buy;
   pop.innerHTML = `${pin ? '<div class="x" id="popX">✕</div>' : ''}<div class="pp mono">${P(pr.p)}</div>
-    <div class="r"><span>Volume</span><b class="mono">$${fmt(pr.vol)}</b></div>
+    <div class="r"><span>Volume</span><b class="mono">${S.unit}${fmt(pr.vol)}</b></div>
     <div class="r"><span>Delta</span><b class="mono ${pr.d>=0?'g':'s'}">${sgn(pr.d)}</b></div>
     <div class="r"><span>Time</span><span class="mono">${tStr(pr.t)}</span></div>
     <div class="z" style="color:${pr.d<0?COL.gold:COL.buy}">${zone}</div>`;
@@ -863,6 +1008,7 @@ function showPop(pr, x, y, pin){
   if (pin) $('popX').onclick = () => { pinned = null; pop.style.display = 'none'; };
 }
 function mainHover(){
+  if (tool !== 'cursor' || draft || (act && act.m === 'dr')){ hideTip(); if (!pinned) pop.style.display = 'none'; return; }
   if (pinned){ showPop(pinned, xF(pinned.i), yOf(pinned.p), true); }
   if (!hover.in || act){ if (!pinned) pop.style.display = 'none'; if (!panelHover) hideTip(); return; }
   if (panelHover) return;
@@ -879,11 +1025,167 @@ function mainHover(){
   showTip(`<div class="h">${tStr(c.t)}</div>
     <div class="r"><span>O / H</span><span class="mono">${P(c.o)} / ${P(c.h)}</span></div>
     <div class="r"><span>L / C</span><span class="mono">${P(c.l)} / ${P(c.c)}</span></div>
-    <div class="r"><span>Volume</span><span>$${fmt(c.buy + c.sell)}</span></div>
+    <div class="r"><span>Volume</span><span>${S.unit}${fmt(c.buy + c.sell)}</span></div>
     <div class="r"><span>Delta</span><span class="${d>=0?'g':'s'}">${sgn(d)}</span></div>
     <div class="r"><span>POC</span><span class="mono">${poc != null ? P((poc + .5)*S.row) : '-'}</span></div>
     ${c.est ? '<div style="color:#ffb02e;font-size:11px">footprint estimated (history, not live trades)</div>' : ''}`, hover.x + r.left, hover.y + r.top);
 }
+
+
+// ───────── drawing tools (TradingView-style) ─────────
+let drawings = [], tool = 'cursor', draft = null, selId = null, magnet = true, drawColor = '#4fb3ff', hideDraw = false;
+const TOOL_PTS = {trend:2, ray:2, ext:2, hline:1, hray:1, vline:1, rect:2, fib:2, range:2, long:2, short:2, text:1, brush:0};
+const FIB = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1, 1.618];
+const dKey = () => 'fp_draw_' + (S.sym || '');
+function saveDraw(){ try{ localStorage.setItem(dKey(), JSON.stringify(drawings)); }catch(e){} }
+function loadDraw(){ try{ drawings = JSON.parse(localStorage.getItem(dKey()) || '[]'); }catch(e){ drawings = []; } selId = null; draft = null; dirty = true; }
+function tIdx(t){
+  const C = S.candles, N = C.length; if (!N) return 0;
+  if (t <= C[0].t) return (t - C[0].t)/S.tfMs;
+  if (t >= C[N-1].t) return N - 1 + (t - C[N-1].t)/S.tfMs;
+  let lo = 0, hi = N - 1; while (hi - lo > 1){ const m = (lo + hi) >> 1; if (C[m].t <= t) lo = m; else hi = m; }
+  return lo + (t - C[lo].t)/(C[hi].t - C[lo].t);
+}
+function idxT(f){
+  const C = S.candles, N = C.length; if (!N) return 0;
+  if (f <= 0) return C[0].t + f*S.tfMs;
+  if (f >= N - 1) return C[N-1].t + (f - (N - 1))*S.tfMs;
+  const lo = Math.floor(f); return C[lo].t + (f - lo)*(C[lo + 1].t - C[lo].t);
+}
+const tX = t => xF(tIdx(t));
+const pAt = y => V.hi - (y - TOP)*ppp();
+function ptAt(x, y, snap = true){
+  const i = Math.round(iAt(x)), t = idxT(i); let p = pAt(y);
+  if (snap && magnet){ const c = S.candles[i]; if (c){ let bd = 14; for (const v of [c.o, c.h, c.l, c.c]){ const d = Math.abs(yOf(v) - y); if (d < bd){ bd = d; p = v; } } } }
+  return {t, p};
+}
+function setTool(t){
+  tool = t; draft = null;
+  document.querySelectorAll('#dtb [data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  cv.style.cursor = t === 'cursor' ? 'default' : 'crosshair'; dirty = true;
+}
+function posPts(d){   // long / short: entry, target, stop
+  if (d.pts.length >= 3) return d.pts;
+  const e = d.pts[0], b = d.pts[1] || e, up = d.type === 'long';
+  let r = Math.abs(b.p - e.p); if (r < S.row*2) r = e.p*0.004;
+  let t2 = b.t; if (tIdx(t2) - tIdx(e.t) < 3) t2 = idxT(tIdx(e.t) + 25);
+  return [e, {t:t2, p: up ? e.p + r : e.p - r}, {t:t2, p: up ? e.p - r/2 : e.p + r/2}];
+}
+function finishDraft(){
+  const d = draft; draft = null; if (!d) return;
+  if (d.type === 'text'){ const tx = window.prompt('Text', 'Note'); if (!tx){ setTool('cursor'); return; } d.text = tx; }
+  if (d.type === 'long' || d.type === 'short') d.pts = posPts(d);
+  if (d.type === 'brush' && d.pts.length < 2){ setTool('cursor'); return; }
+  if (TOOL_PTS[d.type] === 2 && d.pts.length < 2) d.pts.push({t: idxT(tIdx(d.pts[0].t) + 10), p: d.pts[0].p});
+  d.id = Date.now() + '' + Math.random(); d.color = drawColor;
+  drawings.push(d); selId = d.id; saveDraw(); setTool('cursor');
+}
+function extendSeg(a, b, back, fwd){
+  const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1, k = 6000/L;
+  return [back ? {x: a.x - dx*k, y: a.y - dy*k} : a, fwd ? {x: b.x + dx*k, y: b.y + dy*k} : b];
+}
+function scr(d){ const pts = (d.type === 'long' || d.type === 'short') ? posPts(d) : d.pts; return pts.map(q => ({x: tX(q.t), y: yOf(q.p)})); }
+function handlesOf(d, Q){
+  if (d.type === 'long' || d.type === 'short') return [{x:Q[0].x, y:Q[0].y}, {x:Q[0].x, y:Q[1].y}, {x:Q[0].x, y:Q[2].y}, {x:Q[1].x, y:Q[0].y}];
+  if (d.type === 'hline') return [{x: pw() - 50, y: Q[0].y}];
+  if (d.type === 'vline') return [{x: Q[0].x, y: ph()/2}];
+  if (d.type === 'brush') return [];
+  return Q;
+}
+function drawDrawings(PW, PH){
+  const list = hideDraw ? [] : drawings.slice(); if (draft && draft.pts.length) list.push(draft);
+  for (const d of list){
+    const sel = d.id === selId, col = d.color || drawColor, Q = scr(d);
+    ctx.save(); ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = sel || d === draft ? 2 : 1.5;
+    ctx.font = '11px ui-monospace,Menlo,monospace'; ctx.textBaseline = 'middle';
+    const seg = (a, b) => { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); };
+    const box = (a, b, fill) => { const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), w = Math.abs(b.x - a.x), h = Math.abs(b.y - a.y); if (fill){ ctx.fillStyle = fill; ctx.fillRect(x, y, w, h); } ctx.strokeRect(x, y, w, h); };
+    const label = (txt, x, y, bg, fg) => { const w = ctx.measureText(txt).width + 10; ctx.fillStyle = bg; ctx.fillRect(x - w/2, y - 9, w, 18); ctx.fillStyle = fg; ctx.textAlign = 'center'; ctx.fillText(txt, x, y + .5); };
+    const A = Q[0], B = Q[1] || Q[0];
+    switch (d.type){
+      case 'trend': case 'ray': case 'ext': { const [a, b] = extendSeg(A, B, d.type === 'ext', d.type !== 'trend'); seg(a, b); break; }
+      case 'hline': seg({x:0, y:A.y}, {x:PW, y:A.y}); break;
+      case 'hray': seg(A, {x:PW, y:A.y}); break;
+      case 'vline': seg({x:A.x, y:0}, {x:A.x, y:PH}); break;
+      case 'rect': box(A, B, hexA(col, .13)); break;
+      case 'fib': {
+        const x1 = Math.min(A.x, B.x), x2 = Math.max(A.x, B.x), p1 = d.pts[0].p, p2 = (d.pts[1] || d.pts[0]).p;
+        FIB.forEach((L, k) => { const pr = p2 + (p1 - p2)*L, y = yOf(pr);
+          if (k < FIB.length - 1){ const y2 = yOf(p2 + (p1 - p2)*FIB[k + 1]); ctx.fillStyle = hexA(col, .05 + .03*(k % 2)); ctx.fillRect(x1, Math.min(y, y2), x2 - x1, Math.abs(y2 - y)); }
+          ctx.strokeStyle = col; seg({x:x1, y}, {x:x2, y}); ctx.fillStyle = col; ctx.textAlign = 'right'; ctx.fillText(`${L} (${P(pr)})`, x1 - 4, y); });
+        ctx.setLineDash([3, 3]); seg(A, B); ctx.setLineDash([]); break; }
+      case 'range': {
+        box(A, B, hexA(col, .12)); const mx = (A.x + B.x)/2; seg({x:mx, y:A.y}, {x:mx, y:B.y});
+        const p1 = d.pts[0].p, p2 = (d.pts[1] || d.pts[0]).p, dp = p2 - p1, bars = Math.round(tIdx((d.pts[1] || d.pts[0]).t) - tIdx(d.pts[0].t));
+        label(`${dp >= 0 ? '+' : ''}${P(dp)} (${(100*dp/p1).toFixed(2)}%) · ${bars} bars`, mx, Math.max(A.y, B.y) + 14, dp >= 0 ? COL.buy : COL.sell, '#03121f'); break; }
+      case 'long': case 'short': {
+        const [E, T, Sx] = Q, x1 = Math.min(E.x, T.x), x2 = Math.max(E.x, T.x), pp = posPts(d);
+        ctx.fillStyle = 'rgba(31,211,138,.20)'; ctx.fillRect(x1, Math.min(E.y, T.y), x2 - x1, Math.abs(T.y - E.y));
+        ctx.fillStyle = 'rgba(255,77,94,.20)'; ctx.fillRect(x1, Math.min(E.y, Sx.y), x2 - x1, Math.abs(Sx.y - E.y));
+        ctx.strokeStyle = '#c9d1e0'; seg({x:x1, y:E.y}, {x:x2, y:E.y});
+        const e = pp[0].p, tp = pp[1].p, sl = pp[2].p, rr = Math.abs(tp - e)/Math.max(1e-12, Math.abs(e - sl)), xm = (x1 + x2)/2;
+        label(`Target ${P(tp)} (${(100*(tp - e)/e).toFixed(2)}%)`, xm, T.y + (T.y < E.y ? -12 : 12), COL.buy, '#03121f');
+        label(`Stop ${P(sl)} (${(100*(sl - e)/e).toFixed(2)}%)`, xm, Sx.y + (Sx.y < E.y ? -12 : 12), COL.sell, '#fff');
+        label(`${d.type === 'long' ? 'Long' : 'Short'} · RR ${rr.toFixed(2)}`, xm, E.y, '#2b3547', '#fff'); break; }
+      case 'text': { ctx.font = 'bold 13px -apple-system,Segoe UI,sans-serif'; const tx = d.text || 'Text', w = ctx.measureText(tx).width;
+        ctx.fillStyle = 'rgba(8,11,17,.75)'; ctx.fillRect(A.x - 4, A.y - 11, w + 8, 22); ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.fillText(tx, A.x, A.y); break; }
+      case 'brush': { ctx.beginPath(); Q.forEach((q, k) => k ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); ctx.stroke(); break; }
+    }
+    if (sel || d === draft) for (const h of handlesOf(d, Q)){ ctx.fillStyle = '#07090e'; ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(h.x, h.y, 5, 0, 7); ctx.fill(); ctx.stroke(); }
+    ctx.restore();
+  }
+}
+function drawTags(PW){
+  if (hideDraw) return;
+  ctx.font = 'bold 11px ui-monospace,monospace'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  for (const d of drawings){
+    if (!(d.type === 'hline' || d.type === 'hray' || d.id === selId) || d.type === 'brush') continue;
+    const pts = (d.type === 'long' || d.type === 'short') ? posPts(d) : d.pts;
+    for (const q of (d.type === 'hline' || d.type === 'hray') ? [d.pts[0]] : pts){
+      const y = yOf(q.p); if (y < 0 || y > ph()) continue;
+      ctx.fillStyle = d.color || drawColor; ctx.fillRect(PW, y - 9, AX, 18); ctx.fillStyle = '#03121f'; ctx.fillText(P(q.p), PW + 6, y);
+    }
+  }
+}
+function hexA(hex, a){ const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; }
+function distSeg(x, y, a, b){ const dx = b.x - a.x, dy = b.y - a.y, L = dx*dx + dy*dy; let t = L ? ((x - a.x)*dx + (y - a.y)*dy)/L : 0; t = clamp(t, 0, 1); return Math.hypot(x - a.x - t*dx, y - a.y - t*dy); }
+function hitDraw(x, y, touch){
+  if (hideDraw) return null;
+  const R = touch ? 16 : 8;
+  for (let i = drawings.length - 1; i >= 0; i--){
+    const d = drawings[i], Q = scr(d), A = Q[0], B = Q[1] || Q[0];
+    if (d.id === selId){ const H = handlesOf(d, Q); for (let h = 0; h < H.length; h++) if (Math.hypot(H[h].x - x, H[h].y - y) < R + 3) return {d, h}; }
+    const inBox = (a, b) => x >= Math.min(a.x, b.x) - R && x <= Math.max(a.x, b.x) + R && y >= Math.min(a.y, b.y) - R && y <= Math.max(a.y, b.y) + R;
+    let hit = false;
+    switch (d.type){
+      case 'trend': case 'ray': case 'ext': { const [a, b] = extendSeg(A, B, d.type === 'ext', d.type !== 'trend'); hit = distSeg(x, y, a, b) < R; break; }
+      case 'hline': hit = Math.abs(y - A.y) < R; break;
+      case 'hray': hit = Math.abs(y - A.y) < R && x >= A.x - R; break;
+      case 'vline': hit = Math.abs(x - A.x) < R; break;
+      case 'rect': case 'range': case 'fib': hit = inBox(A, B); break;
+      case 'long': case 'short': hit = inBox({x:Math.min(Q[0].x, Q[1].x), y:Math.min(Q[1].y, Q[2].y)}, {x:Math.max(Q[0].x, Q[1].x), y:Math.max(Q[1].y, Q[2].y)}); break;
+      case 'text': hit = x >= A.x - 6 && x <= A.x + 9*(d.text || '').length + 10 && Math.abs(y - A.y) < 14; break;
+      case 'brush': for (let k = 1; k < Q.length && !hit; k++) hit = distSeg(x, y, Q[k - 1], Q[k]) < R; break;
+    }
+    if (hit) return {d, h:-1};
+  }
+  return null;
+}
+function editDrawing(a, x, y){
+  const d = a.d, o = a.orig;
+  if (a.h === -1){
+    const di = Math.round(iAt(x) - a.i0), dp = pAt(y) - a.p0;
+    d.pts = o.map(q => ({t: idxT(tIdx(q.t) + di), p: q.p + dp}));
+  } else if (d.type === 'long' || d.type === 'short'){
+    const q = ptAt(x, y);
+    if (a.h === 0){ d.pts[0] = {t:q.t, p:q.p}; }
+    else if (a.h === 1) d.pts[1].p = pAt(y);
+    else if (a.h === 2) d.pts[2].p = pAt(y);
+    else { d.pts[1].t = q.t; d.pts[2].t = q.t; }
+  } else d.pts[a.h] = ptAt(x, y);
+  dirty = true;
+}
+function deleteSelected(){ if (!selId) return; drawings = drawings.filter(d => d.id !== selId); selId = null; saveDraw(); dirty = true; }
 
 // ───────── interaction: main chart ─────────
 const ptrs = new Map(); let act = null, pinch = null, lastAxisTap = 0;
@@ -902,6 +1204,20 @@ cv.addEventListener('pointerdown', e => {
   }
   // time axis: drag to widen / narrow candles
   if (p.y >= ph()){ act = {m:'xs', x:p.x, cw:V.cw, i0:iAt(p.x)}; return; }
+  // drawing tools
+  if (tool !== 'cursor' && S.candles.length){
+    const q = ptAt(p.x, p.y, tool !== 'brush');
+    if (tool === 'brush'){ draft = {type:'brush', pts:[q]}; act = {m:'brush'}; return; }
+    if (!draft || !draft.pts.length){ draft = {type:tool, pts:[q]};
+      if (TOOL_PTS[tool] === 1){ finishDraft(); act = null; return; }
+      act = {m:'mk', x:p.x, y:p.y, moved:false}; dirty = true; return; }
+    draft.pts[1] = q; finishDraft(); act = null; return;
+  }
+  { const hd = hitDraw(p.x, p.y, e.pointerType !== 'mouse');
+    if (hd){ selId = hd.d.id; act = {m:'dr', d:hd.d, h:hd.h, orig:hd.d.pts.map(q => ({...q})), i0:iAt(p.x), p0:pAt(p.y)};
+      if ((hd.d.type === 'long' || hd.d.type === 'short') && hd.d.pts.length < 3) hd.d.pts = posPts(hd.d);
+      dirty = true; return; }
+    if (selId){ selId = null; dirty = true; } }
   const L = ON.xray ? lensRect() : null;
   if (L && Math.abs(p.x - L.x2) < 14 && Math.abs(p.y - L.y2) < 14) act = {m:'rs'};
   else if (L && p.x >= L.x1 - 4 && p.x <= L.x2 + 4 && p.y >= L.y1 - 4 && p.y <= L.y2 + 4) act = {m:'mv', x:p.x, y:p.y, ci:lens.ci, cp:lens.cp};
@@ -915,8 +1231,12 @@ cv.addEventListener('pointermove', e => {
     if (pinch.dx > 30) V.cw = clamp(pinch.cw*Math.abs(a.x - b.x)/pinch.dx, 1.5, 80);
     if (pinch.dy > 50){ const f = pinch.dy/Math.max(10, Math.abs(a.y - b.y)), mid = (pinch.lo + pinch.hi)/2, half = (pinch.hi - pinch.lo)/2*f;
       V.auto = false; V.lo = mid - half; V.hi = mid + half; } }
+  else if (!act && draft && draft.pts.length && draft.type !== 'brush' && TOOL_PTS[draft.type] === 2){ draft.pts[1] = ptAt(p.x, p.y); }
   else if (act){
-    if (act.m === 'mv'){ lens.ci = act.ci + (p.x - act.x)/V.cw; lens.cp = act.cp - (p.y - act.y)*ppp(); }
+    if (act.m === 'mk'){ if (Math.hypot(p.x - act.x, p.y - act.y) > 8){ act.moved = true; if (draft) draft.pts[1] = ptAt(p.x, p.y); } }
+    else if (act.m === 'brush'){ const l = draft.pts[draft.pts.length - 1]; if (Math.abs(tX(l.t) - p.x) + Math.abs(yOf(l.p) - p.y) > 3) draft.pts.push({t: idxT(iAt(p.x)), p: pAt(p.y)}); }
+    else if (act.m === 'dr') editDrawing(act, p.x, p.y);
+    else if (act.m === 'mv'){ lens.ci = act.ci + (p.x - act.x)/V.cw; lens.cp = act.cp - (p.y - act.y)*ppp(); }
     else if (act.m === 'rs'){ lens.wc = Math.max(0.6, 2*Math.abs(p.x - xF(lens.ci))/V.cw); lens.hp = Math.max(S.row, 2*Math.abs(p.y - yOf(lens.cp))*ppp()); }
     else if (act.m === 'pan'){
       const dx = p.x - act.x, dy = p.y - act.y;
@@ -931,7 +1251,13 @@ cv.addEventListener('pointermove', e => {
   }
   dirty = true;
 });
-const endPtr = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; act = null; dirty = true; };
+const endPtr = e => {
+  ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null;
+  if (act && act.m === 'mk' && act.moved) finishDraft();
+  if (act && act.m === 'brush') finishDraft();
+  if (act && act.m === 'dr') saveDraw();
+  act = null; dirty = true;
+};
 cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
 cv.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse'){ hover.in = false; dirty = true; } });
 cv.addEventListener('wheel', e => {
@@ -943,7 +1269,8 @@ cv.addEventListener('wheel', e => {
 }, {passive:false});
 window.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
-  if (e.key === 'Escape'){ setInd('xray', false); }
+  if (e.key === 'Escape'){ if (draft || tool !== 'cursor') setTool('cursor'); else if (selId){ selId = null; dirty = true; } else setInd('xray', false); }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && selId){ e.preventDefault(); deleteSelected(); }
   if ((e.key === '[' || e.key === ']') && lens){ const f = e.key === ']' ? 0.85 : 1/0.85; lens.wc = Math.max(0.6, lens.wc*f); lens.hp = Math.max(S.row, lens.hp*f); dirty = true; }
 });
 
@@ -983,12 +1310,63 @@ function setInd(k, v){
 document.querySelectorAll('#indMenu input').forEach(cb => cb.onchange = () => setInd(cb.dataset.k, cb.checked));
 $('bFollow').onclick = () => setFollow(true);
 $('bFixed').onclick = () => setFollow(false);
+document.querySelectorAll('#dtb [data-t]').forEach(b => b.onclick = () => setTool(tool === b.dataset.t && b.dataset.t !== 'cursor' ? 'cursor' : b.dataset.t));
+$('dtT').onclick = () => { $('dtb').classList.toggle('hide'); try{ localStorage.setItem('dtbHide', $('dtb').classList.contains('hide') ? '1' : ''); }catch(e){} };
+$('dMag').onclick = () => { magnet = !magnet; $('dMag').classList.toggle('on', magnet); };
+$('dCol').oninput = e => { drawColor = e.target.value; const d = drawings.find(z => z.id === selId); if (d){ d.color = drawColor; saveDraw(); } dirty = true; };
+$('dHide').onclick = () => { hideDraw = !hideDraw; $('dHide').classList.toggle('on', hideDraw); dirty = true; };
+$('dDel').onclick = deleteSelected;
+$('dClr').onclick = () => { if (drawings.length && window.confirm('Remove all drawings on ' + S.sym + '?')){ drawings = []; selId = null; saveDraw(); dirty = true; } };
+try{ if (localStorage.getItem('dtbHide')) $('dtb').classList.add('hide'); }catch(e){}
+// ───────── symbol search ─────────
+let symGroup = 'all', cryptoList = null;
+const METALS = [
+  {s:'XAUUSDT', label:'XAUUSD', d:'Gold — live trades (Bybit) + Dukascopy history', g:'metals', m:'byl'},
+  {s:'XAGUSDT', label:'XAGUSD', d:'Silver — live trades (Bybit) + Dukascopy history', g:'metals', m:'byl'},
+  {s:'XAUUSD', label:'XAUUSD', d:'Gold — forex feed (Dukascopy + Finnhub)', g:'metals', m:'fx'},
+  {s:'XAGUSD', label:'XAGUSD', d:'Silver — forex feed (Dukascopy + Finnhub)', g:'metals', m:'fx'}];
+const FXI = FX_LIST.map(s => ({s, label:s, d:fxName(s), g:'forex', m:'fx'}));
+async function loadCrypto(){
+  if (cryptoList) return cryptoList;
+  const out = [];
+  try{
+    let cursor = '';
+    for (let k = 0; k < 5; k++){
+      const j = await getJSON(SRC.byl, `/v5/market/instruments-info?category=linear&limit=1000${cursor ? '&cursor=' + encodeURIComponent(cursor) : ''}`);
+      for (const it of (j.result && j.result.list) || []) if (it.quoteCoin === 'USDT' && it.status === 'Trading' && !/^X(AU|AG)T?USDT$/.test(it.symbol)) out.push({s:it.symbol, label:it.symbol, d:`${it.baseCoin} / USDT perpetual`, g:'crypto', m:'byl'});
+      cursor = j.result && j.result.nextPageCursor; if (!cursor) break;
+    }
+  }catch(e){
+    try{ const arr = await getJSON(SRC.spot, '/api/v3/ticker/price');
+      for (const it of arr) if (/USDT$/.test(it.symbol)) out.push({s:it.symbol, label:it.symbol, d:`${it.symbol.replace(/USDT$/, '')} / USDT spot`, g:'crypto', m:'spot'}); }catch(e2){}
+  }
+  const top = ['BTCUSDT','ETHUSDT','SOLUSDT','XRPUSDT','BNBUSDT','DOGEUSDT'];
+  out.sort((a, b) => ((top.indexOf(a.s) + 1 || 99) - (top.indexOf(b.s) + 1 || 99)) || a.s.localeCompare(b.s));
+  cryptoList = out; return out;
+}
+function renderSyms(){
+  const q = $('symQ').value.trim().toUpperCase().replace(/[\/\-\s_.]/g, ''), gold = /GOLD/.test(q) ? 'XAU' : /SILVER/.test(q) ? 'XAG' : q;
+  let items = [...METALS, ...FXI, ...(cryptoList || [])];
+  if (symGroup !== 'all') items = items.filter(i => i.g === symGroup);
+  if (gold) items = items.filter(i => i.label.includes(gold) || i.d.toUpperCase().includes(q));
+  const html = items.slice(0, 250).map(i => `<div class="si" data-s="${i.s}" data-m="${i.m}"><b>${i.label}</b><span>${i.d}</span><i>${i.g.toUpperCase()}</i></div>`).join('');
+  $('symList').innerHTML = html || `<div class="si"><span>${cryptoList ? 'No match' : 'Loading crypto list…'}</span></div>`;
+}
+function openSym(){ closeMenus(); $('symModal').classList.add('open'); $('symQ').value = ''; renderSyms(); setTimeout(() => $('symQ').focus(), 50); loadCrypto().then(renderSyms); }
+function pickSym(s, m){ $('sym').value = s; $('mkt').value = m; $('symModal').classList.remove('open'); connect(); }
+$('sym').onclick = openSym;
+$('symX').onclick = () => $('symModal').classList.remove('open');
+$('symModal').onclick = e => { if (e.target.id === 'symModal') $('symModal').classList.remove('open'); };
+$('symQ').oninput = renderSyms;
+$('symQ').onkeydown = e => { if (e.key === 'Enter'){ const f = $('symList').querySelector('.si[data-s]'); if (f) pickSym(f.dataset.s, f.dataset.m); } };
+$('symList').onclick = e => { const it = e.target.closest('.si[data-s]'); if (it) pickSym(it.dataset.s, it.dataset.m); };
+document.querySelectorAll('.mtabs button').forEach(b => b.onclick = () => { symGroup = b.dataset.g; document.querySelectorAll('.mtabs button').forEach(z => z.classList.toggle('on', z === b)); renderSyms(); });
 $('bAuto').onclick = () => { V.auto = true; dirty = true; };
 $('bIn').onclick = () => zoomX(1.25, pw() - 80);
 $('bOut').onclick = () => zoomX(1/1.25, pw() - 80);
 setInterval(() => { dirty = true; }, 1000);  // bar-close countdown
 $('go').onclick = connect;
-$('sym').addEventListener('keydown', e => { if (e.key === 'Enter') connect(); });
+
 $('tf').onchange = e => { S.tfMs = +e.target.value*1000; lens = null; rebuild(); };
 $('mode').onchange = e => { S.mode = e.target.value; dirty = true; };
 $('big').onchange = e => { S.bigTh = +e.target.value || 0; dirty = true; };
@@ -1003,6 +1381,8 @@ function loop(ts){
   requestAnimationFrame(loop);
 }
 try{ $('dukaUrl').value = localStorage.getItem('dukaUrl') || ''; }catch(e){}
+try{ $('fhKey').value = localStorage.getItem('fhKey') || ''; }catch(e){}
+$('fhKey').onchange = e => { try{ localStorage.setItem('fhKey', e.target.value.trim()); }catch(err){} };
 $('dukaUrl').onchange = e => { try{ localStorage.setItem('dukaUrl', e.target.value.trim()); }catch(err){} };
 layout(); requestAnimationFrame(loop);
 })();
