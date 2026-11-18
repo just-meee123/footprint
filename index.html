@@ -101,6 +101,204 @@
   #dtb hr{border:0;border-top:1px solid var(--line2);margin:2px 3px}
   #dtb input[type=color]{width:26px;height:24px;border:0;padding:0;background:none;margin:3px auto}
   @media (max-width:600px){#kl{width:148px;right:76px;top:4px;font-size:10px;padding:5px 7px}#kl .row .p{width:56px}#kl .h{margin:3px 0 2px}}
+
+
+  /* iOS-inspired motion polish — visual only; no controls or app logic changed */
+  :root {
+    --ios-ease: cubic-bezier(.22, 1, .36, 1);
+    --ios-spring: cubic-bezier(.2, .85, .25, 1.18);
+  }
+
+  button, select, input, .si, .tpi, #fol button, #dtb button {
+    transition:
+      background-color .2s var(--ios-ease),
+      border-color .2s var(--ios-ease),
+      color .2s var(--ios-ease),
+      box-shadow .24s var(--ios-ease),
+      opacity .2s var(--ios-ease),
+      transform .24s var(--ios-spring);
+  }
+
+  button:active, #fol button:active, #dtb button:active, .tpi:active, .si:active {
+    transform: scale(.96);
+  }
+
+  button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--acc) 75%, transparent);
+    outline-offset: 2px;
+  }
+
+  #top {
+    -webkit-backdrop-filter: saturate(150%) blur(18px);
+    backdrop-filter: saturate(150%) blur(18px);
+  }
+
+  .menu {
+    transform-origin: top left;
+    opacity: 0;
+    transform: translateY(-7px) scale(.97);
+  }
+  .menu.open {
+    animation: ios-menu-in .28s var(--ios-ease) both;
+  }
+  @keyframes ios-menu-in {
+    from { opacity: 0; transform: translateY(-7px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal {
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+    transition: backdrop-filter .32s var(--ios-ease);
+  }
+  .modal.open {
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .mbox {
+    transform: translateY(18px) scale(.97);
+    opacity: 0;
+  }
+  .modal.open .mbox {
+    animation: ios-sheet-in .42s var(--ios-spring) both;
+  }
+  @keyframes ios-sheet-in {
+    0%   { opacity: 0; transform: translateY(22px) scale(.965); }
+    72%  { opacity: 1; transform: translateY(-2px) scale(1.006); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  #xp, #pop, #tip, #kl, #dtb, #fol {
+    transition:
+      opacity .24s var(--ios-ease),
+      box-shadow .28s var(--ios-ease),
+      border-color .24s var(--ios-ease);
+  }
+  #xp {
+    transition:
+      opacity .28s var(--ios-ease),
+      transform .34s var(--ios-spring),
+      box-shadow .28s var(--ios-ease);
+    transform: scale(.985);
+    transform-origin: center;
+  }
+  #xp[style*="display: flex"], #xp[style*="display:flex"] {
+    animation: ios-panel-in .32s var(--ios-spring) both;
+  }
+  @keyframes ios-panel-in {
+    from { opacity: 0; transform: scale(.965) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  #pop[style*="display: block"], #pop[style*="display:block"] {
+    animation: ios-pop-in .24s var(--ios-spring) both;
+  }
+  #tip[style*="display: block"], #tip[style*="display:block"] {
+    animation: ios-tip-in .16s var(--ios-ease) both;
+  }
+  @keyframes ios-pop-in {
+    from { opacity: 0; transform: translateY(7px) scale(.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes ios-tip-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  #toast {
+    animation: none;
+  }
+  #toast[style*="display: block"], #toast[style*="display:block"] {
+    animation: ios-toast-in .38s var(--ios-spring) both;
+  }
+  @keyframes ios-toast-in {
+    from { opacity: 0; transform: translate(-50%, -10px) scale(.94); }
+    to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  }
+
+  #dtb, #fol button, #top button {
+    -webkit-tap-highlight-color: transparent;
+  }
+  #dtb {
+    box-shadow: 0 8px 28px rgba(0,0,0,.22);
+  }
+  #dtb button.on, #fol button.on, .mtabs button.on {
+    transition: background-color .22s var(--ios-ease), color .22s var(--ios-ease), transform .22s var(--ios-spring);
+  }
+  .tpi:hover, .si:hover {
+    transform: translateY(-1px);
+  }
+  #xp .hd, #dtG {
+    touch-action: pan-y;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: .01ms !important;
+    }
+  }
+
+
+  /* Professional dark trading palette — visual styling only */
+  :root {
+    color-scheme: dark;
+    --bg: #0b1220;
+    --panel: #111c2e;
+    --line: #26364d;
+    --txt: #e6edf7;
+    --dim: #91a0b5;
+    --buy: #28c997;
+    --sell: #f07178;
+    --acc: #63a7e8;
+    --gold: #d6ad62;
+    --inbg: #0d1727;
+    --mbg: #142137;
+    --line2: #30445f;
+    --ovl: rgba(12, 21, 36, .97);
+    --hov: #1b2b43;
+  }
+
+  body { background: var(--bg); color: var(--txt); }
+  #top {
+    background: linear-gradient(180deg, #142137 0%, #111c2e 100%);
+    border-bottom-color: #30445f;
+    box-shadow: 0 5px 20px rgba(0,0,0,.18);
+  }
+  #top input, #top select, #top button, .menu input, .menu select {
+    background: #0d1727;
+    color: #e6edf7;
+    border-color: #30445f;
+    border-radius: 9px;
+  }
+  #top input:focus, #top select:focus, .menu input:focus, .menu select:focus {
+    outline: none;
+    border-color: #63a7e8;
+    box-shadow: 0 0 0 3px rgba(99,167,232,.14);
+  }
+  .pri {
+    background: #397fbd !important;
+    color: #f7fbff !important;
+    border-color: #5599d2 !important;
+  }
+  #indBtn { color: #83bdf0 !important; }
+  #indCount { background: #397fbd; color: #fff; }
+  .menu, #xp, #kl, #pop, #dtG, #dtb {
+    border-color: #30445f;
+    box-shadow: 0 16px 42px rgba(0,0,0,.36);
+  }
+  .menu { background: #142137; }
+  .menu .t, #kl .h { color: #d6ad62; }
+  .menu label:hover { background: #1b2b43; }
+  #xp .hd { background: #17263d; border-bottom-color: #30445f; }
+  #xp .ft { border-top-color: #30445f; }
+  #xp .rs { background: linear-gradient(135deg, transparent 50%, #63a7e8 50%); }
+  #kl { background: rgba(15,27,45,.96); }
+  #dot { box-shadow: 0 0 0 3px rgba(145,160,181,.12); }
+  button, select, input { accent-color: #63a7e8; }
+
 </style>
 </head>
 <body>
