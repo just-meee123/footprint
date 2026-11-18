@@ -57,6 +57,7 @@
   #tip .r{display:flex;justify-content:space-between;gap:14px}
   #tip .r span:first-child{color:var(--dim)}
   .g{color:var(--buy)}.s{color:var(--sell)}
+  #toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:40;background:var(--gold);color:#1a1200;font-weight:800;border-radius:10px;padding:10px 16px;display:none;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:92%;text-align:center}
   #fol{position:absolute;left:8px;bottom:26px;display:flex;gap:4px;z-index:7}
   #fol button{background:var(--mbg);color:var(--txt);border:1px solid var(--line2);border-radius:6px;padding:4px 10px;font-size:12px}
   #fol button{min-width:34px}
@@ -78,6 +79,15 @@
   .si b{min-width:96px;font-family:ui-monospace,Menlo,monospace}
   .si span{flex:1;color:var(--dim);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .si i{font-style:normal;font-size:10px;color:var(--dim);background:var(--hov);border-radius:5px;padding:2px 6px}
+  /* tool picker */
+  #tpGrid{overflow:auto;flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;padding:10px}
+  .tpi{position:relative;background:var(--inbg);border:1px solid var(--line2);border-radius:12px;padding:12px 6px 10px;text-align:center;cursor:pointer;min-height:84px}
+  .tpi:hover{background:var(--hov)} .tpi.on{border-color:var(--acc);background:var(--hov)}
+  .tpi .ic{height:28px;display:flex;align-items:center;justify-content:center;color:var(--txt)}
+  .tpi .ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6}
+  .tpi .nm{font-size:12px;color:var(--txt);margin-top:6px;line-height:1.25}
+  .tpi .star{position:absolute;right:8px;top:6px;color:var(--line2);font-size:15px;cursor:pointer}
+  .tpi .star.f{color:var(--gold)}
   /* drawing toolbar */
   #dtb{position:absolute;left:6px;top:8px;z-index:9;display:flex;flex-direction:column;gap:2px;background:var(--ovl);border:1px solid var(--line2);border-radius:10px;padding:3px;max-height:calc(100% - 80px);overflow-y:auto;scrollbar-width:none}
   #dtb.hide>*:not(#dtT):not(#dtG){display:none}
@@ -101,10 +111,16 @@
   <button id="indBtn">Indicators<span id="indCount">4</span></button>
   <button id="setBtn" title="Settings">⚙</button>
   <button id="thBtn" title="Switch theme">◐</button>
+  <button id="alBtn" title="Price alert: tap, then tap the chart at a price">🔔 <span id="alCount">0/5</span></button>
   <button id="go" class="pri">Connect</button>
   <div id="status"><div id="dot"></div><span id="stxt">idle</span></div>
 </div>
 
+<div id="toolModal" class="modal"><div class="mbox" style="width:min(640px,96vw)">
+  <div class="mhd" style="align-items:center"><b style="flex:1;font-size:15px;padding-left:4px">Drawing tools</b><button id="tpX">✕</button></div>
+  <div class="mtabs" id="tpTabs"></div>
+  <div id="tpGrid"></div>
+</div></div>
 <div id="symModal" class="modal"><div class="mbox">
   <div class="mhd"><input id="symQ" placeholder="Search: EURUSD, BTC, gold…" autocomplete="off"><button id="symX">✕</button></div>
   <div class="mtabs"><button data-g="all" class="on">All</button><button data-g="crypto">Crypto</button><button data-g="forex">Forex</button><button data-g="metals">Metals</button></div>
@@ -113,8 +129,20 @@
 
 <div id="indMenu" class="menu">
   <div class="t">★ PRO</div>
-  <label><input type="checkbox" data-k="xray" checked> XRay (footprint lens)</label>
-  <label><input type="checkbox" data-k="prints" checked> Print Pro (big orders)</label>
+  <label><input type="checkbox" data-k="xray" checked> XRay lens (footprint window)</label>
+  <label><input type="checkbox" data-k="fp"> Footprint candles (POC + value area)</label>
+  <label><input type="checkbox" data-k="whales"> Whale bubbles (large trades)</label>
+  <label><input type="checkbox" data-k="vp"> Volume profile (POC · VA · HVN · LVN)</label>
+  <label><input type="checkbox" data-k="liq"> Liquidity levels (above / below price)</label>
+  <label><input type="checkbox" data-k="heat"> Volume heatmap + rolling POC</label>
+  <div class="t" style="margin-top:6px">Trend &amp; signals</div>
+  <label><input type="checkbox" data-k="umb"> Trend umbrella (trailing curve + Buy/Sell)</label>
+  <label><input type="checkbox" data-k="lux"> Hull trend line + momentum pane</label>
+  <label><input type="checkbox" data-k="aur"> Regime glow (background bands + Buy/Sell)</label>
+  <label><input type="checkbox" data-k="zones"> Supply &amp; demand zones</label>
+  <label><input type="checkbox" data-k="binlex"> Multi-RSI oscillator pane</label>
+  <label><input type="checkbox" data-k="brk"> Squeeze breakout pane</label>
+  <label><input type="checkbox" data-k="prints" checked> Big prints (glow lines)</label>
   <label><input type="checkbox" data-k="levels" checked> Key Levels</label>
   <label><input type="checkbox" data-k="senti" checked> Buy / Sell pressure</label>
   <div class="t" style="margin-top:6px">Chart</div>
@@ -127,6 +155,10 @@
   <label>Up candle <input id="upCol" type="color" value="#1fd38a"></label>
   <label>Down candle <input id="dnCol" type="color" value="#ff4d5e"></label>
   <label>Grid lines <input id="gridOn" type="checkbox" checked></label>
+  <div class="t" style="margin-top:8px">Indicators</div>
+  <label>Whale size ≥ $ (0 = auto) <input id="whTh" type="number" value="0" step="10000" min="0"></label>
+  <label>Volume profile <select id="vpMode"><option value="visible">Visible range</option><option value="session">Each day</option></select></label>
+  <label>Heatmap window (bars) <input id="hmWin" type="number" value="30" min="5" max="300"></label>
   <label>Row size <input id="row" type="number" step="any" placeholder="auto"></label>
   <label>XRay shows <select id="mode"><option value="delta">Delta</option><option value="ba">Sell x Buy</option><option value="vol">Volume</option></select></label>
   <label>Big prints shown <input id="np" type="number" value="6" min="0" max="30"></label>
@@ -148,20 +180,8 @@
   <div id="dtG" title="Drag to move the toolbar">⋮⋮⋮</div>
   <button id="dtT" title="Collapse / expand drawing tools"><svg viewBox="0 0 20 20"><path d="M13 3l4 4-9 9H4v-4z"/></svg></button>
   <hr>
-  <button data-t="cursor" title="Cursor" class="on"><svg viewBox="0 0 20 20"><path d="M5 3l11 7-5 1-2 5z"/></svg></button>
-  <button data-t="trend" title="Trend line"><svg viewBox="0 0 20 20"><path d="M4 16L16 4"/><circle cx="4" cy="16" r="1.6"/><circle cx="16" cy="4" r="1.6"/></svg></button>
-  <button data-t="ray" title="Ray"><svg viewBox="0 0 20 20"><path d="M4 16L18 2"/><circle cx="4" cy="16" r="1.6"/><circle cx="10" cy="10" r="1.6"/></svg></button>
-  <button data-t="ext" title="Extended line"><svg viewBox="0 0 20 20"><path d="M1 19L19 1"/><circle cx="7" cy="13" r="1.6"/><circle cx="13" cy="7" r="1.6"/></svg></button>
-  <button data-t="hline" title="Horizontal line"><svg viewBox="0 0 20 20"><path d="M1 10h18"/><circle cx="10" cy="10" r="1.6"/></svg></button>
-  <button data-t="hray" title="Horizontal ray"><svg viewBox="0 0 20 20"><path d="M5 10h14"/><circle cx="5" cy="10" r="1.6"/></svg></button>
-  <button data-t="vline" title="Vertical line"><svg viewBox="0 0 20 20"><path d="M10 1v18"/><circle cx="10" cy="10" r="1.6"/></svg></button>
-  <button data-t="rect" title="Rectangle"><svg viewBox="0 0 20 20"><rect x="3" y="5" width="14" height="10" rx="1"/></svg></button>
-  <button data-t="fib" title="Fib retracement"><svg viewBox="0 0 20 20"><path d="M2 4h16M2 8h16M2 12h16M2 16h16"/><path d="M4 16L16 4" stroke-dasharray="2 2"/></svg></button>
-  <button data-t="range" title="Price range / measure"><svg viewBox="0 0 20 20"><path d="M10 2v16M6 5l4-3 4 3M6 15l4 3 4-3"/></svg></button>
-  <button data-t="long" title="Long position"><svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="7" fill="rgba(31,211,138,.5)"/><rect x="3" y="10" width="14" height="5" fill="rgba(255,77,94,.5)"/></svg></button>
-  <button data-t="short" title="Short position"><svg viewBox="0 0 20 20"><rect x="3" y="5" width="14" height="5" fill="rgba(31,211,138,.5)" transform="translate(0,7)"/><rect x="3" y="3" width="14" height="7" fill="rgba(255,77,94,.5)"/></svg></button>
-  <button data-t="text" title="Text"><svg viewBox="0 0 20 20"><path d="M4 4h12M10 4v13"/></svg></button>
-  <button data-t="brush" title="Brush"><svg viewBox="0 0 20 20"><path d="M3 15c3-1 3-5 6-6s4 3 8-4"/></svg></button>
+  <div id="dtFav" style="display:contents"></div>
+  <button id="dAll" title="All drawing tools"><svg viewBox="0 0 20 20"><rect x="3" y="3" width="6" height="6"/><rect x="11" y="3" width="6" height="6"/><rect x="3" y="11" width="6" height="6"/><path d="M14 11v6M11 14h6"/></svg></button>
   <hr>
   <button id="dMag" class="on" title="Magnet: snap to candle open/high/low/close"><svg viewBox="0 0 20 20"><path d="M5 3v7a5 5 0 0010 0V3M5 6h3M12 6h3"/></svg></button>
   <input id="dCol" type="color" value="#4fb3ff" title="Drawing colour">
@@ -177,6 +197,7 @@
     <div class="rs"></div>
   </div>
   <div id="pop"></div>
+  <div id="toast"></div>
   <div id="tip"></div>
   <div id="fol"><button id="bFollow" class="on">Follow</button><button id="bFixed">Fixed</button><button id="bAuto" class="on" title="Auto-fit price">Auto</button><button id="bOut">−</button><button id="bIn">+</button></div>
 </div>
@@ -213,14 +234,14 @@ function applyTheme(name, custom){
 function saveTheme(custom){ try{ localStorage.setItem('fpTheme', JSON.stringify({name:$('theme').value, custom, grid:gridOn})); }catch(e){} }
 
 // ───────── state ─────────
-const S = {trades:[], k1:[], dk:[], dt:[], off:0, duka:false, candles:[], tfMs:60000, row:0, dec:2, mode:'delta', bigTh:250000, nPrints:6,
+const S = {whales:[], trades:[], k1:[], dk:[], dt:[], off:0, duka:false, candles:[], tfMs:60000, row:0, dec:2, mode:'delta', bigTh:250000, nPrints:6,
            ws:null, wsBuf:[], back:false, lastId:-1, sess:0, unit:'$'};
 const V = {cw:9, panX:0, follow:true, auto:true, W:0, H:0, dpr:1, lo:0, hi:1};
-const ON = {xray:true, prints:true, levels:true, senti:true};
+const ON = {xray:true, fp:false, whales:false, vp:false, liq:false, heat:false, umb:false, lux:false, aur:false, zones:false, binlex:false, brk:false, prints:true, levels:true, senti:true};
 let lens = null, prints = [], keyLv = [], buyPct = 50;
 let hover = {x:-1, y:-1, in:false}, pinned = null, panelHover = null;
 let dirty = true, derivedDirty = true;
-const MAX_TRADES = 1500000, MAX_CANDLES = 12000;
+const MAX_TRADES = 400000, MAX_CANDLES = 12000, WHALE_MIN = 5000;
 
 // ───────── helpers ─────────
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -237,7 +258,8 @@ function fmt(v){
 const sgn = v => (v > 0 ? '+' : '') + fmt(v);
 const P = p => p.toFixed(S.dec);
 const tStr = t => new Date(t).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-const setStatus = (t, c) => { $('stxt').textContent = t; $('dot').style.background = c; };
+const setStatus = (t, c) => { if ($('stxt').textContent !== t) $('stxt').textContent = t; if ($('dot').style.background !== c) $('dot').style.background = c; };
+const setText = (el, t) => { if (el.textContent !== t) el.textContent = t; };
 
 // ───────── aggregation ─────────
 function addTrade(tr){
@@ -252,6 +274,7 @@ function addTrade(tr){
   let L = c.lv.get(k); if (!L){ L = {b:0, s:0, n:0, big:0}; c.lv.set(k, L); }
   if (isSell){ L.s += v; c.sell += v; } else { L.b += v; c.buy += v; }
   L.n++; c.n++; if (v > L.big) L.big = v;
+  if (v >= WHALE_MIN && !tr[4] && S.unit === '$'){ S.whales.push({t:c.t, T, p, v, sell:isSell}); if (S.whales.length > 30000) S.whales.splice(0, 10000); }
 }
 // 1-minute candles from the exchange give long history; their volume is spread across the
 // candle's price range and counted as buying (green) or selling (red). Marked as estimated.
@@ -281,13 +304,13 @@ function addKline(m){
 function rebuild(){
   const keepT = lens && S.candles.length ? S.candles[clamp(Math.round(lens.ci), 0, S.candles.length - 1)].t : null;
   pinned = null;
-  S.candles = [];
+  S.candles = []; S.whales = [];
   const cut = S.trades.length ? Math.floor(S.trades[0][0]/60000)*60000 : Infinity;
   const tStart = S.dt.length ? Math.floor(S.dt[0][0]/60000)*60000 : Infinity;
   let end = -Infinity;
   for (const m of S.dk) if (m[0] < tStart && m[0] < cut){ addKline(m); end = m[0] + 60000; }
   for (const t of S.dt) if (t[0] < cut && t[0] >= end){
-    addTrade([t[0], t[1], t[2]/t[1], t[3]]); S.candles[S.candles.length-1].est = true;
+    addTrade([t[0], t[1], t[2]/t[1], t[3], 1]); S.candles[S.candles.length-1].est = true;
     end = Math.max(end, Math.floor(t[0]/60000)*60000 + 60000);
   }
   const T = S.trades, tm = new Set(); for (const tr of T) tm.add(Math.floor(tr[0]/60000));
@@ -321,6 +344,10 @@ function derive(){
   keyLv = [...agg.entries()].sort((a, b) => b[1].v - a[1].v).slice(0, 5).map(([g, a]) => ({p:(g*G + G/2)*S.row, v:a.v, d:a.d}));
   let b = 0, s = 0; for (const c of C.slice(-30)){ b += c.buy; s += c.sell; }
   buyPct = b + s ? 100*b/(b + s) : 50;
+  if (ON.whales) whaleCut();
+  if (ON.liq) calcLiq();
+  if (ON.heat) calcHeat();
+  if (ON.umb || ON.lux || ON.aur || ON.zones || ON.binlex || ON.brk) calcTA();
   renderKL();
 }
 function renderKL(){
@@ -333,7 +360,7 @@ function renderKL(){
     const mx = keyLv[0].v;
     h += `<div class="h">Key Levels</div>` + keyLv.map(l => `<div class="row mono"><span class="${l.d>=0?'g':'s'}">${l.d>=0?'▲':'▼'}</span><span class="p">${P(l.p)}</span><span class="b"><i style="width:${(100*l.v/mx).toFixed(0)}%;background:${l.d>=0?COL.buy:COL.sell}"></i></span></div>`).join('');
   }
-  kl.innerHTML = h;
+  if (kl._h !== h){ kl._h = h; kl.innerHTML = h; }
 }
 
 // ───────── Dukascopy history (through your relay) ─────────
@@ -529,6 +556,7 @@ function pushRaw(T, p, q, isSell){
   S.trades.push(tr);
   if (S.trades.length > MAX_TRADES) S.trades.splice(0, S.trades.length - (MAX_TRADES*0.8|0));
   addTrade(tr); dirty = derivedDirty = true;
+  checkAlerts(tr[1]);
 }
 function pushBn(a){ if (a.a <= S.lastId) return; S.lastId = a.a; pushRaw(a.T, +a.p, +a.q, a.m); }
 const seen = new Set();
@@ -713,10 +741,11 @@ async function backgroundHistory(src, sym, info, my){
     for (let pg = 1; pg < pagesK && my === S.sess && S.k1.length; pg++){
       const rows = await fetchK1(src, sym, {end: S.k1[0][0] - 1});
       if (my !== S.sess || !rows.length) break;
-      mergeK1(rows); rebuild();
+      mergeK1(rows);
       if (rows.length < 900) break;
     }
   }catch(e){ console.warn('older klines', e); }
+  if (my === S.sess) rebuild();
   const dsym = DUKA_MAP[sym];
   if (my !== S.sess || !(dsym && dukaRelay() && $('useDuka').checked)) return;
   try{
@@ -804,7 +833,8 @@ function openWS(src, sym, my, hostIdx = 0, retry = 0){
 
 // ───────── geometry ─────────
 const AX = 72, TH_H = 22, VH = 56, TOP = 12;
-const pw = () => V.W - AX, ph = () => V.H - TH_H, priceH = () => ph() - VH - TOP - 8;
+const pw = () => V.W - AX, ph = () => V.H - TH_H, priceH = () => ph() - VH - TOP - 8 - panes().length*paneH();
+const panes = () => ['lux', 'binlex', 'brk'].filter(k => ON[k]), paneH = () => clamp(ph()*0.15, 60, 120);
 const xF = f => pw() - 80 + V.panX - (S.candles.length - 1 - f)*V.cw;
 const iAt = x => S.candles.length - 1 - (pw() - 80 + V.panX - x)/V.cw;
 const yOf = p => TOP + (V.hi - p)/(V.hi - V.lo)*priceH();
@@ -831,7 +861,7 @@ function lensCandles(){
 // ───────── main chart ─────────
 function layout(){
   wrap.style.top = $('top').getBoundingClientRect().height + 'px';
-  V.dpr = window.devicePixelRatio || 1; V.W = wrap.clientWidth; V.H = wrap.clientHeight;
+  V.dpr = Math.min(2, window.devicePixelRatio || 1); V.W = wrap.clientWidth; V.H = wrap.clientHeight;
   cv.width = V.W*V.dpr; cv.height = V.H*V.dpr; ctx.setTransform(V.dpr, 0, 0, V.dpr, 0, 0);
   if (!xp.dataset.placed){
     const w = Math.min(360, V.W*0.62), h = Math.min(380, V.H*0.5);
@@ -871,6 +901,8 @@ function draw(){
   }
   ctx.save(); ctx.beginPath(); ctx.rect(0, 0, PW, PH); ctx.clip();
 
+  if (ON.heat) drawHeat(PW, PH);
+  if (TA && (ON.aur || ON.zones)){ const sv = {umb:ON.umb, lux:ON.lux}; ON.umb = ON.lux = false; const sg = TA.sig; TA.sig = []; drawTA(PW); TA.sig = sg; ON.umb = sv.umb; ON.lux = sv.lux; }
   // key level lines
   if (ON.levels) for (const l of keyLv){ const y = Math.round(yOf(l.p)) + .5;
     ctx.setLineDash([2, 4]); ctx.strokeStyle = hexA(l.d >= 0 ? COL.buy : COL.sell, .35);
@@ -882,9 +914,14 @@ function draw(){
     const c = C[i], x = xF(i), up = c.c >= c.o, col = up ? COL.buy : COL.sell;
     const vh = vmax ? (c.buy + c.sell)/vmax*(VH - 6) : 0;
     ctx.fillStyle = hexA(up ? COL.buy : COL.sell, .45); ctx.fillRect(x - bw/2, PH - vh, bw, vh);
+    if (ON.fp && V.cw >= 14 && drawFpCandle(c, x)) continue;
     ctx.fillStyle = col; ctx.fillRect(Math.round(x) - .5, yOf(c.h), 1, Math.max(1, yOf(c.l) - yOf(c.h)));
     const yo = yOf(c.o), yc = yOf(c.c); ctx.fillRect(x - bw/2, Math.min(yo, yc), bw, Math.max(1, Math.abs(yc - yo)));
   }
+  if (ON.liq) drawLiq(PW);
+  if (ON.vp) drawProfile(PW, PH, a, b);
+  if (ON.whales) drawWhales(PW, PH);
+  if (TA && (ON.umb || ON.lux || TA.sig.length)){ const sv = {aur:ON.aur, zones:ON.zones}; ON.aur = ON.zones = false; drawTA(PW); ON.aur = sv.aur; ON.zones = sv.zones; }
 
   // Print Pro glowing bands
   if (ON.prints && prints.length){
@@ -893,14 +930,17 @@ function draw(){
       const x = xF(pr.i), y = yOf(pr.p); if (x > PW + 5) continue;
       const rgb = pr.d < 0 ? '255,160,30' : '40,220,170';
       const g = ctx.createLinearGradient(x, 0, PW, 0); g.addColorStop(0, `rgba(${rgb},.95)`); g.addColorStop(1, `rgba(${rgb},.08)`);
-      ctx.save(); ctx.shadowColor = `rgba(${rgb},.9)`; ctx.shadowBlur = 16; ctx.strokeStyle = g;
-      ctx.lineWidth = 2 + 5*pr.vol/top; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(PW, y); ctx.stroke(); ctx.restore();
+      const gw = ctx.createLinearGradient(x, 0, PW, 0); gw.addColorStop(0, `rgba(${rgb},.28)`); gw.addColorStop(1, `rgba(${rgb},0)`);
+      const lw = 2 + 5*pr.vol/top;
+      ctx.save(); ctx.strokeStyle = gw; ctx.lineWidth = lw + 10; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(PW, y); ctx.stroke();
+      ctx.strokeStyle = g; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(PW, y); ctx.stroke(); ctx.restore();
       ctx.fillStyle = `rgba(${rgb},1)`; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 7); ctx.fill();
       ctx.font = 'bold 10px ui-monospace,monospace'; ctx.textAlign = 'left'; ctx.fillText(fmt(pr.vol), x + 6, y - 9);
     }
   }
 
   drawDrawings(PW, PH);
+  drawPanes(PW);
 
   // last price line
   const last = C[N-1], ly = yOf(last.c), lc = last.c >= last.o ? COL.buy : COL.sell;
@@ -910,8 +950,8 @@ function draw(){
   if (ON.xray && lens){
     const L = lensRect();
     ctx.fillStyle = 'rgba(79,179,255,.10)'; ctx.fillRect(L.x1, L.y1, L.x2 - L.x1, L.y2 - L.y1);
-    ctx.strokeStyle = COL.acc; ctx.lineWidth = 2; ctx.shadowColor = COL.acc; ctx.shadowBlur = 8;
-    ctx.strokeRect(L.x1, L.y1, L.x2 - L.x1, L.y2 - L.y1); ctx.shadowBlur = 0; ctx.lineWidth = 1;
+    ctx.strokeStyle = COL.acc; ctx.lineWidth = 2;
+    ctx.strokeRect(L.x1, L.y1, L.x2 - L.x1, L.y2 - L.y1); ctx.lineWidth = 1;
     ctx.fillStyle = COL.acc; ctx.fillRect(L.x2 - 4, L.y2 - 4, 8, 8);
   }
 
@@ -996,8 +1036,8 @@ function drawPanel(){
   }
   if (hv){ g.strokeStyle = COL.acc; g.lineWidth = 1.5; g.strokeRect(hv.x + 10.5, hv.y + 1, cwp - 14, rh - 2); }
   const mid = C[Math.round((i0 + i1)/2)];
-  $('xpT').textContent = `${tStr(mid.t)}   ${P(lens.cp)}${C[i1].est || C[i0].est ? '  ~est' : ''}`;
-  $('xpZ').textContent = (w/Math.max(14, lens.wc*V.cw)).toFixed(1) + 'x';
+  setText($('xpT'), `${tStr(mid.t)}   ${P(lens.cp)}${C[i1].est || C[i0].est ? '  ~est' : ''}`);
+  setText($('xpZ'), (w/Math.max(14, lens.wc*V.cw)).toFixed(1) + 'x');
   if (panelHover){
     if (hv){
       const pHi = (kHi + 1 - hv.r*G)*row, pLo = Math.max(kLo, kHi + 1 - (hv.r + 1)*G)*row, cl = hv.cl, d = cl.b - cl.s, tot = cl.b + cl.s;
@@ -1015,13 +1055,13 @@ function drawPanel(){
 
 // ───────── tooltips / popups ─────────
 function showTip(html, cx, cy){
-  const r = wrap.getBoundingClientRect(); tip.innerHTML = html; tip.style.display = 'block';
+  const r = wrap.getBoundingClientRect(); if (tip._h !== html){ tip._h = html; tip.innerHTML = html; } if (tip.style.display !== 'block') tip.style.display = 'block';
   const tw = tip.offsetWidth, th = tip.offsetHeight; let x = cx - r.left + 16, y = cy - r.top + 16;
   if (x + tw > V.W) x = cx - r.left - tw - 16; if (x < 2) x = 2;
   if (y + th > V.H) y = V.H - th - 2; if (y < 2) y = 2;
   tip.style.left = x + 'px'; tip.style.top = y + 'px';
 }
-const hideTip = () => tip.style.display = 'none';
+const hideTip = () => { if (tip.style.display !== 'none') tip.style.display = 'none'; };
 function hitPrint(p){
   if (!ON.prints) return null;
   for (const pr of prints){ const x = xF(pr.i), y = yOf(pr.p); if (Math.abs(p.y - y) < 8 && p.x >= x - 8 && p.x <= pw()) return pr; }
@@ -1030,22 +1070,28 @@ function hitPrint(p){
 function showPop(pr, x, y, pin){
   const zone = pr.d < 0 ? 'Sell pressure zone' : 'Buy pressure zone';
   pop.style.borderColor = pr.d < 0 ? COL.gold : COL.buy;
-  pop.innerHTML = `${pin ? '<div class="x" id="popX">✕</div>' : ''}<div class="pp mono">${P(pr.p)}</div>
+  const ph_ = `${pin ? '<div class="x" id="popX">✕</div>' : ''}<div class="pp mono">${P(pr.p)}</div>
     <div class="r"><span>Volume</span><b class="mono">${S.unit}${fmt(pr.vol)}</b></div>
     <div class="r"><span>Delta</span><b class="mono ${pr.d>=0?'g':'s'}">${sgn(pr.d)}</b></div>
     <div class="r"><span>Time</span><span class="mono">${tStr(pr.t)}</span></div>
     <div class="z" style="color:${pr.d<0?COL.gold:COL.buy}">${zone}</div>`;
-  pop.style.display = 'block';
+  const changed = pop._h !== ph_; if (changed){ pop._h = ph_; pop.innerHTML = ph_; }
+  if (pop.style.display !== 'block') pop.style.display = 'block';
   let px = x + 14, py = y - pop.offsetHeight - 14;
   if (px + pop.offsetWidth > V.W) px = V.W - pop.offsetWidth - 4; if (py < 2) py = y + 14;
   pop.style.left = px + 'px'; pop.style.top = py + 'px';
-  if (pin) $('popX').onclick = () => { pinned = null; pop.style.display = 'none'; };
+  if (pin && changed) $('popX').onclick = () => { pinned = null; pop._h = ''; pop.style.display = 'none'; };
 }
 function mainHover(){
   if (tool !== 'cursor' || draft || (act && act.m === 'dr')){ hideTip(); if (!pinned) pop.style.display = 'none'; return; }
   if (pinned){ showPop(pinned, xF(pinned.i), yOf(pinned.p), true); }
   if (!hover.in || act){ if (!pinned) pop.style.display = 'none'; if (!panelHover) hideTip(); return; }
   if (panelHover) return;
+  const wh = hitWhale(hover);
+  if (wh){ const r = wrap.getBoundingClientRect(); if (!pinned) pop.style.display = 'none';
+    showTip(`<div class="h">${wh.sell ? '🔴 Whale SELL' : '🟢 Whale BUY'}</div>
+      <div class="r"><span>Size</span><b>$${fmt(wh.v)}</b></div><div class="r"><span>Price</span><span class="mono">${P(wh.p)}</span></div>
+      <div class="r"><span>Time</span><span class="mono">${new Date(wh.T).toLocaleTimeString()}</span></div>`, hover.x + r.left, hover.y + r.top); return; }
   const pr = hitPrint(hover);
   if (pr && !pinned){ showPop(pr, hover.x, hover.y, false); hideTip(); return; }
   if (!pinned) pop.style.display = 'none';
@@ -1066,13 +1112,292 @@ function mainHover(){
 }
 
 
+const ICONS = {"cursor": "<svg viewBox=\"0 0 20 20\"><path d=\"M5 3l11 7-5 1-2 5z\"/></svg>", "trend": "<svg viewBox=\"0 0 20 20\"><path d=\"M4 16L16 4\"/><circle cx=\"4\" cy=\"16\" r=\"1.6\"/><circle cx=\"16\" cy=\"4\" r=\"1.6\"/></svg>", "ray": "<svg viewBox=\"0 0 20 20\"><path d=\"M4 16L18 2\"/><circle cx=\"4\" cy=\"16\" r=\"1.6\"/><circle cx=\"10\" cy=\"10\" r=\"1.6\"/></svg>", "ext": "<svg viewBox=\"0 0 20 20\"><path d=\"M1 19L19 1\"/><circle cx=\"7\" cy=\"13\" r=\"1.6\"/><circle cx=\"13\" cy=\"7\" r=\"1.6\"/></svg>", "hline": "<svg viewBox=\"0 0 20 20\"><path d=\"M1 10h18\"/><circle cx=\"10\" cy=\"10\" r=\"1.6\"/></svg>", "hray": "<svg viewBox=\"0 0 20 20\"><path d=\"M5 10h14\"/><circle cx=\"5\" cy=\"10\" r=\"1.6\"/></svg>", "vline": "<svg viewBox=\"0 0 20 20\"><path d=\"M10 1v18\"/><circle cx=\"10\" cy=\"10\" r=\"1.6\"/></svg>", "rect": "<svg viewBox=\"0 0 20 20\"><rect x=\"3\" y=\"5\" width=\"14\" height=\"10\" rx=\"1\"/></svg>", "fib": "<svg viewBox=\"0 0 20 20\"><path d=\"M2 4h16M2 8h16M2 12h16M2 16h16\"/><path d=\"M4 16L16 4\" stroke-dasharray=\"2 2\"/></svg>", "range": "<svg viewBox=\"0 0 20 20\"><path d=\"M10 2v16M6 5l4-3 4 3M6 15l4 3 4-3\"/></svg>", "long": "<svg viewBox=\"0 0 20 20\"><rect x=\"3\" y=\"3\" width=\"14\" height=\"7\" fill=\"rgba(31,211,138,.5)\"/><rect x=\"3\" y=\"10\" width=\"14\" height=\"5\" fill=\"rgba(255,77,94,.5)\"/></svg>", "short": "<svg viewBox=\"0 0 20 20\"><rect x=\"3\" y=\"5\" width=\"14\" height=\"5\" fill=\"rgba(31,211,138,.5)\" transform=\"translate(0,7)\"/><rect x=\"3\" y=\"3\" width=\"14\" height=\"7\" fill=\"rgba(255,77,94,.5)\"/></svg>", "text": "<svg viewBox=\"0 0 20 20\"><path d=\"M4 4h12M10 4v13\"/></svg>", "brush": "<svg viewBox=\"0 0 20 20\"><path d=\"M3 15c3-1 3-5 6-6s4 3 8-4\"/></svg>"};
+// ═════════════ drawing tool library ═════════════
+const PHI = 1.6180339887;
+const TCAT = ['Favorites', 'Tools', 'Trend tools', 'Gann & Fibonacci', 'Patterns', 'Forecasting & measurement', 'Shapes', 'Annotation', 'Visuals'];
+// n = points to click (-1 = keep clicking, tap the last point again to finish; 0 = drag to draw)
+const TL = {
+  trend:{n:2, name:'Trendline', cat:2}, ray:{n:2, name:'Ray', cat:2}, info:{n:2, name:'Info line', cat:2, g:'ℹ'}, ext:{n:2, name:'Extended line', cat:2},
+  angle:{n:2, name:'Trend angle', cat:2, g:'∠'}, hline:{n:1, name:'Horizontal line', cat:2}, hray:{n:1, name:'Horizontal ray', cat:2}, vline:{n:1, name:'Vertical line', cat:2},
+  cross:{n:1, name:'Cross line', cat:2, g:'┼'}, channel:{n:3, name:'Parallel channel', cat:2, g:'⫽', area:1}, regress:{n:2, name:'Regression trend', cat:2, g:'≋'},
+  flat:{n:3, name:'Flat top/bottom', cat:2, g:'⊐', area:1}, disjoint:{n:4, name:'Disjoint channel', cat:2, g:'≺', area:1},
+  pitchfork:{n:3, name:'Pitchfork', cat:2, g:'Ψ'}, schiff:{n:3, name:'Schiff pitchfork', cat:2, g:'Ψs'}, mschiff:{n:3, name:'Modified Schiff', cat:2, g:'Ψm'}, ipitch:{n:3, name:'Inside pitchfork', cat:2, g:'Ψi'},
+  fib:{n:2, name:'Fib retracement', cat:3}, fibext:{n:3, name:'Trend-based fib extension', cat:3, g:'F↗'}, fibch:{n:3, name:'Fib channel', cat:3, g:'F⫽'},
+  fibtz:{n:2, name:'Fib time zone', cat:3, g:'F|'}, fibfan:{n:2, name:'Fib speed fan', cat:3, g:'F∢'}, fibtime:{n:3, name:'Trend-based fib time', cat:3, g:'Ft'},
+  fibcirc:{n:2, name:'Fib circles', cat:3, g:'◎'}, fibspiral:{n:2, name:'Fib spiral', cat:3, g:'@'}, fibarcs:{n:2, name:'Fib speed arcs', cat:3, g:'⌒'},
+  fibwedge:{n:3, name:'Fib wedge', cat:3, g:'◺'}, pitchfan:{n:3, name:'Pitchfan', cat:3, g:'⋔'}, gannbox:{n:2, name:'Gann box', cat:3, g:'▦', area:1},
+  gannfix:{n:2, name:'Gann fixed square', cat:3, g:'▩', area:1}, gannsq:{n:2, name:'Gann square', cat:3, g:'⊠', area:1}, gannfan:{n:2, name:'Gann fan', cat:3, g:'⋰'},
+  xabcd:{n:5, name:'XABCD pattern', cat:4, g:'XA'}, cypher:{n:5, name:'Cypher pattern', cat:4, g:'Cy'}, hs:{n:7, name:'Head and shoulders', cat:4, g:'HS'},
+  abcd:{n:4, name:'ABCD pattern', cat:4, g:'AB'}, tripat:{n:4, name:'Triangle pattern', cat:4, g:'◁'}, drives:{n:7, name:'Three drives', cat:4, g:'3D'},
+  ew5:{n:6, name:'Elliott impulse (1-5)', cat:4, g:'15'}, ewabc:{n:4, name:'Elliott correction (ABC)', cat:4, g:'AC'}, ewtri:{n:6, name:'Elliott triangle (A-E)', cat:4, g:'AE'},
+  ewwxy:{n:4, name:'Elliott double combo (WXY)', cat:4, g:'WY'}, ewwxyxz:{n:6, name:'Elliott triple combo (WXYXZ)', cat:4, g:'WZ'},
+  cyclic:{n:2, name:'Cyclic lines', cat:4, g:'|||'}, tcycles:{n:2, name:'Time cycles', cat:4, g:'⌓'}, sine:{n:2, name:'Sine line', cat:4, g:'∿'},
+  long:{n:2, name:'Long position', cat:5}, short:{n:2, name:'Short position', cat:5}, forecast:{n:2, name:'Position forecast', cat:5, g:'↗%'},
+  bars:{n:3, name:'Bars pattern (copy bars)', cat:5, g:'⧉'}, ghost:{n:-1, name:'Ghost feed', cat:5, g:'👻'}, sector:{n:3, name:'Sector', cat:5, g:'◔'},
+  avwap:{n:1, name:'Anchored VWAP', cat:5, g:'VW'}, frvp:{n:2, name:'Fixed range volume profile', cat:5, g:'▤'}, avp:{n:1, name:'Anchored volume profile', cat:5, g:'▥'},
+  range:{n:2, name:'Price range', cat:5}, drange:{n:2, name:'Date range', cat:5, g:'↔'}, dprange:{n:2, name:'Date & price range', cat:5, g:'⊞'},
+  brush:{n:0, name:'Brush', cat:6}, hl:{n:0, name:'Highlighter', cat:6, g:'🖍'}, arrowmk:{n:2, name:'Arrow marker', cat:6, g:'➚'}, arrow:{n:2, name:'Arrow', cat:6, g:'→'},
+  arrowup:{n:1, name:'Arrow mark up', cat:6, g:'⇧'}, arrowdn:{n:1, name:'Arrow mark down', cat:6, g:'⇩'}, rect:{n:2, name:'Rectangle', cat:6},
+  rotrect:{n:3, name:'Rotated rectangle', cat:6, g:'◇', area:1}, path:{n:-1, name:'Path', cat:6, g:'⤳'}, circle:{n:2, name:'Circle', cat:6, g:'○', area:1},
+  ellipse:{n:2, name:'Ellipse', cat:6, g:'⬭', area:1}, polyline:{n:-1, name:'Polyline', cat:6, g:'⬠', area:1}, triangle:{n:3, name:'Triangle', cat:6, g:'△', area:1},
+  arc:{n:3, name:'Arc', cat:6, g:'◠'}, curve:{n:3, name:'Curve', cat:6, g:'⌒'}, dcurve:{n:4, name:'Double curve', cat:6, g:'S'},
+  text:{n:1, name:'Text', cat:7}, note:{n:1, name:'Note', cat:7, g:'🗒', txt:1}, pnote:{n:2, name:'Price note', cat:7, g:'$', txt:1}, pin:{n:1, name:'Pin', cat:7, g:'📍', txt:1},
+  table:{n:1, name:'Table', cat:7, g:'▦', txt:1}, callout:{n:2, name:'Callout', cat:7, g:'💬', txt:1}, comment:{n:1, name:'Comment', cat:7, g:'🗨', txt:1},
+  plabel:{n:1, name:'Price label', cat:7, g:'🏷'}, signpost:{n:1, name:'Signpost', cat:7, g:'⚑', txt:1}, flag:{n:1, name:'Flag mark', cat:7, g:'🚩'},
+  idea:{n:1, name:'Idea', cat:7, g:'💡', txt:1}, image:{n:1, name:'Image', cat:7, g:'🖼'}, alert:{n:1, name:'Price alert', cat:7, g:'🔔'},
+};
+const GLYPHS = {emoji:['😀','😎','🤔','😱','🥳','😴','🤑','😡','👍','👎','👀','🙏'], sticker:['🚀','🔥','💎','🐂','🐻','🎯','💰','⚠️','✅','❌','🏆','⏰'], icon:['★','♥','▲','▼','●','■','◆','✚','✖','⚡','☂','⌛']};
+for (const [kind, arr] of Object.entries(GLYPHS)) for (const gl of arr) TL['g:' + kind + ':' + gl] = {n:1, name:(kind === 'icon' ? 'Icon ' : kind === 'sticker' ? 'Sticker ' : 'Emoji ') + gl, cat:8, g:gl};
+const ACTIONS = [{k:'cursor', name:'Cursor'}, {k:'range', name:'Measure'}, {k:'eraser', name:'Eraser', g:'⌫'}, {k:'@keep', name:'Keep drawing', g:'🔁'}, {k:'@hide', name:'Hide drawings', g:'👁'},
+  {k:'@lock', name:'Lock all drawings', g:'🔒'}, {k:'@magnet', name:'Magnet: strong / weak / off', g:'🧲'}, {k:'@clear', name:'Remove all objects', g:'🗑'}, {k:'@zin', name:'Zoom in', g:'＋'}, {k:'@zout', name:'Zoom out', g:'－'}];
+let favTools = ['trend', 'hline', 'hray', 'vline', 'rect', 'fib', 'range', 'long', 'short', 'text', 'brush'];
+try{ const f = JSON.parse(localStorage.getItem('fpFav') || 'null'); if (Array.isArray(f)) favTools = f.filter(k => TL[k]); }catch(e){}
+let keepDraw = false, lockDraw = false, magnetMode = 'weak';
+const bbMap = new WeakMap();   // last drawn box of label-type drawings, for tapping them
+const nOf = t => (TL[t] || {n:2}).n;
+
+// render helpers
+function arrowHead(a, b, s = 10){ const an = Math.atan2(b.y - a.y, b.x - a.x); ctx.beginPath(); ctx.moveTo(b.x, b.y);
+  ctx.lineTo(b.x - s*Math.cos(an - .45), b.y - s*Math.sin(an - .45)); ctx.lineTo(b.x - s*Math.cos(an + .45), b.y - s*Math.sin(an + .45)); ctx.closePath(); ctx.fill(); }
+const mid = (a, b) => ({x:(a.x + b.x)/2, y:(a.y + b.y)/2});
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+function circum(a, b, c){ const d = 2*(a.x*(b.y - c.y) + b.x*(c.y - a.y) + c.x*(a.y - b.y)); if (Math.abs(d) < 1e-6) return null;
+  const ux = ((a.x**2 + a.y**2)*(b.y - c.y) + (b.x**2 + b.y**2)*(c.y - a.y) + (c.x**2 + c.y**2)*(a.y - b.y))/d, uy = ((a.x**2 + a.y**2)*(c.x - b.x) + (b.x**2 + b.y**2)*(a.x - c.x) + (c.x**2 + c.y**2)*(b.x - a.x))/d;
+  return {x:ux, y:uy, r:Math.hypot(a.x - ux, a.y - uy)}; }
+function bubble(d, x, y, lines, opt = {}){
+  ctx.font = (opt.font || '12px -apple-system,Segoe UI,sans-serif'); const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + 14, h = lines.length*16 + 8;
+  const bx = opt.cx ? x - w/2 : x, by = opt.above ? y - h - (opt.gap ?? 10) : y;
+  ctx.fillStyle = opt.bg || hexA(d.color || drawColor, .92); ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(bx, by, w, h, opt.r ?? 6); else ctx.rect(bx, by, w, h); ctx.fill();
+  if (opt.tail){ ctx.beginPath(); ctx.moveTo(bx + w/2 - 6, by + h); ctx.lineTo(x, y); ctx.lineTo(bx + w/2 + 6, by + h); ctx.fill(); }
+  ctx.fillStyle = opt.fg || '#fff'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; lines.forEach((l, i) => ctx.fillText(l, bx + 7, by + 12 + i*16));
+  bbMap.set(d, {x:bx, y:by, w, h});
+}
+function ptLabels(Q, names, col){
+  ctx.font = 'bold 11px -apple-system,Segoe UI,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  Q.forEach((q, i) => { if (!names[i]) return; const nb = [Q[i - 1], Q[i + 1]].filter(Boolean), up = nb.length ? q.y <= Math.min(...nb.map(z => z.y)) : true;
+    const y = up ? q.y - 12 : q.y + 12, w = ctx.measureText(names[i]).width + 8; ctx.fillStyle = col; ctx.fillRect(q.x - w/2, y - 8, w, 16); ctx.fillStyle = '#fff'; ctx.fillText(names[i], q.x, y + .5); });
+}
+function ratioTag(a, b, txt){ const m = mid(a, b); ctx.font = '10px ui-monospace,monospace'; const w = ctx.measureText(txt).width + 8;
+  ctx.fillStyle = hexA(TH.bg, .85); ctx.fillRect(m.x - w/2, m.y - 7, w, 14); ctx.fillStyle = TH.txt; ctx.textAlign = 'center'; ctx.fillText(txt, m.x, m.y + .5); }
+function rangeProfile(i1, i2, x0, x1, col){
+  const C = S.candles; i1 = clamp(Math.round(i1), 0, C.length - 1); i2 = clamp(Math.round(i2), 0, C.length - 1); if (i2 < i1) [i1, i2] = [i2, i1];
+  const br = Math.max(1, Math.ceil((V.hi - V.lo)/S.row/70)), bins = new Map(); let tot = 0;
+  for (let i = i1; i <= i2; i++) for (const [k, L] of C[i].lv){ const b = Math.floor(k/br), v = L.b + L.s; bins.set(b, (bins.get(b) || 0) + v); tot += v; }
+  if (!tot) return;
+  const keys = [...bins.keys()].sort((a, b) => a - b); let pk = keys[0]; for (const k of keys) if (bins.get(k) > bins.get(pk)) pk = k;
+  let lo = keys.indexOf(pk), hi = lo, acc = bins.get(pk);
+  while (acc < tot*.7 && (lo > 0 || hi < keys.length - 1)){ const vd = lo > 0 ? bins.get(keys[lo - 1]) : -1, vu = hi < keys.length - 1 ? bins.get(keys[hi + 1]) : -1; if (vu >= vd){ hi++; acc += vu; } else { lo--; acc += vd; } }
+  const w = Math.max(30, (x1 - x0)*.6), mx = bins.get(pk), hB = br*S.row/ppp();
+  for (const [k, v] of bins){ const y = yOf((k + 1)*br*S.row); ctx.fillStyle = k >= keys[lo] && k <= keys[hi] ? hexA(col, .5) : hexA(col, .22); ctx.fillRect(x0, y + .5, w*v/mx, Math.max(1, hB - 1)); }
+  const yp = yOf((pk + .5)*br*S.row); ctx.strokeStyle = COL.gold; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x0, yp); ctx.lineTo(Math.max(x1, x0 + w), yp); ctx.stroke();
+  for (const [k, nm] of [[keys[hi] + 1, 'VAH'], [keys[lo], 'VAL']]){ const y = yOf(k*br*S.row); ctx.setLineDash([3, 3]); ctx.strokeStyle = hexA(col, .7); ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(Math.max(x1, x0 + w), y); ctx.stroke(); ctx.setLineDash([]); }
+}
+function candlesIn(t1, t2){ let a = Math.round(tIdx(t1)), b = Math.round(tIdx(t2)); if (a > b) [a, b] = [b, a]; return [clamp(a, 0, S.candles.length - 1), clamp(b, 0, S.candles.length - 1)]; }
+
+// one renderer per tool (screen points Q, drawing d)
+function renderTool(d, Q, PW, PH){
+  const col = d.color || drawColor, A = Q[0], B = Q[1] || Q[0], Cq = Q[2] || B, D = Q[3] || Cq;
+  const seg = (a, b) => { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); };
+  const ray = (a, b) => { const [p, q] = extendSeg(a, b, false, true); seg(p, q); };
+  const poly = (P, close, fillA) => { if (P.length < 2) return; ctx.beginPath(); P.forEach((q, i) => i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); if (close) ctx.closePath();
+    if (fillA){ ctx.fillStyle = hexA(col, fillA); ctx.fill(); } ctx.stroke(); };
+  const pr = q => pAt(q.y), dsh = (on) => ctx.setLineDash(on ? [4, 4] : []);
+  const lab = (txt, x, y, align = 'center') => { ctx.font = '10px ui-monospace,monospace'; ctx.fillStyle = col; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(txt, x, y); };
+  const t = d.type, pts = d.pts;
+  if (t.startsWith('g:')){ const kind = t.split(':')[1], g = TL[t].g, s = kind === 'sticker' ? 40 : kind === 'emoji' ? 28 : 24;
+    ctx.font = `${s}px -apple-system,Segoe UI Emoji,Apple Color Emoji,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = col; ctx.fillText(g, A.x, A.y);
+    bbMap.set(d, {x:A.x - s/2, y:A.y - s/2, w:s, h:s}); return; }
+  switch (t){
+    case 'info': { seg(A, B); const p1 = pts[0].p, p2 = (pts[1] || pts[0]).p, dp = p2 - p1, bars = Math.round(tIdx((pts[1] || pts[0]).t) - tIdx(pts[0].t)), ang = Math.atan2(A.y - B.y, B.x - A.x)*180/Math.PI;
+      bubble(d, B.x + 8, B.y, [`${dp >= 0 ? '+' : ''}${P(dp)} (${(100*dp/p1).toFixed(2)}%)`, `${bars} bars · ${ang.toFixed(1)}°`], {bg:hexA(TH.bg, .9), fg:col}); break; }
+    case 'angle': { seg(A, B); dsh(1); seg(A, {x:A.x + 70, y:A.y}); dsh(0); const an = Math.atan2(B.y - A.y, B.x - A.x);
+      ctx.beginPath(); ctx.arc(A.x, A.y, 30, Math.min(0, an), Math.max(0, an)); ctx.stroke(); lab(`${(-an*180/Math.PI).toFixed(1)}°`, A.x + 44, A.y + (an < 0 ? -10 : 10), 'left'); break; }
+    case 'cross': seg({x:0, y:A.y}, {x:PW, y:A.y}); seg({x:A.x, y:0}, {x:A.x, y:PH}); break;
+    case 'channel': { const off = Q.length > 2 ? Cq.y - (A.y + (B.y - A.y)*((Cq.x - A.x)/((B.x - A.x) || 1))) : 0, A2 = {x:A.x, y:A.y + off}, B2 = {x:B.x, y:B.y + off};
+      poly([A, B, B2, A2], true, .08); dsh(1); seg(mid(A, A2), mid(B, B2)); dsh(0); break; }
+    case 'flat': { const y = Q.length > 2 ? Cq.y : B.y; poly([A, B, {x:B.x, y}, {x:A.x, y}], true, .08); break; }
+    case 'disjoint': poly(Q.length > 3 ? [A, B, D, Cq] : Q, Q.length > 3, .08); break;
+    case 'regress': { const [a, b] = candlesIn(pts[0].t, (pts[1] || pts[0]).t), n = b - a + 1; if (n < 3){ seg(A, B); break; }
+      let sx = 0, sy = 0, sxx = 0, sxy = 0; for (let i = a; i <= b; i++){ const x = i - a, y = S.candles[i].c; sx += x; sy += y; sxx += x*x; sxy += x*y; }
+      const m = (n*sxy - sx*sy)/(n*sxx - sx*sx || 1), c0 = (sy - m*sx)/n; let ss = 0; for (let i = a; i <= b; i++){ ss += (S.candles[i].c - (c0 + m*(i - a)))**2; } const sd = Math.sqrt(ss/n);
+      const L = k => [{x:xF(a), y:yOf(c0 + k*sd)}, {x:xF(b), y:yOf(c0 + m*(n - 1) + k*sd)}];
+      const [u1, u2] = L(2), [l1, l2] = L(-2); ctx.fillStyle = hexA(col, .07); ctx.beginPath(); ctx.moveTo(u1.x, u1.y); ctx.lineTo(u2.x, u2.y); ctx.lineTo(l2.x, l2.y); ctx.lineTo(l1.x, l1.y); ctx.fill();
+      const [c1, c2] = L(0); seg(c1, c2); dsh(1); seg(u1, u2); seg(l1, l2); dsh(0); break; }
+    case 'pitchfork': case 'schiff': case 'mschiff': case 'ipitch': { if (Q.length < 3){ seg(A, B); break; }
+      const O = t === 'schiff' ? {x:A.x, y:(A.y + B.y)/2} : t === 'mschiff' ? mid(A, B) : t === 'ipitch' ? mid(A, Cq) : A, M = mid(B, Cq), dv = {x:M.x - O.x, y:M.y - O.y};
+      if (t !== 'pitchfork'){ dsh(1); seg(A, O); dsh(0); } seg(B, Cq); ray(O, M); ray(B, {x:B.x + dv.x, y:B.y + dv.y}); ray(Cq, {x:Cq.x + dv.x, y:Cq.y + dv.y});
+      ctx.fillStyle = hexA(col, .06); ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(B.x + dv.x*20, B.y + dv.y*20); ctx.lineTo(Cq.x + dv.x*20, Cq.y + dv.y*20); ctx.lineTo(Cq.x, Cq.y); ctx.fill(); break; }
+    case 'fibext': { dsh(1); poly(Q); dsh(0); if (Q.length < 3) break; const p1 = pts[0].p, p2 = pts[1].p, p3 = pts[2].p, x2 = Cq.x + Math.abs(B.x - A.x);
+      for (const L of [0, .236, .382, .5, .618, .786, 1, 1.272, 1.618, 2.618]){ const pp = p3 + (p2 - p1)*L, y = yOf(pp); seg({x:Cq.x, y}, {x:x2, y}); lab(`${L} (${P(pp)})`, Cq.x - 4, y, 'right'); } break; }
+    case 'fibch': { seg(A, B); if (Q.length < 3) break; const off = Cq.y - (A.y + (B.y - A.y)*((Cq.x - A.x)/((B.x - A.x) || 1)));
+      for (const L of [0, .236, .382, .5, .618, .786, 1, 1.618]){ const o = off*L; seg({x:A.x, y:A.y + o}, {x:B.x, y:B.y + o}); lab(String(L), A.x - 4, A.y + o, 'right'); } break; }
+    case 'fibtz': { const dx = B.x - A.x; if (Math.abs(dx) < 2) break; [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89].forEach(F => { const x = A.x + dx*F; seg({x, y:0}, {x, y:PH}); lab(String(F), x + 3, 12, 'left'); }); break; }
+    case 'fibfan': { const dx = B.x - A.x, dy = B.y - A.y; dsh(1); ctx.strokeRect(Math.min(A.x, B.x), Math.min(A.y, B.y), Math.abs(dx), Math.abs(dy)); dsh(0);
+      for (const L of [.25, .382, .5, .618, .75, 1]){ ray(A, {x:B.x, y:A.y + dy*L}); if (L < 1) ray(A, {x:A.x + dx*L, y:B.y}); lab(String(L), B.x + 4, A.y + dy*L, 'left'); } break; }
+    case 'fibtime': { dsh(1); poly(Q); dsh(0); if (Q.length < 3) break; const dx = B.x - A.x; for (const L of [0, .382, .5, .618, 1, 1.382, 1.618, 2, 2.618, 3]){ const x = Cq.x + dx*L; seg({x, y:0}, {x, y:PH}); lab(String(L), x + 3, 12, 'left'); } break; }
+    case 'fibcirc': { const r = dist(A, B); dsh(1); seg(A, B); dsh(0); for (const L of [.382, .5, .618, 1, 1.618, 2.618]){ ctx.beginPath(); ctx.arc(A.x, A.y, r*L, 0, 7); ctx.stroke(); } break; }
+    case 'fibspiral': { const r0 = dist(A, B), a0 = Math.atan2(B.y - A.y, B.x - A.x); if (r0 < 2) break; ctx.beginPath();
+      for (let k = 0; k <= 400; k++){ const th = -6*Math.PI + k*(7.5*Math.PI/400), r = r0*Math.pow(PHI, th/(Math.PI/2)), x = A.x + r*Math.cos(a0 + th), y = A.y + r*Math.sin(a0 + th); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+      ctx.stroke(); dsh(1); seg(A, B); dsh(0); break; }
+    case 'fibarcs': { const r = dist(A, B), upHalf = A.y < B.y; dsh(1); seg(A, B); dsh(0);
+      for (const L of [.382, .5, .618, 1]){ ctx.beginPath(); ctx.arc(B.x, B.y, r*L, upHalf ? Math.PI : 0, upHalf ? 2*Math.PI : Math.PI); ctx.stroke(); lab(String(L), B.x, B.y + (upHalf ? -r*L - 6 : r*L + 6)); } break; }
+    case 'fibwedge': { seg(A, B); if (Q.length < 3) break; seg(A, Cq); const r = dist(A, B), a1 = Math.atan2(B.y - A.y, B.x - A.x), a2 = Math.atan2(Cq.y - A.y, Cq.x - A.x);
+      for (const L of [.236, .382, .5, .618, .786, 1]){ ctx.beginPath(); ctx.arc(A.x, A.y, r*L, Math.min(a1, a2), Math.max(a1, a2)); ctx.stroke(); } break; }
+    case 'pitchfan': { if (Q.length < 3){ seg(A, B); break; } seg(B, Cq); for (const L of [0, .25, .382, .5, .618, .75, 1]) ray(A, {x:B.x + (Cq.x - B.x)*L, y:B.y + (Cq.y - B.y)*L}); break; }
+    case 'gannbox': case 'gannsq': case 'gannfix': { let B2 = B; if (t === 'gannfix'){ const s = Math.max(Math.abs(B.x - A.x), Math.abs(B.y - A.y)); B2 = {x:A.x + Math.sign(B.x - A.x || 1)*s, y:A.y + Math.sign(B.y - A.y || 1)*s}; }
+      const x1 = Math.min(A.x, B2.x), y1 = Math.min(A.y, B2.y), w = Math.abs(B2.x - A.x), h = Math.abs(B2.y - A.y); ctx.fillStyle = hexA(col, .05); ctx.fillRect(x1, y1, w, h); ctx.strokeRect(x1, y1, w, h);
+      const lv = t === 'gannbox' ? [.25, .382, .5, .618, .75] : [.125, .25, .375, .5, .625, .75, .875]; ctx.globalAlpha = .55;
+      for (const L of lv){ seg({x:x1 + w*L, y:y1}, {x:x1 + w*L, y:y1 + h}); seg({x:x1, y:y1 + h*L}, {x:x1 + w, y:y1 + h*L}); }
+      ctx.globalAlpha = 1; seg({x:x1, y:y1}, {x:x1 + w, y:y1 + h}); seg({x:x1, y:y1 + h}, {x:x1 + w, y:y1}); break; }
+    case 'gannfan': { const dx = B.x - A.x, dy = B.y - A.y; for (const [u, v, nm] of [[1, 8, '1/8'], [1, 4, '1/4'], [1, 3, '1/3'], [1, 2, '1/2'], [1, 1, '1/1'], [2, 1, '2/1'], [3, 1, '3/1'], [4, 1, '4/1'], [8, 1, '8/1']]){
+      const P2 = {x:A.x + dx*u/Math.max(u, v)*(v > u ? 1 : 1), y:A.y + dy*v/Math.max(u, v)}; const Pq = {x:A.x + dx*(u >= v ? 1 : u/v), y:A.y + dy*(v >= u ? 1 : v/u)}; ray(A, Pq); lab(nm, Pq.x + 4, Pq.y, 'left'); } break; }
+    case 'xabcd': case 'cypher': { poly(Q); ctx.fillStyle = hexA(col, .12); for (const tri of [[0, 1, 2], [2, 3, 4]]) if (Q[tri[2]]){ ctx.beginPath(); tri.forEach((k, i) => i ? ctx.lineTo(Q[k].x, Q[k].y) : ctx.moveTo(Q[k].x, Q[k].y)); ctx.fill(); }
+      dsh(1); for (const [a, b] of [[0, 2], [1, 3], [2, 4], [0, 4]]) if (Q[b]) seg(Q[a], Q[b]); dsh(0);
+      const pv = pts.map(q => q.p), R = (a, b, c, e) => Math.abs((pv[c] - pv[e])/((pv[a] - pv[b]) || 1)).toFixed(3);
+      if (Q[2]) ratioTag(Q[0], Q[2], R(0, 1, 1, 2)); if (Q[3]) ratioTag(Q[1], Q[3], R(1, 2, 2, 3)); if (Q[4]){ ratioTag(Q[2], Q[4], R(2, 3, 3, 4)); ratioTag(Q[0], Q[4], R(0, 1, 1, 4)); }
+      ptLabels(Q, ['X', 'A', 'B', 'C', 'D'], col); break; }
+    case 'abcd': { poly(Q); dsh(1); if (Q[2]) seg(A, Cq); if (Q[3]) seg(B, D); dsh(0); const pv = pts.map(q => q.p);
+      if (Q[2]) ratioTag(A, Cq, Math.abs((pv[2] - pv[1])/((pv[1] - pv[0]) || 1)).toFixed(3)); if (Q[3]) ratioTag(B, D, Math.abs((pv[3] - pv[2])/((pv[2] - pv[1]) || 1)).toFixed(3));
+      ptLabels(Q, ['A', 'B', 'C', 'D'], col); break; }
+    case 'tripat': { poly(Q, false, 0); if (Q[2]) ray(A, Cq); if (Q[3]) ray(B, D); ptLabels(Q, ['A', 'B', 'C', 'D'], col); break; }
+    case 'hs': { poly(Q); if (Q[4]){ dsh(1); const [p, q] = extendSeg(Q[2], Q[4], true, true); seg(p, q); dsh(0); } ptLabels(Q, ['', 'LS', '', 'Head', '', 'RS', ''], col); break; }
+    case 'drives': poly(Q); ptLabels(Q, ['', '1', '', '2', '', '3', ''], col); break;
+    case 'ew5': poly(Q); ptLabels(Q, ['0', '1', '2', '3', '4', '5'], col); break;
+    case 'ewabc': poly(Q); ptLabels(Q, ['0', 'A', 'B', 'C'], col); break;
+    case 'ewtri': poly(Q); ptLabels(Q, ['0', 'A', 'B', 'C', 'D', 'E'], col); break;
+    case 'ewwxy': poly(Q); ptLabels(Q, ['0', 'W', 'X', 'Y'], col); break;
+    case 'ewwxyxz': poly(Q); ptLabels(Q, ['0', 'W', 'X', 'Y', 'X', 'Z'], col); break;
+    case 'cyclic': { const dx = Math.abs(B.x - A.x); if (dx < 4) break; for (let x = A.x; x < PW + dx; x += dx) seg({x, y:0}, {x, y:PH}); break; }
+    case 'tcycles': { const dx = Math.abs(B.x - A.x); if (dx < 4) break; for (let x = Math.min(A.x, B.x); x < PW + dx; x += dx){ ctx.beginPath(); ctx.arc(x + dx/2, A.y, dx/2, Math.PI, 2*Math.PI); ctx.stroke(); } break; }
+    case 'sine': { const dx = B.x - A.x, amp = (B.y - A.y)/2; if (Math.abs(dx) < 3) break; ctx.beginPath();
+      for (let x = 0; x <= PW; x += 3){ const y = A.y + amp*(1 - Math.cos(Math.PI*(x - A.x)/dx)); x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); break; }
+    case 'forecast': { seg(A, B); arrowHead(A, B); const p1 = pts[0].p, p2 = (pts[1] || pts[0]).p, bars = Math.round(tIdx((pts[1] || pts[0]).t) - tIdx(pts[0].t));
+      bubble(d, B.x + 8, B.y - 10, [`${p2 >= p1 ? '▲' : '▼'} ${(100*(p2 - p1)/p1).toFixed(2)}%  (${P(p2 - p1)})`, `in ${bars} bars`], {bg: p2 >= p1 ? COL.buy : COL.sell, fg: p2 >= p1 ? '#03121f' : '#fff'}); break; }
+    case 'bars': { dsh(1); ctx.strokeRect(Math.min(A.x, B.x), 0, Math.abs(B.x - A.x), PH); dsh(0); if (Q.length < 3) break;
+      const [a, b] = candlesIn(pts[0].t, pts[1].t), C = S.candles, shift = Math.round(tIdx(pts[2].t)) - a, dp = pts[2].p - C[a].o, bw = Math.max(1, V.cw*.6); ctx.globalAlpha = .5;
+      for (let i = a; i <= b; i++){ const c = C[i], x = xF(i + shift), up = c.c >= c.o; ctx.fillStyle = up ? COL.buy : COL.sell; ctx.fillRect(x - .5, yOf(c.h + dp), 1, yOf(c.l + dp) - yOf(c.h + dp));
+        ctx.fillRect(x - bw/2, Math.min(yOf(c.o + dp), yOf(c.c + dp)), bw, Math.max(1, Math.abs(yOf(c.o + dp) - yOf(c.c + dp)))); } ctx.globalAlpha = 1; break; }
+    case 'ghost': { ctx.globalAlpha = .55; const bw = Math.max(1, V.cw*.6);
+      for (let s2 = 1; s2 < pts.length; s2++){ const i1 = tIdx(pts[s2 - 1].t), i2 = tIdx(pts[s2].t), n = Math.max(1, Math.round(i2 - i1));
+        for (let k = 0; k < n; k++){ const o = pts[s2 - 1].p + (pts[s2].p - pts[s2 - 1].p)*k/n, c = pts[s2 - 1].p + (pts[s2].p - pts[s2 - 1].p)*(k + 1)/n, x = xF(i1 + k + 1), up = c >= o, wick = Math.abs(c - o)*.6 + S.row;
+          ctx.fillStyle = up ? COL.buy : COL.sell; ctx.fillRect(x - .5, yOf(Math.max(o, c) + wick), 1, yOf(Math.min(o, c) - wick) - yOf(Math.max(o, c) + wick)); ctx.fillRect(x - bw/2, Math.min(yOf(o), yOf(c)), bw, Math.max(1, Math.abs(yOf(o) - yOf(c)))); } }
+      ctx.globalAlpha = 1; dsh(1); poly(Q); dsh(0); break; }
+    case 'sector': { const r = dist(A, B), a1 = Math.atan2(B.y - A.y, B.x - A.x), a2 = Q.length > 2 ? Math.atan2(Cq.y - A.y, Cq.x - A.x) : a1;
+      ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.arc(A.x, A.y, r, a1, a2, a2 < a1); ctx.closePath(); ctx.fillStyle = hexA(col, .12); ctx.fill(); ctx.stroke(); break; }
+    case 'avwap': { const C = S.candles, a = clamp(Math.round(tIdx(pts[0].t)), 0, C.length - 1); let pv = 0, vv = 0; ctx.beginPath(); let st = false;
+      for (let i = a; i < C.length; i++){ const c = C[i], v = c.buy + c.sell || 1; pv += (c.h + c.l + c.c)/3*v; vv += v; const x = xF(i), y = yOf(pv/vv); if (x < -10) continue; st ? ctx.lineTo(x, y) : (ctx.moveTo(x, y), st = true); }
+      ctx.lineWidth = 2; ctx.stroke(); lab('AVWAP', A.x, A.y + 14); break; }
+    case 'frvp': { const x0 = Math.min(A.x, B.x), x1 = Math.max(A.x, B.x); dsh(1); seg({x:x0, y:0}, {x:x0, y:PH}); seg({x:x1, y:0}, {x:x1, y:PH}); dsh(0);
+      rangeProfile(tIdx(pts[0].t), tIdx((pts[1] || pts[0]).t), x0, x1, col); break; }
+    case 'avp': { dsh(1); seg({x:A.x, y:0}, {x:A.x, y:PH}); dsh(0); rangeProfile(tIdx(pts[0].t), S.candles.length - 1, A.x, xF(S.candles.length - 1), col); break; }
+    case 'drange': case 'dprange': { const x0 = Math.min(A.x, B.x), w = Math.abs(B.x - A.x), y0 = t === 'drange' ? Math.min(A.y, B.y) - 20 : Math.min(A.y, B.y), h = t === 'drange' ? Math.abs(B.y - A.y) + 40 : Math.abs(B.y - A.y);
+      ctx.fillStyle = hexA(col, .12); ctx.fillRect(x0, y0, w, h); ctx.strokeRect(x0, y0, w, h); seg({x:x0, y:(A.y + B.y)/2}, {x:x0 + w, y:(A.y + B.y)/2}); arrowHead(A.x < B.x ? {x:x0, y:(A.y + B.y)/2} : {x:x0 + w, y:(A.y + B.y)/2}, A.x < B.x ? {x:x0 + w, y:(A.y + B.y)/2} : {x:x0, y:(A.y + B.y)/2}, 8);
+      const [a, b] = candlesIn(pts[0].t, (pts[1] || pts[0]).t); let vol = 0; for (let i = a; i <= b; i++) vol += S.candles[i].buy + S.candles[i].sell;
+      const ms = Math.abs((pts[1] || pts[0]).t - pts[0].t), hh = Math.floor(ms/3600000), mm = Math.round(ms%3600000/60000), lines = [`${b - a} bars · ${hh}h ${mm}m`, `Vol ${S.unit}${fmt(vol)}`];
+      if (t === 'dprange'){ const dp = (pts[1] || pts[0]).p - pts[0].p; lines.unshift(`${dp >= 0 ? '+' : ''}${P(dp)} (${(100*dp/pts[0].p).toFixed(2)}%)`); }
+      bubble(d, x0 + w/2, y0 + h + 6, lines, {cx:1, bg:hexA(col, .9)}); break; }
+    case 'hl': { ctx.globalAlpha = .35; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; poly(Q); break; }
+    case 'arrow': seg(A, B); arrowHead(A, B); break;
+    case 'arrowmk': { const an = Math.atan2(B.y - A.y, B.x - A.x), L = dist(A, B), w = 7, hl = Math.min(22, L*.4), nx = -Math.sin(an), ny = Math.cos(an), ux = Math.cos(an), uy = Math.sin(an), bx = B.x - ux*hl, by = B.y - uy*hl;
+      const P2 = [{x:A.x + nx*w*.4, y:A.y + ny*w*.4}, {x:bx + nx*w, y:by + ny*w}, {x:bx + nx*w*2.2, y:by + ny*w*2.2}, B, {x:bx - nx*w*2.2, y:by - ny*w*2.2}, {x:bx - nx*w, y:by - ny*w}, {x:A.x - nx*w*.4, y:A.y - ny*w*.4}];
+      ctx.fillStyle = hexA(col, .85); ctx.beginPath(); P2.forEach((q, i) => i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); ctx.closePath(); ctx.fill(); break; }
+    case 'arrowup': case 'arrowdn': { const up = t === 'arrowup', s = up ? 1 : -1, y = A.y + s*6; ctx.fillStyle = up ? COL.buy : COL.sell; ctx.beginPath();
+      ctx.moveTo(A.x, y); ctx.lineTo(A.x - 10, y + s*12); ctx.lineTo(A.x - 4, y + s*12); ctx.lineTo(A.x - 4, y + s*26); ctx.lineTo(A.x + 4, y + s*26); ctx.lineTo(A.x + 4, y + s*12); ctx.lineTo(A.x + 10, y + s*12); ctx.closePath(); ctx.fill();
+      bbMap.set(d, {x:A.x - 11, y:Math.min(y, y + s*26), w:22, h:26}); break; }
+    case 'rotrect': { if (Q.length < 3){ seg(A, B); break; } const dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1, nx = -dy/L, ny = dx/L, h = (Cq.x - A.x)*nx + (Cq.y - A.y)*ny;
+      poly([A, B, {x:B.x + nx*h, y:B.y + ny*h}, {x:A.x + nx*h, y:A.y + ny*h}], true, .12); break; }
+    case 'path': poly(Q); if (Q.length > 1) arrowHead(Q[Q.length - 2], Q[Q.length - 1]); break;
+    case 'polyline': poly(Q, Q.length > 2, .12); break;
+    case 'triangle': poly(Q, Q.length > 2, .12); break;
+    case 'circle': { ctx.beginPath(); ctx.arc(A.x, A.y, dist(A, B), 0, 7); ctx.fillStyle = hexA(col, .1); ctx.fill(); ctx.stroke(); break; }
+    case 'ellipse': { ctx.beginPath(); ctx.ellipse((A.x + B.x)/2, (A.y + B.y)/2, Math.abs(B.x - A.x)/2 || 1, Math.abs(B.y - A.y)/2 || 1, 0, 0, 7); ctx.fillStyle = hexA(col, .1); ctx.fill(); ctx.stroke(); break; }
+    case 'arc': { if (Q.length < 3){ seg(A, B); break; } const c = circum(A, B, Cq); if (!c){ poly(Q); break; }
+      const a1 = Math.atan2(A.y - c.y, A.x - c.x), a2 = Math.atan2(B.y - c.y, B.x - c.x), a3 = Math.atan2(Cq.y - c.y, Cq.x - c.x), norm = a => (a + 4*Math.PI)%(2*Math.PI), ccw = !(norm(a2 - a1) < norm(a3 - a1));
+      ctx.beginPath(); ctx.arc(c.x, c.y, c.r, a1, a3, ccw); ctx.stroke(); break; }
+    case 'curve': { ctx.beginPath(); ctx.moveTo(A.x, A.y); Q.length > 2 ? ctx.quadraticCurveTo(B.x, B.y, Cq.x, Cq.y) : ctx.lineTo(B.x, B.y); ctx.stroke(); break; }
+    case 'dcurve': { ctx.beginPath(); ctx.moveTo(A.x, A.y); Q.length > 3 ? ctx.bezierCurveTo(B.x, B.y, Cq.x, Cq.y, D.x, D.y) : ctx.lineTo(Q[Q.length - 1].x, Q[Q.length - 1].y); ctx.stroke(); break; }
+    case 'note': ctx.beginPath(); ctx.arc(A.x, A.y, 4, 0, 7); ctx.fill(); seg(A, {x:A.x, y:A.y - 14}); bubble(d, A.x, A.y - 14, (d.text || 'Note').split('\n'), {cx:1, above:1, gap:0}); break;
+    case 'pnote': { ctx.beginPath(); ctx.arc(A.x, A.y, 4, 0, 7); ctx.fill(); seg(A, B); bubble(d, B.x, B.y, [P(pts[0].p), ...(d.text || '').split('\n').filter(Boolean)], {cx:1}); break; }
+    case 'pin': { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(A.x, A.y - 16, 8, Math.PI*.85, Math.PI*.15); ctx.lineTo(A.x, A.y); ctx.closePath(); ctx.fill(); ctx.fillStyle = TH.bg; ctx.beginPath(); ctx.arc(A.x, A.y - 16, 3, 0, 7); ctx.fill();
+      if (d.text) bubble(d, A.x + 12, A.y - 34, d.text.split('\n')); else bbMap.set(d, {x:A.x - 9, y:A.y - 26, w:18, h:26}); break; }
+    case 'table': { const rows = (d.text || 'A,B;1,2').split(';').map(r => r.split(',')); ctx.font = '12px -apple-system,Segoe UI,sans-serif';
+      const nc = Math.max(...rows.map(r => r.length)), cw = []; for (let c = 0; c < nc; c++) cw[c] = Math.max(...rows.map(r => ctx.measureText(r[c] || '').width)) + 14;
+      const W = cw.reduce((a, b) => a + b, 0), H = rows.length*20; ctx.fillStyle = hexA(TH.bg, .92); ctx.fillRect(A.x, A.y, W, H); ctx.strokeStyle = col; ctx.strokeRect(A.x, A.y, W, H);
+      rows.forEach((r, i) => { let x = A.x; r.forEach((cell, c) => { ctx.fillStyle = i ? TH.txt : col; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(cell, x + 7, A.y + i*20 + 10); x += cw[c]; }); if (i) seg({x:A.x, y:A.y + i*20}, {x:A.x + W, y:A.y + i*20}); });
+      bbMap.set(d, {x:A.x, y:A.y, w:W, h:H}); break; }
+    case 'callout': { const lines = (d.text || 'Callout').split('\n'); ctx.font = '12px -apple-system,Segoe UI,sans-serif'; const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + 14, h = lines.length*16 + 8;
+      ctx.fillStyle = hexA(col, .92); ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x + w*.3, B.y + h/2); ctx.lineTo(B.x + w*.6, B.y + h/2); ctx.closePath(); ctx.fill(); bubble(d, B.x, B.y, lines); break; }
+    case 'comment': bubble(d, A.x, A.y, (d.text || 'Comment').split('\n'), {r:14}); break;
+    case 'plabel': bubble(d, A.x, A.y, [P(pts[0].p)], {cx:1, above:1, tail:1}); break;
+    case 'signpost': { seg(A, {x:A.x, y:A.y - 40}); ctx.beginPath(); ctx.arc(A.x, A.y, 3, 0, 7); ctx.fill(); bubble(d, A.x, A.y - 40, ['★ ' + (d.text || 'Signpost')], {cx:1, above:1, gap:0, r:12}); break; }
+    case 'flag': { ctx.lineWidth = 2; seg(A, {x:A.x, y:A.y - 28}); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(A.x, A.y - 28); ctx.lineTo(A.x + 18, A.y - 22); ctx.lineTo(A.x, A.y - 16); ctx.fill(); bbMap.set(d, {x:A.x - 4, y:A.y - 30, w:24, h:32}); break; }
+    case 'idea': bubble(d, A.x, A.y, ['💡 ' + (d.text || 'Idea')], {bg:hexA(COL.gold, .95), fg:'#1a1200', r:10}); break;
+    case 'image': { const im = imgCache(d); if (im && im.complete && im.naturalWidth){ const w = d.w || im.naturalWidth, h = d.h || im.naturalHeight; ctx.drawImage(im, A.x, A.y, w, h); ctx.strokeRect(A.x, A.y, w, h); bbMap.set(d, {x:A.x, y:A.y, w, h}); } break; }
+    default: poly(Q);
+  }
+}
+const imgs = new Map();
+function imgCache(d){ if (!d.img) return null; let im = imgs.get(d.id); if (!im){ im = new Image(); im.onload = () => { dirty = true; }; im.src = d.img; imgs.set(d.id, im); } return im; }
+function pickImage(cb){ const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = () => { const f = inp.files[0]; if (!f) return cb(null); const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => {
+    const s = Math.min(1, 260/Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width*s); c.height = Math.round(im.height*s); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+    cb({img:c.toDataURL('image/jpeg', .82), w:c.width, h:c.height}); }; im.src = r.result; }; r.readAsDataURL(f); };
+  inp.click(); }
+function genericHit(d, Q, x, y, R){
+  const bb = bbMap.get(d); if (bb && x >= bb.x - 4 && x <= bb.x + bb.w + 4 && y >= bb.y - 4 && y <= bb.y + bb.h + 4) return true;
+  const sp = TL[d.type] || {};
+  if (sp.area || ['gannbox','gannsq','gannfix','fibcirc','fibarcs','frvp','drange','dprange','bars','sector'].includes(d.type)){
+    const xs = Q.map(q => q.x), ys = Q.map(q => q.y), r2 = d.type === 'circle' || d.type === 'fibcirc' ? dist(Q[0], Q[1] || Q[0]) : 0;
+    if (r2){ if (dist({x, y}, Q[0]) < r2 + R) return true; }
+    else if (x >= Math.min(...xs) - R && x <= Math.max(...xs) + R && y >= Math.min(...ys) - R && y <= Math.max(...ys) + R) return true; }
+  for (let k = 1; k < Q.length; k++) if (distSeg(x, y, Q[k - 1], Q[k]) < R) return true;
+  if (['cross','cyclic','fibtz','fibtime','avwap','avp'].includes(d.type) && Math.abs(x - Q[0].x) < R) return true;
+  return Q.length === 1 && dist({x, y}, Q[0]) < R + 6;
+}
+
+// ── toolbar favourites + tool picker ──
+function toolIcon(k){ if (ICONS[k]) return ICONS[k]; const sp = TL[k] || ACTIONS.find(a => a.k === k) || {}; return `<span style="font-size:${(sp.g || '').length > 2 ? 10 : 14}px;font-weight:700">${sp.g || '•'}</span>`; }
+function renderFav(){
+  $('dtFav').innerHTML = ['cursor', ...favTools].map(k => `<button data-t="${k}" title="${(TL[k] || {name:'Cursor'}).name}"${k === tool ? ' class="on"' : ''}>${toolIcon(k)}</button>`).join('');
+  $('dtFav').querySelectorAll('[data-t]').forEach(b => b.onclick = () => setTool(tool === b.dataset.t && b.dataset.t !== 'cursor' ? 'cursor' : b.dataset.t));
+}
+let toolCat = 0;
+function renderPicker(){
+  $('tpTabs').innerHTML = TCAT.map((c, i) => `<button data-c="${i}"${i === toolCat ? ' class="on"' : ''}>${c}</button>`).join('');
+  $('tpTabs').querySelectorAll('button').forEach(b => b.onclick = () => { toolCat = +b.dataset.c; renderPicker(); });
+  let items;
+  if (toolCat === 0) items = favTools.map(k => ({k, ...TL[k]}));
+  else if (toolCat === 1) items = ACTIONS.map(a => ({...a, act:1, on: a.k === '@keep' ? keepDraw : a.k === '@lock' ? lockDraw : a.k === '@hide' ? hideDraw : a.k === '@magnet' ? magnetMode !== 'off' : false}));
+  else items = Object.entries(TL).filter(([, v]) => v.cat === toolCat).map(([k, v]) => ({k, ...v}));
+  $('tpGrid').innerHTML = items.map(it => `<div class="tpi${it.on ? ' on' : ''}" data-k="${it.k}">${it.act ? '' : `<b class="star${favTools.includes(it.k) ? ' f' : ''}" data-s="${it.k}">★</b>`}
+    <div class="ic">${toolIcon(it.k)}</div><div class="nm">${it.k === '@magnet' ? 'Magnet: ' + magnetMode : it.name}</div></div>`).join('') || '<div style="padding:20px;color:var(--dim)">Tap ★ on any tool to add it here and to the toolbar.</div>';
+  $('tpGrid').querySelectorAll('.star').forEach(s => s.onclick = e => { e.stopPropagation(); const k = s.dataset.s; favTools = favTools.includes(k) ? favTools.filter(z => z !== k) : [...favTools, k];
+    try{ localStorage.setItem('fpFav', JSON.stringify(favTools)); }catch(err){} renderFav(); renderPicker(); });
+  $('tpGrid').querySelectorAll('.tpi').forEach(el => el.onclick = () => { const k = el.dataset.k;
+    if (k.startsWith('@')){ doAction(k); renderPicker(); return; }
+    $('toolModal').classList.remove('open'); setTool(k); const sp = TL[k];
+    if (sp && sp.n === -1) toast('Tap points on the chart · tap the last point again to finish');
+    else if (sp && sp.n > 2) toast(`Tap ${sp.n} points on the chart`); });
+}
+function doAction(k){
+  if (k === '@keep') keepDraw = !keepDraw;
+  if (k === '@lock'){ lockDraw = !lockDraw; selId = null; toast(lockDraw ? 'Drawings locked' : 'Drawings unlocked'); }
+  if (k === '@hide'){ hideDraw = !hideDraw; $('dHide').classList.toggle('on', hideDraw); }
+  if (k === '@magnet'){ magnetMode = magnetMode === 'weak' ? 'strong' : magnetMode === 'strong' ? 'off' : 'weak'; $('dMag').classList.toggle('on', magnetMode !== 'off'); $('dMag').title = 'Magnet: ' + magnetMode; toast('Magnet: ' + magnetMode); }
+  if (k === '@clear') $('dClr').click();
+  if (k === '@zin') zoomX(1.25, pw() - 80);
+  if (k === '@zout') zoomX(1/1.25, pw() - 80);
+  dirty = true;
+}
+
 // ───────── drawing tools (TradingView-style) ─────────
-let drawings = [], tool = 'cursor', draft = null, selId = null, magnet = true, drawColor = '#4fb3ff', hideDraw = false;
-const TOOL_PTS = {trend:2, ray:2, ext:2, hline:1, hray:1, vline:1, rect:2, fib:2, range:2, long:2, short:2, text:1, brush:0};
+let pendingImg = null, drawings = [], tool = 'cursor', draft = null, selId = null, drawColor = '#4fb3ff', hideDraw = false;
+
 const FIB = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1, 1.618];
 const dKey = () => 'fp_draw_' + (S.sym || '');
 function saveDraw(){ try{ localStorage.setItem(dKey(), JSON.stringify(drawings)); }catch(e){} }
-function loadDraw(){ try{ drawings = JSON.parse(localStorage.getItem(dKey()) || '[]'); }catch(e){ drawings = []; } selId = null; draft = null; dirty = true; }
+function loadDraw(){ try{ drawings = JSON.parse(localStorage.getItem(dKey()) || '[]'); }catch(e){ drawings = []; } selId = null; draft = null; lastPx = null; dirty = true; try{ alertCount(); }catch(e){} }
 function tIdx(t){
   const C = S.candles, N = C.length; if (!N) return 0;
   if (t <= C[0].t) return (t - C[0].t)/S.tfMs;
@@ -1090,12 +1415,13 @@ const tX = t => xF(tIdx(t));
 const pAt = y => V.hi - (y - TOP)*ppp();
 function ptAt(x, y, snap = true){
   const i = Math.round(iAt(x)), t = idxT(i); let p = pAt(y);
-  if (snap && magnet){ const c = S.candles[i]; if (c){ let bd = 14; for (const v of [c.o, c.h, c.l, c.c]){ const d = Math.abs(yOf(v) - y); if (d < bd){ bd = d; p = v; } } } }
+  if (snap && magnetMode !== 'off'){ const c = S.candles[i]; if (c){ let bd = magnetMode === 'strong' ? 1e9 : 14; for (const v of [c.o, c.h, c.l, c.c]){ const d = Math.abs(yOf(v) - y); if (d < bd){ bd = d; p = v; } } } }
   return {t, p};
 }
 function setTool(t){
   tool = t; draft = null;
   document.querySelectorAll('#dtb [data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  if (t === 'image'){ tool = 'cursor'; pickImage(r => { if (!r) return; tool = 'image'; pendingImg = r; toast('Tap the chart where the image should go'); }); }
   cv.style.cursor = t === 'cursor' ? 'default' : 'crosshair'; dirty = true;
 }
 function posPts(d){   // long / short: entry, target, stop
@@ -1107,23 +1433,30 @@ function posPts(d){   // long / short: entry, target, stop
 }
 function finishDraft(){
   const d = draft; draft = null; if (!d) return;
-  if (d.type === 'text'){ const tx = window.prompt('Text', 'Note'); if (!tx){ setTool('cursor'); return; } d.text = tx; }
+  const sp = TL[d.type] || {};
+  if (d.type === 'text' || sp.txt){ const def = d.type === 'table' ? 'Level,Price;Entry,0;Target,0' : d.type === 'text' ? 'Note' : ''; const tx = window.prompt(d.type === 'table' ? 'Table: cells split by , rows split by ;' : 'Text', def); if (tx == null || (d.type === 'text' && !tx)){ setTool('cursor'); return; } d.text = tx; }
+  if (d.type === 'image'){ if (!pendingImg){ setTool('cursor'); return; } Object.assign(d, pendingImg); pendingImg = null; }
+  if (sp.n > 2 && d.pts.length < sp.n && !['ghost','path','polyline'].includes(d.type)){ while (d.pts.length < sp.n) d.pts.push({...d.pts[d.pts.length - 1]}); }
   if (d.type === 'long' || d.type === 'short') d.pts = posPts(d);
-  if (d.type === 'brush' && d.pts.length < 2){ setTool('cursor'); return; }
-  if (TOOL_PTS[d.type] === 2 && d.pts.length < 2) d.pts.push({t: idxT(tIdx(d.pts[0].t) + 10), p: d.pts[0].p});
-  d.id = Date.now() + '' + Math.random(); d.color = drawColor;
-  drawings.push(d); selId = d.id; saveDraw(); setTool('cursor');
+  if ((d.type === 'brush' || d.type === 'hl') && d.pts.length < 2){ setTool('cursor'); return; }
+  if (nOf(d.type) === -1 && d.pts.length < 2){ setTool('cursor'); return; }
+  if (nOf(d.type) === 2 && d.pts.length < 2) d.pts.push({t: idxT(tIdx(d.pts[0].t) + 10), p: d.pts[0].p});
+  if (d.type === 'alert' && alertCount() >= 5){ toast('Maximum 5 alerts per symbol — delete one first'); setTool('cursor'); return; }
+  d.id = Date.now() + '' + Math.random(); d.color = d.type === 'alert' ? COL.gold : drawColor;
+  delete d.preview; drawings.push(d); selId = d.id; saveDraw();
+  if (keepDraw && d.type !== 'image') { const k = d.type; setTool(k); } else setTool('cursor');
 }
 function extendSeg(a, b, back, fwd){
   const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1, k = 6000/L;
   return [back ? {x: a.x - dx*k, y: a.y - dy*k} : a, fwd ? {x: b.x + dx*k, y: b.y + dy*k} : b];
 }
-function scr(d){ const pts = (d.type === 'long' || d.type === 'short') ? posPts(d) : d.pts; return pts.map(q => ({x: tX(q.t), y: yOf(q.p)})); }
+function scr(d){ let pts = d.preview ? [...d.pts, d.preview] : d.pts; if (d.type === 'long' || d.type === 'short') pts = posPts({...d, pts}); return pts.map(q => ({x: tX(q.t), y: yOf(q.p)})); }
 function handlesOf(d, Q){
   if (d.type === 'long' || d.type === 'short') return [{x:Q[0].x, y:Q[0].y}, {x:Q[0].x, y:Q[1].y}, {x:Q[0].x, y:Q[2].y}, {x:Q[1].x, y:Q[0].y}];
-  if (d.type === 'hline') return [{x: pw() - 50, y: Q[0].y}];
+  if (d.type === 'hline' || d.type === 'alert') return [{x: pw() - 50, y: Q[0].y}];
   if (d.type === 'vline') return [{x: Q[0].x, y: ph()/2}];
-  if (d.type === 'brush') return [];
+  if (d.type === 'brush' || d.type === 'hl' || d.type === 'ghost' && false) return [];
+  if (d.type.startsWith('g:') || ['plabel','comment','idea','table','image','flag','arrowup','arrowdn'].includes(d.type)) return [Q[0]];
   return Q;
 }
 function drawDrawings(PW, PH){
@@ -1139,6 +1472,9 @@ function drawDrawings(PW, PH){
     switch (d.type){
       case 'trend': case 'ray': case 'ext': { const [a, b] = extendSeg(A, B, d.type === 'ext', d.type !== 'trend'); seg(a, b); break; }
       case 'hline': seg({x:0, y:A.y}, {x:PW, y:A.y}); break;
+      case 'alert': { ctx.setLineDash([6, 4]); ctx.globalAlpha = d.fired ? .4 : 1; seg({x:0, y:A.y}, {x:PW, y:A.y}); ctx.setLineDash([]);
+        ctx.font = 'bold 11px -apple-system,Segoe UI,sans-serif'; const tx = (d.fired ? '✓ alert hit ' : '🔔 alert ') + P(d.pts[0].p), w = ctx.measureText(tx).width + 12;
+        ctx.fillStyle = col; ctx.fillRect(PW - w - 90, A.y - 9, w, 18); ctx.fillStyle = '#1a1200'; ctx.textAlign = 'left'; ctx.fillText(tx, PW - w - 84, A.y + .5); break; }
       case 'hray': seg(A, {x:PW, y:A.y}); break;
       case 'vline': seg({x:A.x, y:0}, {x:A.x, y:PH}); break;
       case 'rect': box(A, B, hexA(col, .13)); break;
@@ -1164,6 +1500,7 @@ function drawDrawings(PW, PH){
       case 'text': { ctx.font = 'bold 13px -apple-system,Segoe UI,sans-serif'; const tx = d.text || 'Text', w = ctx.measureText(tx).width;
         ctx.fillStyle = hexA(TH.bg, .75); ctx.fillRect(A.x - 4, A.y - 11, w + 8, 22); ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.fillText(tx, A.x, A.y); break; }
       case 'brush': { ctx.beginPath(); Q.forEach((q, k) => k ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); ctx.stroke(); break; }
+      default: renderTool(d, Q, PW, PH);
     }
     if (sel || d === draft) for (const h of handlesOf(d, Q)){ ctx.fillStyle = TH.bg; ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(h.x, h.y, 5, 0, 7); ctx.fill(); ctx.stroke(); }
     ctx.restore();
@@ -1173,9 +1510,9 @@ function drawTags(PW){
   if (hideDraw) return;
   ctx.font = 'bold 11px ui-monospace,monospace'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
   for (const d of drawings){
-    if (!(d.type === 'hline' || d.type === 'hray' || d.id === selId) || d.type === 'brush') continue;
+    if (!(d.type === 'hline' || d.type === 'hray' || d.type === 'alert' || d.id === selId) || d.type === 'brush') continue;
     const pts = (d.type === 'long' || d.type === 'short') ? posPts(d) : d.pts;
-    for (const q of (d.type === 'hline' || d.type === 'hray') ? [d.pts[0]] : pts){
+    for (const q of (d.type === 'hline' || d.type === 'hray' || d.type === 'alert') ? [d.pts[0]] : pts){
       const y = yOf(q.p); if (y < 0 || y > ph()) continue;
       ctx.fillStyle = d.color || drawColor; ctx.fillRect(PW, y - 9, AX, 18); ctx.fillStyle = '#03121f'; ctx.fillText(P(q.p), PW + 6, y);
     }
@@ -1184,7 +1521,7 @@ function drawTags(PW){
 function hexA(hex, a){ const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; }
 function distSeg(x, y, a, b){ const dx = b.x - a.x, dy = b.y - a.y, L = dx*dx + dy*dy; let t = L ? ((x - a.x)*dx + (y - a.y)*dy)/L : 0; t = clamp(t, 0, 1); return Math.hypot(x - a.x - t*dx, y - a.y - t*dy); }
 function hitDraw(x, y, touch){
-  if (hideDraw) return null;
+  if (hideDraw || (lockDraw && tool !== 'eraser')) return null;
   const R = touch ? 16 : 8;
   for (let i = drawings.length - 1; i >= 0; i--){
     const d = drawings[i], Q = scr(d), A = Q[0], B = Q[1] || Q[0];
@@ -1193,20 +1530,21 @@ function hitDraw(x, y, touch){
     let hit = false;
     switch (d.type){
       case 'trend': case 'ray': case 'ext': { const [a, b] = extendSeg(A, B, d.type === 'ext', d.type !== 'trend'); hit = distSeg(x, y, a, b) < R; break; }
-      case 'hline': hit = Math.abs(y - A.y) < R; break;
+      case 'hline': case 'alert': hit = Math.abs(y - A.y) < R; break;
       case 'hray': hit = Math.abs(y - A.y) < R && x >= A.x - R; break;
       case 'vline': hit = Math.abs(x - A.x) < R; break;
       case 'rect': case 'range': case 'fib': hit = inBox(A, B); break;
       case 'long': case 'short': hit = inBox({x:Math.min(Q[0].x, Q[1].x), y:Math.min(Q[1].y, Q[2].y)}, {x:Math.max(Q[0].x, Q[1].x), y:Math.max(Q[1].y, Q[2].y)}); break;
       case 'text': hit = x >= A.x - 6 && x <= A.x + 9*(d.text || '').length + 10 && Math.abs(y - A.y) < 14; break;
       case 'brush': for (let k = 1; k < Q.length && !hit; k++) hit = distSeg(x, y, Q[k - 1], Q[k]) < R; break;
+      default: hit = genericHit(d, Q, x, y, R);
     }
     if (hit) return {d, h:-1};
   }
   return null;
 }
 function editDrawing(a, x, y){
-  const d = a.d, o = a.orig;
+  const d = a.d, o = a.orig; if (d.type === 'alert') d.fired = false;
   if (a.h === -1){
     const di = Math.round(iAt(x) - a.i0), dp = pAt(y) - a.p0;
     d.pts = o.map(q => ({t: idxT(tIdx(q.t) + di), p: q.p + dp}));
@@ -1219,7 +1557,347 @@ function editDrawing(a, x, y){
   } else d.pts[a.h] = ptAt(x, y);
   dirty = true;
 }
-function deleteSelected(){ if (!selId) return; drawings = drawings.filter(d => d.id !== selId); selId = null; saveDraw(); dirty = true; }
+function deleteSelected(){ if (!selId) return; drawings = drawings.filter(d => d.id !== selId); selId = null; saveDraw(); alertCount(); dirty = true; }
+
+
+
+// ═════════════ trend & signal indicators (own formulas, based on classic techniques) ═════════════
+let TA = null;
+function emaA(x, n){ const o = new Float64Array(x.length), k = 2/(n + 1); let e = x[0]; for (let i = 0; i < x.length; i++){ e = i ? e + (x[i] - e)*k : x[0]; o[i] = e; } return o; }
+function smaA(x, n){ const o = new Float64Array(x.length); let s = 0; for (let i = 0; i < x.length; i++){ s += x[i]; if (i >= n) s -= x[i - n]; o[i] = s/Math.min(i + 1, n); } return o; }
+function wmaA(x, n){ const o = new Float64Array(x.length); for (let i = 0; i < x.length; i++){ let s = 0, w = 0; for (let j = 0; j < n && i - j >= 0; j++){ s += x[i - j]*(n - j); w += n - j; } o[i] = s/w; } return o; }
+function hmaA(x, n){ const a = wmaA(x, Math.round(n/2)), b = wmaA(x, n), d = new Float64Array(x.length); for (let i = 0; i < x.length; i++) d[i] = 2*a[i] - b[i]; return wmaA(d, Math.round(Math.sqrt(n))); }
+function rsiA(x, n){ const o = new Float64Array(x.length).fill(50); let g = 0, l = 0;
+  for (let i = 1; i < x.length; i++){ const d = x[i] - x[i - 1], up = Math.max(d, 0), dn = Math.max(-d, 0);
+    if (i <= n){ g += up/n; l += dn/n; } else { g = (g*(n - 1) + up)/n; l = (l*(n - 1) + dn)/n; }
+    o[i] = l === 0 ? 100 : 100 - 100/(1 + g/l); } return o; }
+function atrA(h, l, c, n){ const o = new Float64Array(c.length); let a = h[0] - l[0];
+  for (let i = 0; i < c.length; i++){ const tr = i ? Math.max(h[i] - l[i], Math.abs(h[i] - c[i - 1]), Math.abs(l[i] - c[i - 1])) : h[i] - l[i]; a = i ? (a*(n - 1) + tr)/n : tr; o[i] = a; } return o; }
+function stdA(x, n){ const m = smaA(x, n), o = new Float64Array(x.length); for (let i = 0; i < x.length; i++){ let s = 0, k = 0; for (let j = 0; j < n && i - j >= 0; j++){ s += (x[i - j] - m[i])**2; k++; } o[i] = Math.sqrt(s/k); } return o; }
+function calcTA(){
+  const C = S.candles, N = C.length; if (N < 30){ TA = null; return; }
+  const i0 = Math.max(0, N - 3000), n = N - i0, o = new Float64Array(n), h = new Float64Array(n), l = new Float64Array(n), c = new Float64Array(n);
+  for (let j = 0; j < n; j++){ const k = C[i0 + j]; o[j] = k.o; h[j] = k.h; l[j] = k.l; c[j] = k.c; }
+  const atr = atrA(h, l, c, 14), T = {t0:C[i0].t, n, sig:[]};
+  // trend umbrella: parabolic SAR (slow settings for a smooth curve)
+  if (ON.umb){ const sar = new Float64Array(n), tr = new Int8Array(n); let up = c[1] >= c[0], af = .015, ep = up ? h[0] : l[0], sv = up ? l[0] : h[0];
+    for (let j = 1; j < n; j++){
+      sv = sv + af*(ep - sv);
+      if (up){ sv = Math.min(sv, l[j - 1], j > 1 ? l[j - 2] : l[j - 1]);
+        if (l[j] < sv){ up = false; sv = ep; ep = l[j]; af = .015; T.sig.push({j, buy:false, src:'Umbrella'}); } else if (h[j] > ep){ ep = h[j]; af = Math.min(af + .015, .12); } }
+      else { sv = Math.max(sv, h[j - 1], j > 1 ? h[j - 2] : h[j - 1]);
+        if (h[j] > sv){ up = true; sv = ep; ep = h[j]; af = .015; T.sig.push({j, buy:true, src:'Umbrella'}); } else if (l[j] < ep){ ep = l[j]; af = Math.min(af + .015, .12); } }
+      sar[j] = sv; tr[j] = up ? 1 : -1; }
+    sar[0] = sar[1]; tr[0] = tr[1]; T.sar = sar; T.tr = tr; }
+  // Hull trend line + momentum histogram
+  if (ON.lux){ const hm = hmaA(c, 55), mo = new Float64Array(n); T.hma = hm;
+    for (let j = 0; j < n; j++) mo[j] = atr[j] ? (c[j] - hm[j])/atr[j] : 0; T.mo = mo;
+    for (let j = 3; j < n; j++){ const s1 = hm[j] - hm[j - 1], s0 = hm[j - 1] - hm[j - 2];
+      if (s0 <= 0 && s1 > 0 && mo[j] > 0) T.sig.push({j, buy:true, src:'Hull'}); if (s0 >= 0 && s1 < 0 && mo[j] < 0) T.sig.push({j, buy:false, src:'Hull'}); } }
+  // regime glow: trend (EMA 21 vs 55) + RSI
+  if (ON.aur){ const e1 = emaA(c, 21), e2 = emaA(c, 55), r = rsiA(c, 14), sc = new Float64Array(n); let armed = 0;
+    for (let j = 0; j < n; j++){ sc[j] = 0.6*Math.tanh(atr[j] ? (e1[j] - e2[j])/atr[j] : 0) + 0.4*(r[j] - 50)/50;
+      if (sc[j] < -0.55) armed = -1; else if (sc[j] > 0.55) armed = 1;
+      if (j && armed === -1 && sc[j - 1] <= 0 && sc[j] > 0){ T.sig.push({j, buy:true, src:'Regime'}); armed = 0; }
+      if (j && armed === 1 && sc[j - 1] >= 0 && sc[j] < 0){ T.sig.push({j, buy:false, src:'Regime'}); armed = 0; } }
+    T.sc = sc; }
+  // supply & demand zones: the base candle before a strong impulse candle
+  if (ON.zones){ const Z = [];
+    for (let j = 2; j < n; j++){ const rg = h[j] - l[j];
+      if (rg > 1.8*atr[j - 1] && Math.abs(c[j] - o[j]) > 0.6*rg){ const up = c[j] > o[j], b = j - 1, z = {j:b, top:h[b], bot:l[b], up, end:null};
+        for (let k = j + 1; k < n; k++) if (up ? c[k] < z.bot : c[k] > z.top){ z.end = k; break; }
+        if (!Z.some(q => q.up === up && q.end == null && Math.abs(q.top - z.top) < atr[j]*0.5)) Z.push(z); } }
+    T.zones = Z.slice(-25); }
+  // multi-RSI oscillator
+  if (ON.binlex){ T.rsis = [7, 14, 21, 28].map(p => rsiA(c, p)); const avg = new Float64Array(n);
+    for (let j = 0; j < n; j++) avg[j] = (T.rsis[0][j] + T.rsis[1][j] + T.rsis[2][j] + T.rsis[3][j])/4;
+    for (let j = 1; j < n; j++){ if (avg[j - 1] < 30 && avg[j] >= 30) T.sig.push({j, buy:true, src:'Multi-RSI'}); if (avg[j - 1] > 70 && avg[j] <= 70) T.sig.push({j, buy:false, src:'Multi-RSI'}); } }
+  // squeeze breakout: Bollinger inside Keltner = squeeze; momentum histogram
+  if (ON.brk){ const sm = smaA(c, 20), sd = stdA(c, 20), em = emaA(c, 20), at = atrA(h, l, c, 20), sq = new Int8Array(n), val = new Float64Array(n);
+    for (let j = 0; j < n; j++){ sq[j] = (sm[j] - 2*sd[j] > em[j] - 1.5*at[j] && sm[j] + 2*sd[j] < em[j] + 1.5*at[j]) ? 1 : 0;
+      let hh = -Infinity, ll = Infinity; for (let k = Math.max(0, j - 19); k <= j; k++){ hh = Math.max(hh, h[k]); ll = Math.min(ll, l[k]); }
+      val[j] = c[j] - ((hh + ll)/2 + sm[j])/2; }
+    const mom = emaA(val, 5); T.sq = sq; T.mom = mom;
+    for (let j = 1; j < n; j++) if (sq[j - 1] && !sq[j]) T.sig.push({j, buy: mom[j] > 0, src:'Squeeze'}); }
+  TA = T;
+}
+const taX = j => xF(TA.base + j);
+function drawTA(PW){
+  if (!TA) return;
+  TA.base = Math.round(tIdx(TA.t0));
+  const N = TA.n, jA = Math.max(0, Math.floor(iAt(0)) - TA.base - 1), jB = Math.min(N - 1, Math.ceil(iAt(PW)) - TA.base + 1);
+  if (jB < jA) return;
+  // regime background
+  if (ON.aur && TA.sc){ for (let j = jA; j <= jB; j++){ const v = TA.sc[j], x = taX(j) - V.cw/2;
+      ctx.fillStyle = v >= 0 ? `rgba(38,166,154,${Math.min(.2, Math.abs(v)*.22)})` : `rgba(170,60,140,${Math.min(.2, Math.abs(v)*.22)})`; ctx.fillRect(x, 0, V.cw + .5, priceH() + TOP + 8); } }
+  // supply & demand zones
+  if (ON.zones && TA.zones) for (const z of TA.zones){ const x1 = taX(z.j) - V.cw/2, x2 = z.end != null ? taX(z.end) : PW; if (x2 < 0 || x1 > PW) continue;
+    const y1 = yOf(z.top), y2 = yOf(z.bot), rgb = z.up ? '60,200,80' : '235,80,80', g = ctx.createLinearGradient(x1, 0, x2, 0);
+    g.addColorStop(0, `rgba(${rgb},${z.end != null ? .18 : .4})`); g.addColorStop(1, `rgba(${rgb},${z.end != null ? .05 : .12})`);
+    ctx.fillStyle = g; ctx.fillRect(x1, y1, x2 - x1, Math.max(2, y2 - y1)); ctx.strokeStyle = `rgba(${rgb},.6)`; ctx.strokeRect(x1 + .5, y1 + .5, x2 - x1, Math.max(2, y2 - y1)); }
+  // trend umbrella
+  if (ON.umb && TA.sar){ for (let j = Math.max(1, jA); j <= jB; j++){ const up = TA.tr[j] > 0, col = up ? COL.buy : COL.sell;
+      if (TA.tr[j - 1] !== TA.tr[j]) continue;
+      const x0 = taX(j - 1), x1 = taX(j), s0 = yOf(TA.sar[j - 1]), s1 = yOf(TA.sar[j]), c0 = yOf(S.candles[TA.base + j - 1] ? S.candles[TA.base + j - 1].c : TA.sar[j - 1]), c1 = yOf(S.candles[TA.base + j] ? S.candles[TA.base + j].c : TA.sar[j]);
+      ctx.fillStyle = hexA(col, .1); ctx.beginPath(); ctx.moveTo(x0, s0); ctx.lineTo(x1, s1); ctx.lineTo(x1, c1); ctx.lineTo(x0, c0); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, s0); ctx.lineTo(x1, s1); ctx.stroke(); }
+    ctx.lineWidth = 1; }
+  // Hull trend line
+  if (ON.lux && TA.hma){ for (let j = Math.max(1, jA); j <= jB; j++){ const up = TA.hma[j] >= TA.hma[j - 1];
+      ctx.strokeStyle = up ? COL.buy : COL.sell; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(taX(j - 1), yOf(TA.hma[j - 1])); ctx.lineTo(taX(j), yOf(TA.hma[j])); ctx.stroke(); }
+    ctx.lineWidth = 1; }
+  // Buy / Sell flags
+  ctx.font = 'bold 10px -apple-system,Segoe UI,sans-serif'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+  const stack = {};
+  for (const sg of TA.sig){ if (sg.j < jA || sg.j > jB) continue; const cd = S.candles[TA.base + sg.j]; if (!cd) continue;
+    const key = sg.j + (sg.buy ? 'b' : 's'), k = stack[key] = (stack[key] || 0) + 1, x = taX(sg.j), y = sg.buy ? yOf(cd.l) + 12 + (k - 1)*17 : yOf(cd.h) - 12 - (k - 1)*17;
+    const txt = sg.buy ? 'Buy' : 'Sell', w = ctx.measureText(txt).width + 10;
+    ctx.fillStyle = sg.buy ? COL.buy : COL.sell; ctx.fillRect(x - w/2, y - 7, w, 14); ctx.fillStyle = sg.buy ? '#03121f' : '#fff'; ctx.fillText(txt, x, y + .5); }
+}
+function drawPanes(PW){
+  const L = panes(); if (!L.length || !TA) return;
+  const h = paneH(), base = TA.base ?? Math.round(tIdx(TA.t0)), N = TA.n;
+  const jA = Math.max(0, Math.floor(iAt(0)) - base - 1), jB = Math.min(N - 1, Math.ceil(iAt(PW)) - base + 1);
+  L.forEach((k, idx) => {
+    const top = ph() - VH - (L.length - idx)*h;
+    ctx.fillStyle = TH.bg; ctx.fillRect(0, top, PW, h); ctx.strokeStyle = TH.grid; ctx.beginPath(); ctx.moveTo(0, top + .5); ctx.lineTo(PW + AX, top + .5); ctx.stroke();
+    ctx.fillStyle = TH.dim; ctx.font = '10px -apple-system,Segoe UI,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillText(k === 'lux' ? 'Momentum (vs Hull)' : k === 'binlex' ? 'Multi-RSI 7/14/21/28' : 'Squeeze breakout', PW - 6, top + 3);
+    if (jB < jA) return;
+    const mid = top + h/2, X = j => xF(base + j), bw = Math.max(1, V.cw*0.7);
+    if (k === 'lux' && TA.mo){ let mx = 2; for (let j = jA; j <= jB; j++) mx = Math.max(mx, Math.abs(TA.mo[j]));
+      for (let j = jA; j <= jB; j++){ const v = TA.mo[j], hh = v/mx*(h/2 - 8); ctx.fillStyle = v > 1.5 ? COL.buy : v < -1.5 ? COL.sell : 'rgba(123,97,255,.8)'; ctx.fillRect(X(j) - bw/2, mid - Math.max(0, hh), bw, Math.abs(hh)); } }
+    if (k === 'binlex' && TA.rsis){ const yR = v => top + 8 + (100 - v)/100*(h - 16);
+      ctx.setLineDash([3, 3]); ctx.strokeStyle = hexA(TH.txt, .25); for (const lv of [30, 70]){ ctx.beginPath(); ctx.moveTo(0, yR(lv)); ctx.lineTo(PW, yR(lv)); ctx.stroke(); } ctx.setLineDash([]);
+      ['#26a69a', '#4fb3ff', '#ffb02e', '#ff4d5e'].forEach((col, r) => { ctx.strokeStyle = col; ctx.lineWidth = 1.3; ctx.beginPath();
+        for (let j = jA; j <= jB; j++){ const y = yR(TA.rsis[r][j]); j === jA ? ctx.moveTo(X(j), y) : ctx.lineTo(X(j), y); } ctx.stroke(); }); ctx.lineWidth = 1; }
+    if (k === 'brk' && TA.mom){ let mx = 1e-12; for (let j = jA; j <= jB; j++) mx = Math.max(mx, Math.abs(TA.mom[j]));
+      for (let j = jA; j <= jB; j++){ const v = TA.mom[j], hh = v/mx*(h/2 - 12), rising = j && Math.abs(v) > Math.abs(TA.mom[j - 1]);
+        ctx.fillStyle = v >= 0 ? (rising ? '#4fb3ff' : 'rgba(79,179,255,.5)') : (rising ? '#f5c542' : 'rgba(245,197,66,.5)'); ctx.fillRect(X(j) - bw/2, mid - Math.max(0, hh), bw, Math.abs(hh));
+        ctx.fillStyle = TA.sq[j] ? COL.sell : 'rgba(38,166,154,.9)'; ctx.fillRect(X(j) - 1.5, TA.sq[j] ? top + h - 6 : top + 4, 3, 3); } }
+    ctx.textBaseline = 'middle';
+  });
+}
+
+// ═════════════ extra indicators ═════════════
+// ── whale bubbles ──
+let whTh = 0;
+function whaleCut(){
+  const user = +$('whTh').value || 0;
+  if (user > 0){ whTh = user; return; }
+  const C = S.candles; if (!C.length){ whTh = Infinity; return; }
+  const from = C[Math.max(0, C.length - 300)].t, vs = [];
+  for (const w of S.whales) if (w.t >= from) vs.push(w.v);
+  vs.sort((a, b) => b - a);
+  whTh = vs.length ? Math.max(WHALE_MIN*2, vs[Math.min(vs.length - 1, 39)]) : Infinity;   // auto: biggest ~40 trades
+}
+function drawWhales(PW, PH){
+  if (!isFinite(whTh)) return;
+  const C = S.candles, a = Math.floor(iAt(0)) - 1, list = [];
+  const tA = C[clamp(a, 0, C.length - 1)].t;
+  for (const w of S.whales) if (w.v >= whTh && w.t >= tA) list.push(w);
+  list.sort((x, y) => y.v - x.v);
+  for (const w of list){
+    const x = tX(w.t), y = yOf(w.p); if (x < -40 || x > PW + 40) continue;
+    const r = clamp(5*Math.sqrt(w.v/whTh), 4, 38), col = w.sell ? COL.sell : COL.buy;
+    ctx.fillStyle = hexA(col, .22); ctx.strokeStyle = hexA(col, .85); ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = hexA(col, .9); ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 7); ctx.fill();
+  }
+}
+function hitWhale(p){
+  if (!ON.whales || !isFinite(whTh)) return null;
+  let best = null, bd = Infinity;
+  for (const w of S.whales){ if (w.v < whTh) continue; const r = clamp(5*Math.sqrt(w.v/whTh), 4, 38), d = Math.hypot(tX(w.t) - p.x, yOf(w.p) - p.y); if (d < r + 3 && d < bd){ bd = d; best = w; } }
+  return best;
+}
+
+// ── footprint candles ──
+function drawFpCandle(c, x){
+  const rowPx = S.row/ppp(), g = Math.max(1, Math.ceil(5/rowPx)), rows = new Map(); let tot = 0;
+  for (const [k, L] of c.lv){ const gk = Math.floor(k/g); let r = rows.get(gk); if (!r){ r = {b:0, s:0}; rows.set(gk, r); } r.b += L.b; r.s += L.s; tot += L.b + L.s; }
+  if (!tot) return false;
+  let maxV = 0, poc = null; for (const [gk, r] of rows){ const v = r.b + r.s; if (v > maxV){ maxV = v; poc = gk; } }
+  const keys = [...rows.keys()].sort((p, q) => p - q), vol = k => { const r = rows.get(k); return r.b + r.s; };
+  let lo = keys.indexOf(poc), hi = lo, acc = maxV;
+  while (acc < tot*0.7 && (lo > 0 || hi < keys.length - 1)){
+    const vd = lo > 0 ? vol(keys[lo - 1]) : -1, vu = hi < keys.length - 1 ? vol(keys[hi + 1]) : -1;
+    if (vu >= vd){ hi++; acc += vu; } else { lo--; acc += vd; }
+  }
+  const hRow0 = g*S.row/ppp(), nums = V.cw >= 58 && hRow0 >= 10;
+  const left = x - V.cw/2 + 1, bx = left + 6, maxW = Math.max(4, (V.cw - 9)*(nums ? 0.5 : 1)), hRow = hRow0;
+  const yRow = gk => yOf((gk + 1)*g*S.row);
+  const yT = yRow(keys[hi]), yB = yRow(keys[lo]) + hRow;
+  ctx.fillStyle = hexA(TH.txt, .07); ctx.fillRect(bx - 2, yT, maxW + 3, yB - yT);   // value area
+  for (const [gk, r] of rows){
+    const v = r.b + r.s, w = Math.max(1.5, maxW*v/maxV), y = yRow(gk) + .6, h = Math.max(1, hRow - 1.6), ws = w*r.s/v;
+    ctx.fillStyle = hexA(COL.sell, .85); ctx.fillRect(bx, y, ws, h);
+    ctx.fillStyle = hexA(COL.buy, .85); ctx.fillRect(bx + ws, y, w - ws, h);
+    if (gk === poc){ ctx.strokeStyle = COL.gold; ctx.lineWidth = 1.2; ctx.strokeRect(bx - .5, y - .5, w + 1, h + 1); ctx.fillStyle = COL.gold; ctx.fillRect(bx - 5, y, 3, h); }
+    if (nums){ const d = r.b - r.s; ctx.font = `${Math.min(11, h - 1)}px ui-monospace,Menlo,monospace`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = gk === poc ? COL.gold : d >= 0 ? COL.buy : COL.sell; ctx.fillText(sgn(d), bx + maxW + 4, y + h/2 + .5); }
+  }
+  const up = c.c >= c.o, col = up ? COL.buy : COL.sell;
+  ctx.fillStyle = col; ctx.fillRect(left + 1, yOf(c.h), 1, Math.max(1, yOf(c.l) - yOf(c.h)));
+  const yo = yOf(c.o), yc = yOf(c.c); ctx.fillRect(left, Math.min(yo, yc), 3, Math.max(1, Math.abs(yc - yo)));
+  return true;
+}
+
+// ── volume profile per day (session) ──
+function drawSessionProfiles(PW, a, b){
+  const C = S.candles, br = Math.max(1, Math.ceil((V.hi - V.lo)/S.row/90));
+  let i = a;
+  while (i <= b){
+    const day = Math.floor(C[i].t/86400000); let j = i; while (j + 1 <= b && Math.floor(C[j + 1].t/86400000) === day) j++;
+    const bins = new Map(); let tot = 0;
+    for (let k = i; k <= j; k++) for (const [kk, L] of C[k].lv){ const bk = Math.floor(kk/br), v = L.b + L.s; bins.set(bk, (bins.get(bk) || 0) + v); tot += v; }
+    if (tot){
+      const keys = [...bins.keys()].sort((p, q) => p - q); let pk = keys[0]; for (const k of keys) if (bins.get(k) > bins.get(pk)) pk = k;
+      let lo = keys.indexOf(pk), hi = lo, acc = bins.get(pk);
+      while (acc < tot*0.7 && (lo > 0 || hi < keys.length - 1)){ const vd = lo > 0 ? bins.get(keys[lo - 1]) : -1, vu = hi < keys.length - 1 ? bins.get(keys[hi + 1]) : -1; if (vu >= vd){ hi++; acc += vu; } else { lo--; acc += vd; } }
+      const x0 = xF(i) - V.cw/2, x1 = xF(j) + V.cw/2, wMax = (x1 - x0)*0.45, mx = bins.get(pk), hB = br*S.row/ppp();
+      ctx.fillStyle = 'rgba(92,108,255,.06)'; ctx.fillRect(x0, yOf((keys[hi] + 1)*br*S.row), x1 - x0, yOf(keys[lo]*br*S.row) - yOf((keys[hi] + 1)*br*S.row));
+      for (const [k, v] of bins){ const y = yOf((k + 1)*br*S.row); ctx.fillStyle = k >= keys[lo] && k <= keys[hi] ? 'rgba(92,108,255,.55)' : 'rgba(92,108,255,.25)'; ctx.fillRect(x0, y + .5, wMax*v/mx, Math.max(1, hB - 1)); }
+      const yP = yOf((pk + .5)*br*S.row); ctx.strokeStyle = COL.gold; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x0, yP); ctx.lineTo(x1, yP); ctx.stroke(); ctx.lineWidth = 1;
+      ctx.strokeStyle = hexA(TH.txt, .15); ctx.beginPath(); ctx.moveTo(Math.round(x0) + .5, 0); ctx.lineTo(Math.round(x0) + .5, ph()); ctx.stroke();
+    }
+    i = j + 1;
+  }
+}
+// ── volume profile of the visible chart ──
+function drawProfile(PW, PH, a, b){
+  if ($('vpMode').value === 'session') return drawSessionProfiles(PW, a, b);
+  const C = S.candles, span = V.hi - V.lo, br = Math.max(1, Math.ceil(span/S.row/90)), bins = new Map();
+  let tot = 0;
+  for (let i = a; i <= b; i++) for (const [k, L] of C[i].lv){ const bk = Math.floor(k/br), v = L.b + L.s; bins.set(bk, (bins.get(bk) || 0) + v); tot += v; }
+  if (!tot) return;
+  const keys = [...bins.keys()].sort((p, q) => p - q), k0 = keys[0], n = keys[keys.length - 1] - k0 + 1, arr = new Float64Array(n);
+  for (const [k, v] of bins) arr[k - k0] = v;
+  let pi = 0; for (let i = 1; i < n; i++) if (arr[i] > arr[pi]) pi = i;
+  let lo = pi, hi = pi, acc = arr[pi];
+  while (acc < tot*0.7 && (lo > 0 || hi < n - 1)){ const vd = lo > 0 ? arr[lo - 1] : -1, vu = hi < n - 1 ? arr[hi + 1] : -1; if (vu >= vd){ hi++; acc += vu; } else { lo--; acc += vd; } }
+  const price = i => (k0 + i + .5)*br*S.row, maxV = arr[pi], maxW = PW*0.22;
+  const hB = br*S.row/ppp();
+  // histogram on the right
+  for (let i = 0; i < n; i++){ if (!arr[i]) continue; const w = maxW*arr[i]/maxV, y = yOf((k0 + i + 1)*br*S.row);
+    ctx.fillStyle = i >= lo && i <= hi ? 'rgba(92,108,255,.55)' : 'rgba(92,108,255,.28)'; ctx.fillRect(PW - w, y + .5, w, Math.max(1, hB - 1)); }
+  // smoothed copy to find peaks (HVN) and valleys (LVN)
+  const sm = new Float64Array(n); for (let i = 0; i < n; i++){ let s2 = 0, c2 = 0; for (let j = -2; j <= 2; j++) if (i + j >= 0 && i + j < n){ s2 += arr[i + j]; c2++; } sm[i] = s2/c2; }
+  const peaks = []; for (let i = 2; i < n - 2; i++) if (sm[i] >= sm[i - 1] && sm[i] >= sm[i + 1] && sm[i] >= sm[i - 2] && sm[i] >= sm[i + 2] && Math.abs(i - pi) > 3) peaks.push(i);
+  peaks.sort((p, q) => sm[q] - sm[p]); const hvn = [];
+  for (const p of peaks){ if (hvn.every(h => Math.abs(h - p) > 5)) hvn.push(p); if (hvn.length >= 3) break; }
+  const anchors = [pi, ...hvn].sort((p, q) => p - q), lvn = [];
+  for (let j = 1; j < anchors.length; j++){ let m = anchors[j - 1] + 1; for (let i = anchors[j - 1] + 1; i < anchors[j]; i++) if (sm[i] < sm[m]) m = i; if (m < anchors[j] && sm[m] < 0.45*Math.min(sm[anchors[j - 1]], sm[anchors[j]])) lvn.push(m); }
+  const tag = (txt, y, border, fill) => { ctx.font = '11px -apple-system,Segoe UI,sans-serif'; const w = ctx.measureText(txt).width + 12, x = PW - w - 6;
+    ctx.fillStyle = hexA(TH.bg, .85); ctx.fillRect(x, y - 9, w, 18); ctx.strokeStyle = border; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y - 8.5, w - 1, 17);
+    ctx.fillStyle = fill || TH.txt; ctx.textAlign = 'left'; ctx.fillText(txt, x + 6, y + .5); };
+  hvn.forEach((i, r) => { const y1 = yOf(price(i) + 1.5*br*S.row), y2 = yOf(price(i) - 1.5*br*S.row);
+    ctx.fillStyle = 'rgba(38,166,154,.13)'; ctx.fillRect(0, y1, PW, y2 - y1); ctx.strokeStyle = 'rgba(38,166,154,.55)'; ctx.strokeRect(-1, y1 + .5, PW + 2, y2 - y1);
+    tag(`HVN ${r + 1} · ${(100*arr[i]/tot).toFixed(1)}%`, yOf(price(i)), 'rgba(38,166,154,.9)'); });
+  for (const i of lvn){ const y = yOf(price(i)); ctx.setLineDash([3, 3]); ctx.strokeStyle = hexA(COL.sell, .6); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(PW, y); ctx.stroke(); ctx.setLineDash([]);
+    tag('LVN · gap', y, hexA(COL.sell, .8)); }
+  for (const [i, nm] of [[hi, 'VA High'], [lo, 'VA Low']]){ const y = yOf(nm === 'VA High' ? (k0 + i + 1)*br*S.row : (k0 + i)*br*S.row);
+    ctx.setLineDash([2, 3]); ctx.strokeStyle = hexA(TH.txt, .45); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(PW, y); ctx.stroke(); ctx.setLineDash([]);
+    tag(`${nm} ${P(nm === 'VA High' ? (k0 + i + 1)*br*S.row : (k0 + i)*br*S.row)}`, y, hexA(TH.txt, .5)); }
+  const yP = yOf(price(pi));
+  ctx.strokeStyle = COL.gold; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, yP); ctx.lineTo(PW, yP); ctx.stroke(); ctx.lineWidth = 1;
+  tag(`POC ${P(price(pi))}`, yP, COL.gold, COL.gold);
+}
+
+// ── liquidity levels: big volume clusters, blue above price / orange below, until price trades through ──
+let liq = [];
+function calcLiq(){
+  const C = S.candles, N = C.length; if (!N){ liq = []; return; }
+  const from = Math.max(0, N - 400), G = 3, cells = [];
+  for (let i = from; i < N; i++){ const m = new Map(); for (const [k, L] of C[i].lv){ const g = Math.floor(k/G); m.set(g, (m.get(g) || 0) + L.b + L.s); } for (const [g, v] of m) cells.push([v, i, g]); }
+  cells.sort((x, y) => y[0] - x[0]);
+  const out = [];
+  for (const [v, i, g] of cells){
+    if (out.length >= 16) break;
+    const p = (g + .5)*G*S.row;
+    if (out.some(o => Math.abs(o.p - p) < G*S.row*3)) continue;
+    let end = -1; for (let j = i + 2; j < N; j++) if (C[j].l <= p && C[j].h >= p){ end = j; break; }
+    out.push({p, v, t:C[i].t, endT: end >= 0 ? C[end].t : null});
+  }
+  liq = out;
+}
+function drawLiq(PW){
+  if (!liq.length) return;
+  const last = S.candles[S.candles.length - 1].c, maxV = Math.max(...liq.map(l => l.v));
+  const tags = {up:[], dn:[]};
+  for (const l of liq){
+    const x1 = tX(l.t), x2 = l.endT ? tX(l.endT) : PW, y = yOf(l.p); if (x2 < 0 || x1 > PW) continue;
+    const above = l.p >= last, rgb = above ? '79,179,255' : '255,170,60', a = (l.endT ? .25 : .7)*(0.35 + 0.65*l.v/maxV);
+    const g = ctx.createLinearGradient(x1, 0, x2, 0); g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},${a*0.35})`);
+    ctx.strokeStyle = g; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke();
+    ctx.strokeStyle = `rgba(${rgb},${Math.min(1, a + .25)})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke();
+    if (!l.endT) (above ? tags.up : tags.dn).push(l);
+  }
+  ctx.font = 'bold 11px ui-monospace,monospace'; ctx.textAlign = 'left';
+  for (const [arr, up] of [[tags.up, true], [tags.dn, false]]){
+    arr.sort((p, q) => q.v - p.v).slice(0, 2).forEach(l => { const y = yOf(l.p), txt = (up ? '▲ ' : '▼ ') + P(l.p), w = ctx.measureText(txt).width + 12, x = PW - w - 8;
+      ctx.fillStyle = hexA(up ? COL.buy : COL.sell, .25); ctx.fillRect(x, y - 9, w, 18); ctx.strokeStyle = up ? COL.buy : COL.sell; ctx.strokeRect(x + .5, y - 8.5, w - 1, 17);
+      ctx.fillStyle = up ? COL.buy : COL.sell; ctx.fillText(txt, x + 6, y + .5); });
+  }
+}
+
+// ── volume heatmap + rolling POC ──
+let heat = null;
+const hmCanvas = document.createElement('canvas'), hmCtx = hmCanvas.getContext('2d');
+function heatColor(v){   // 0..1 → navy → blue → green → yellow → red
+  const stops = [[0, 15, 30, 70], [.25, 30, 90, 190], [.5, 40, 180, 120], [.75, 230, 210, 60], [1, 235, 60, 50]];
+  for (let i = 1; i < stops.length; i++) if (v <= stops[i][0]){ const [p0, r0, g0, b0] = stops[i - 1], [p1, r1, g1, b1] = stops[i], f = (v - p0)/(p1 - p0);
+    return [r0 + (r1 - r0)*f, g0 + (g1 - g0)*f, b0 + (b1 - b0)*f]; }
+  return [235, 60, 50];
+}
+function calcHeat(){
+  const C = S.candles, N = C.length; if (N < 5){ heat = null; return; }
+  const i0 = Math.max(0, N - 600), n = N - i0, Wn = clamp(+$('hmWin').value || 30, 5, 300);
+  let lo = Infinity, hi = -Infinity; for (let i = i0; i < N; i++){ lo = Math.min(lo, C[i].l); hi = Math.max(hi, C[i].h); }
+  const B = 160, bs = (hi - lo)/B || S.row, col = new Array(n);
+  for (let i = 0; i < n; i++){ const v = new Float32Array(B); for (const [k, L] of C[i0 + i].lv){ const b = clamp(Math.floor(((k + .5)*S.row - lo)/bs), 0, B - 1); v[b] += L.b + L.s; } col[i] = v; }
+  const run = new Float64Array(B), img = hmCtx.createImageData(n, B), poc = new Float64Array(n);
+  hmCanvas.width = n; hmCanvas.height = B;
+  let ema = null;
+  for (let i = 0; i < n; i++){
+    for (let b = 0; b < B; b++){ run[b] += col[i][b]; if (i >= Wn) run[b] -= col[i - Wn][b]; }
+    let mx = 0, mb = 0; for (let b = 0; b < B; b++) if (run[b] > mx){ mx = run[b]; mb = b; }
+    const pp = lo + (mb + .5)*bs; ema = ema == null ? pp : ema + (pp - ema)*0.25; poc[i] = ema;
+    for (let b = 0; b < B; b++){ const v = mx ? run[b]/mx : 0, o = ((B - 1 - b)*n + i)*4, [r, g, bl] = heatColor(v);
+      img.data[o] = r; img.data[o + 1] = g; img.data[o + 2] = bl; img.data[o + 3] = v < 0.04 ? 0 : 255*Math.min(1, 0.15 + v*0.85); }
+  }
+  hmCtx.putImageData(img, 0, 0);
+  heat = {t0:C[i0].t, n, lo, hi, poc};
+}
+function drawHeat(PW, PH){
+  if (!heat) return;
+  const f0 = tIdx(heat.t0), xL = xF(f0) - V.cw/2, xR = xF(f0 + heat.n - 1) + V.cw/2;
+  ctx.save(); ctx.globalAlpha = 0.5; ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(hmCanvas, 0, 0, heat.n, hmCanvas.height, xL, yOf(heat.hi), xR - xL, yOf(heat.lo) - yOf(heat.hi));
+  ctx.restore();
+  ctx.save(); ctx.beginPath(); let st = false;
+  for (let i = 0; i < heat.n; i++){ const x = xF(f0 + i); if (x < -20 || x > PW + 20) continue; const y = yOf(heat.poc[i]); if (!st){ ctx.moveTo(x, y); st = true; } else ctx.lineTo(x, y); }
+  ctx.strokeStyle = 'rgba(255,200,40,.25)'; ctx.lineWidth = 7; ctx.stroke(); ctx.strokeStyle = '#ffc828'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+}
+
+// ── price alerts (max 5 per symbol) ──
+let lastPx = null, audioCtx = null;
+window.addEventListener('pointerdown', () => { try{ if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){} }, {once:true});
+function beep(){ try{ if (!audioCtx) return; const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = 880; o.connect(g); g.connect(audioCtx.destination);
+  g.gain.setValueAtTime(.2, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + .6); o.start(); o.stop(audioCtx.currentTime + .6); }catch(e){} }
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 8000); }
+function alertCount(){ const n = drawings.filter(d => d.type === 'alert' && !d.fired).length; setText($('alCount'), n + '/5'); return n; }
+function checkAlerts(p){
+  if (lastPx != null && !S.back) for (const d of drawings){
+    if (d.type !== 'alert' || d.fired) continue; const a = d.pts[0].p;
+    if ((lastPx < a && p >= a) || (lastPx > a && p <= a)){
+      d.fired = true; saveDraw(); alertCount(); beep(); try{ navigator.vibrate && navigator.vibrate([200, 100, 200]); }catch(e){}
+      const msg = `🔔 ${S.sym} ${p >= lastPx ? 'rose to' : 'fell to'} ${P(a)}`; toast(msg);
+      try{ if (window.Notification && Notification.permission === 'granted') new Notification('Price alert', {body: msg}); }catch(e){}
+    }
+  }
+  lastPx = p;
+}
 
 // ───────── interaction: main chart ─────────
 const ptrs = new Map(); let act = null, pinch = null, lastAxisTap = 0;
@@ -1239,13 +1917,17 @@ cv.addEventListener('pointerdown', e => {
   // time axis: drag to widen / narrow candles
   if (p.y >= ph()){ act = {m:'xs', x:p.x, cw:V.cw, i0:iAt(p.x)}; return; }
   // drawing tools
+  if (tool === 'eraser'){ const hd = hitDraw(p.x, p.y, e.pointerType !== 'mouse'); if (hd){ drawings = drawings.filter(z => z !== hd.d); selId = null; saveDraw(); alertCount(); dirty = true; } act = null; return; }
   if (tool !== 'cursor' && S.candles.length){
-    const q = ptAt(p.x, p.y, tool !== 'brush');
-    if (tool === 'brush'){ draft = {type:'brush', pts:[q]}; act = {m:'brush'}; return; }
+    const q = ptAt(p.x, p.y, tool !== 'brush' && tool !== 'hl'), n = nOf(tool);
+    if (n === 0){ draft = {type:tool, pts:[q]}; act = {m:'brush'}; return; }
     if (!draft || !draft.pts.length){ draft = {type:tool, pts:[q]};
-      if (TOOL_PTS[tool] === 1){ finishDraft(); act = null; return; }
+      if (n === 1){ finishDraft(); act = null; return; }
       act = {m:'mk', x:p.x, y:p.y, moved:false}; dirty = true; return; }
-    draft.pts[1] = q; finishDraft(); act = null; return;
+    if (n === -1){ const L = draft.pts[draft.pts.length - 1]; if (Math.hypot(tX(L.t) - p.x, yOf(L.p) - p.y) < 14 && draft.pts.length >= 2){ draft.preview = null; finishDraft(); act = null; return; } }
+    draft.pts.push(q); draft.preview = null;
+    if (n > 0 && draft.pts.length >= n){ finishDraft(); act = null; } else dirty = true;
+    return;
   }
   { const hd = hitDraw(p.x, p.y, e.pointerType !== 'mouse');
     if (hd){ selId = hd.d.id; act = {m:'dr', d:hd.d, h:hd.h, orig:hd.d.pts.map(q => ({...q})), i0:iAt(p.x), p0:pAt(p.y)};
@@ -1265,9 +1947,9 @@ cv.addEventListener('pointermove', e => {
     if (pinch.dx > 30) V.cw = clamp(pinch.cw*Math.abs(a.x - b.x)/pinch.dx, 1.5, 80);
     if (pinch.dy > 50){ const f = pinch.dy/Math.max(10, Math.abs(a.y - b.y)), mid = (pinch.lo + pinch.hi)/2, half = (pinch.hi - pinch.lo)/2*f;
       V.auto = false; V.lo = mid - half; V.hi = mid + half; } }
-  else if (!act && draft && draft.pts.length && draft.type !== 'brush' && TOOL_PTS[draft.type] === 2){ draft.pts[1] = ptAt(p.x, p.y); }
+  else if (!act && draft && draft.pts.length && nOf(draft.type) !== 0 && nOf(draft.type) !== 1){ draft.preview = ptAt(p.x, p.y); }
   else if (act){
-    if (act.m === 'mk'){ if (Math.hypot(p.x - act.x, p.y - act.y) > 8){ act.moved = true; if (draft) draft.pts[1] = ptAt(p.x, p.y); } }
+    if (act.m === 'mk'){ if (Math.hypot(p.x - act.x, p.y - act.y) > 8){ act.moved = true; if (draft) draft.preview = ptAt(p.x, p.y); } }
     else if (act.m === 'brush'){ const l = draft.pts[draft.pts.length - 1]; if (Math.abs(tX(l.t) - p.x) + Math.abs(yOf(l.p) - p.y) > 3) draft.pts.push({t: idxT(iAt(p.x)), p: pAt(p.y)}); }
     else if (act.m === 'dr') editDrawing(act, p.x, p.y);
     else if (act.m === 'mv'){ lens.ci = act.ci + (p.x - act.x)/V.cw; lens.cp = act.cp - (p.y - act.y)*ppp(); }
@@ -1287,7 +1969,7 @@ cv.addEventListener('pointermove', e => {
 });
 const endPtr = e => {
   ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null;
-  if (act && act.m === 'mk' && act.moved) finishDraft();
+  if (act && act.m === 'mk' && act.moved && draft && draft.preview){ draft.pts.push(draft.preview); draft.preview = null; if (nOf(draft.type) === 2) finishDraft(); }
   if (act && act.m === 'brush') finishDraft();
   if (act && act.m === 'dr') saveDraw();
   act = null; dirty = true;
@@ -1305,6 +1987,7 @@ window.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
   if (e.key === 'Escape'){ if (draft || tool !== 'cursor') setTool('cursor'); else if (selId){ selId = null; dirty = true; } else setInd('xray', false); }
   if ((e.key === 'Delete' || e.key === 'Backspace') && selId){ e.preventDefault(); deleteSelected(); }
+  if (e.key === 'Enter' && draft && nOf(draft.type) === -1 && draft.pts.length >= 2){ draft.preview = null; finishDraft(); }
   if ((e.key === '[' || e.key === ']') && lens){ const f = e.key === ']' ? 0.85 : 1/0.85; lens.wc = Math.max(0.6, lens.wc*f); lens.hp = Math.max(S.row, lens.hp*f); dirty = true; }
 });
 
@@ -1337,16 +2020,30 @@ document.querySelectorAll('.menu').forEach(m => m.addEventListener('click', e =>
 document.addEventListener('click', closeMenus);
 function setInd(k, v){
   ON[k] = v; document.querySelector(`#indMenu input[data-k="${k}"]`).checked = v;
+  try{ localStorage.setItem('fpOn', JSON.stringify(ON)); }catch(e){}
+  derivedDirty = true;
   $('indCount').textContent = Object.values(ON).filter(Boolean).length;
   if (k === 'xray'){ if (v) initLens(); else { panelHover = null; hideTip(); } }
   renderKL(); dirty = true;
 }
-document.querySelectorAll('#indMenu input').forEach(cb => cb.onchange = () => setInd(cb.dataset.k, cb.checked));
+document.querySelectorAll('#indMenu input[data-k]').forEach(cb => cb.onchange = () => setInd(cb.dataset.k, cb.checked));
 $('bFollow').onclick = () => setFollow(true);
 $('bFixed').onclick = () => setFollow(false);
+$('alBtn').onclick = e => { e.stopPropagation(); if (alertCount() >= 5){ toast('Maximum 5 alerts per symbol — select one and delete it'); return; }
+  try{ if (window.Notification && Notification.permission === 'default') Notification.requestPermission(); }catch(err){}
+  setTool('alert'); toast('Tap the chart at the alert price'); };
+$('whTh').onchange = () => { derivedDirty = true; };
+$('hmWin').onchange = () => { derivedDirty = true; };
+$('vpMode').onchange = () => { dirty = true; };
+try{ const on = JSON.parse(localStorage.getItem('fpOn') || 'null'); if (on) for (const k of Object.keys(ON)) if (k in on){ ON[k] = !!on[k]; const cb = document.querySelector(`#indMenu input[data-k="${k}"]`); if (cb) cb.checked = ON[k]; } }catch(e){}
+$('indCount').textContent = Object.values(ON).filter(Boolean).length;
 document.querySelectorAll('#dtb [data-t]').forEach(b => b.onclick = () => setTool(tool === b.dataset.t && b.dataset.t !== 'cursor' ? 'cursor' : b.dataset.t));
 $('dtT').onclick = () => { $('dtb').classList.toggle('hide'); try{ localStorage.setItem('dtbHide', $('dtb').classList.contains('hide') ? '1' : ''); }catch(e){} };
-$('dMag').onclick = () => { magnet = !magnet; $('dMag').classList.toggle('on', magnet); };
+$('dMag').onclick = () => doAction('@magnet');
+$('dAll').onclick = () => { renderPicker(); $('toolModal').classList.add('open'); };
+$('tpX').onclick = () => $('toolModal').classList.remove('open');
+$('toolModal').onclick = e => { if (e.target.id === 'toolModal') $('toolModal').classList.remove('open'); };
+renderFav();
 $('dCol').oninput = e => { drawColor = e.target.value; const d = drawings.find(z => z.id === selId); if (d){ d.color = drawColor; saveDraw(); } dirty = true; };
 $('dHide').onclick = () => { hideDraw = !hideDraw; $('dHide').classList.toggle('on', hideDraw); dirty = true; };
 $('dDel').onclick = deleteSelected;
@@ -1429,10 +2126,15 @@ $('np').onchange = e => { S.nPrints = clamp(+e.target.value || 0, 0, 30); derive
 $('row').onchange = e => { const v = parseFloat(e.target.value); if (v > 0 && (S.trades.length || S.k1.length)){ S.row = v; S.dec = Math.max(decFor(v), 2); rebuild(); } };
 
 // ───────── loop ─────────
-let lastDerive = 0;
+let lastDerive = 0, lastDraw = 0, frameGap = 33, lastInput = 0;
+['pointerdown', 'pointermove', 'wheel', 'keydown'].forEach(ev => window.addEventListener(ev, () => { lastInput = performance.now(); }, {passive:true, capture:true}));
 function loop(ts){
-  if (derivedDirty && ts - lastDerive > 900){ lastDerive = ts; derive(); dirty = true; }
-  if (dirty) draw();
+  if (derivedDirty && ts - lastDerive > 1500 && ts - lastInput > 200){ lastDerive = ts; derive(); dirty = true; }
+  const gap = ts - lastInput < 250 ? 0 : frameGap;   // touching = full speed; watching = adaptive
+  if (dirty && ts - lastDraw >= gap){
+    const t0 = performance.now(); draw(); const dt = performance.now() - t0;
+    lastDraw = ts; frameGap = clamp(frameGap*0.8 + dt*4*0.2, 33, 150);
+  }
   requestAnimationFrame(loop);
 }
 try{ $('dukaUrl').value = localStorage.getItem('dukaUrl') || ''; }catch(e){}
