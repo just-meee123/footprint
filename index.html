@@ -172,10 +172,15 @@ function addKline(m){
   else if (t0 < C.t) return;
   if (h > C.h) C.h = h; if (l < C.l) C.l = l; C.c = c; C.est = true;
   if (!(v > 0)) return;
-  const k0 = Math.floor(l/S.row + 1e-9), k1 = Math.floor(h/S.row + 1e-9), n = Math.min(40, k1 - k0 + 1), part = v/n;
-  const bf = c > o ? 1 : c < o ? 0 : 0.5;
+  const k0 = Math.floor(l/S.row + 1e-9), k1 = Math.floor(h/S.row + 1e-9), n = Math.min(40, k1 - k0 + 1);
+  const bf = c > o ? 1 : c < o ? 0 : 0.5, mid = ((o + c)/2)/S.row, half = Math.max(1, (k1 - k0 + 1)/2);
+  const ks = [], ws = []; let wsum = 0;
   for (let j = 0; j < n; j++){
-    const k = k0 + Math.round(j*(k1 - k0)/Math.max(1, n - 1));
+    const k = k0 + Math.round(j*(k1 - k0)/Math.max(1, n - 1)), w = 1 + 2*Math.max(0, 1 - Math.abs(k + .5 - mid)/half);
+    ks.push(k); ws.push(w); wsum += w;
+  }
+  for (let j = 0; j < n; j++){
+    const part = v*ws[j]/wsum, k = ks[j];
     let L = C.lv.get(k); if (!L){ L = {b:0, s:0, n:0, big:0}; C.lv.set(k, L); }
     L.b += part*bf; L.s += part*(1 - bf);
   }
@@ -183,6 +188,8 @@ function addKline(m){
 }
 // Order of data: Dukascopy 1-min candles → Dukascopy ticks → exchange 1-min candles → live trades
 function rebuild(){
+  const keepT = lens && S.candles.length ? S.candles[clamp(Math.round(lens.ci), 0, S.candles.length - 1)].t : null;
+  pinned = null;
   S.candles = [];
   const cut = S.trades.length ? Math.floor(S.trades[0][0]/60000)*60000 : Infinity;
   const tStart = S.dt.length ? Math.floor(S.dt[0][0]/60000)*60000 : Infinity;
@@ -192,8 +199,15 @@ function rebuild(){
     addTrade([t[0], t[1], t[2]/t[1], t[3]]); S.candles[S.candles.length-1].est = true;
     end = Math.max(end, Math.floor(t[0]/60000)*60000 + 60000);
   }
-  for (const m of S.k1) if (m[0] >= end && m[0] < cut) addKline(m);
-  for (const tr of S.trades) if (tr[0] >= cut) addTrade(tr);
+  const T = S.trades, tm = new Set(); for (const tr of T) tm.add(Math.floor(tr[0]/60000));
+  let j = 0;
+  for (const m of S.k1){
+    if (m[0] < end || tm.has(Math.floor(m[0]/60000))) continue;
+    while (j < T.length && T[j][0] < m[0]) addTrade(T[j++]);
+    addKline(m);
+  }
+  while (j < T.length) addTrade(T[j++]);
+  if (keepT != null && lens){ const idx = S.candles.findIndex(c => c.t >= keepT); if (idx >= 0) lens.ci += idx - Math.round(lens.ci); }
   derivedDirty = dirty = true;
 }
 
@@ -212,7 +226,7 @@ function derive(){
     prints.push({i, k, p:(k + .5)*S.row, vol:v, d, t:C[i].t});
   }
   const G = 5, agg = new Map();
-  for (const c of C) for (const [k, L] of c.lv){ const g = Math.floor(k/G); const a = agg.get(g) || {v:0, d:0}; a.v += L.b + L.s; a.d += L.b - L.s; agg.set(g, a); }
+  for (const c of C.slice(-600)) for (const [k, L] of c.lv){ const g = Math.floor(k/G); const a = agg.get(g) || {v:0, d:0}; a.v += L.b + L.s; a.d += L.b - L.s; agg.set(g, a); }
   keyLv = [...agg.entries()].sort((a, b) => b[1].v - a[1].v).slice(0, 5).map(([g, a]) => ({p:(g*G + G/2)*S.row, v:a.v, d:a.d}));
   let b = 0, s = 0; for (const c of C.slice(-30)){ b += c.buy; s += c.sell; }
   buyPct = b + s ? 100*b/(b + s) : 50;
@@ -355,7 +369,7 @@ async function loadDuka(dsym, refPx, my){
   for (let h = hours; h >= 1; h--){ const t0 = h0 - h*3600000, D = new Date(t0);
     const path = `${dsym}/${D.getUTCFullYear()}/${z2(D.getUTCMonth())}/${z2(D.getUTCDate())}/${z2(D.getUTCHours())}h_ticks.bi5`;
     tasks.push(async () => ({kind:'h', t0, raw: await dukaFile(path)})); }
-  const res = await pool(tasks, 6, (a, b) => { if (my === S.sess) setStatus(`Dukascopy history ${a}/${b}…`, COL.gold); });
+  const res = await pool(tasks, 6, (a, b) => { if (my === S.sess) setStatus(`LIVE · loading Dukascopy ${a}/${b}…`, COL.gold); });
   if (my !== S.sess) return null;
   const errs = res.filter(r => r && r.err);
   if (errs.length === res.length) throw errs[0].err;
@@ -476,47 +490,16 @@ async function connect(){
   if (info.tick && S.row < info.tick) S.row = info.tick;
   S.dec = Math.max(decFor(S.row), info.tick ? decFor(info.tick) : 0, 2);
   $('row').placeholder = 'auto ' + S.row;
-  S.k1 = [];
+  S.k1 = []; S.src = src; S.sym = sym;
   S.back = true; openWS(src, sym, my);
   const mins = Math.max(0, +$('hist').value || 0);
-  // chart history: 1-minute candles, 1000 per page
-  const pagesK = clamp(Math.ceil((+$('days').value || 3)*1440/1000), 1, 20);
+  // 1) quick start: last ~16 hours of 1-minute candles + recent trades, then go LIVE
   try{
-    let end = Date.now(), got = [];
-    for (let pg = 0; pg < pagesK && my === S.sess; pg++){
-      let rows;
-      if (src.kind === 'bn'){
-        const arr = await getJSON(src, `${src.pre}/klines?symbol=${sym}&interval=1m&limit=1000&endTime=${end}`);
-        rows = arr.map(k => [+k[0], +k[1], +k[2], +k[3], +k[4], +k[7]]);
-      } else {
-        const j = await getJSON(src, `/v5/market/kline?category=${src.cat}&symbol=${sym}&interval=1&limit=1000&end=${end}`);
-        rows = ((j.result && j.result.list) || []).map(k => [+k[0], +k[1], +k[2], +k[3], +k[4], +k[6]]);
-      }
-      if (!rows.length) break;
-      got = got.concat(rows);
-      end = Math.min(...rows.map(r => r[0])) - 1;
-      setStatus(`chart history ${pg + 1}/${pagesK}…`, COL.gold);
-      if (rows.length < 900) break;
-    }
-    const uniq = new Map(); for (const r of got) uniq.set(r[0], r);
-    S.k1 = [...uniq.values()].sort((a, b) => a[0] - b[0]);
+    setStatus('loading chart…', COL.gold);
+    S.k1 = await fetchK1(src, sym, {end: Date.now()});
     rebuild();
   }catch(e){ console.warn('klines', e); }
-  const dsym = DUKA_MAP[sym];
-  if (dsym && dukaRelay() && $('useDuka').checked){
-    try{
-      const D = await loadDuka(dsym, info.px, my);
-      if (my !== S.sess) return;
-      if (D){
-        const cal = calibrate(D);
-        S.off = cal.n >= 5 ? cal.off : 0;
-        S.k1 = S.k1.map(r => [r[0], r[1] - S.off, r[2] - S.off, r[3] - S.off, r[4] - S.off, r[5]]);
-        S.dk = D.k1.map(r => [r[0], r[1], r[2], r[3], r[4], r[5]*cal.sc]);
-        S.dt = D.tk.map(t => [t[0], t[1], t[2]*cal.st, t[3]]);
-        S.duka = true; rebuild();
-      }
-    }catch(e){ console.warn('duka', e); setStatus('Dukascopy relay not reachable — check the URL in ⚙', COL.sell); await new Promise(r => setTimeout(r, 1500)); }
-  }
+  if (my !== S.sess) return;
   try{
     if (src.kind === 'bn' && mins > 0){
       let start = Date.now() - mins*60000, fromId = null, pages = 0;
@@ -540,18 +523,97 @@ async function connect(){
   S.back = false; for (const a of S.wsBuf) S.push(a); S.wsBuf = [];
   rebuild(); lens = null;
   setStatus(liveLabel(sym, src), COL.buy);
+  // 2) in the background: older chart history, then Dukascopy
+  backgroundHistory(src, sym, info, my);
 }
+// exchange 1-minute candles: [time, open, high, low, close, $volume]
+async function fetchK1(src, sym, {start, end}){
+  let rows;
+  if (src.kind === 'bn'){
+    const q = start != null ? `startTime=${start}` : `endTime=${end}`;
+    const arr = await getJSON(src, `${src.pre}/klines?symbol=${sym}&interval=1m&limit=1000&${q}`);
+    rows = arr.map(k => [+k[0], +k[1], +k[2], +k[3], +k[4], +k[7]]);
+  } else {
+    const q = start != null ? `start=${start}&end=${Date.now()}` : `end=${end}`;
+    const j = await getJSON(src, `/v5/market/kline?category=${src.cat}&symbol=${sym}&interval=1&limit=1000&${q}`);
+    rows = ((j.result && j.result.list) || []).map(k => [+k[0], +k[1], +k[2], +k[3], +k[4], +k[6]]);
+  }
+  return rows.map(r => [r[0], r[1] - S.off, r[2] - S.off, r[3] - S.off, r[4] - S.off, r[5]]).sort((a, b) => a[0] - b[0]);
+}
+function mergeK1(rows){ const m = new Map(S.k1.map(r => [r[0], r])); for (const r of rows) m.set(r[0], r); S.k1 = [...m.values()].sort((a, b) => a[0] - b[0]); }
+async function backgroundHistory(src, sym, info, my){
+  const pagesK = clamp(Math.ceil((+$('days').value || 3)*1440/1000), 1, 20);
+  try{
+    for (let pg = 1; pg < pagesK && my === S.sess && S.k1.length; pg++){
+      const rows = await fetchK1(src, sym, {end: S.k1[0][0] - 1});
+      if (my !== S.sess || !rows.length) break;
+      mergeK1(rows); rebuild();
+      if (rows.length < 900) break;
+    }
+  }catch(e){ console.warn('older klines', e); }
+  const dsym = DUKA_MAP[sym];
+  if (my !== S.sess || !(dsym && dukaRelay() && $('useDuka').checked)) return;
+  try{
+    const D = await loadDuka(dsym, info.px, my, true);
+    if (my !== S.sess || !D) return;
+    const cal = calibrate(D), off = cal.n >= 5 ? cal.off : 0;
+    // shift exchange prices onto the XAUUSD (Dukascopy) price level
+    S.k1 = S.k1.map(r => [r[0], r[1] - off, r[2] - off, r[3] - off, r[4] - off, r[5]]);
+    for (const tr of S.trades) tr[1] -= off;
+    if (lens) lens.cp -= off;
+    if (!V.auto){ V.lo -= off; V.hi -= off; }
+    S.off += off;
+    S.dk = D.k1.map(r => [r[0], r[1], r[2], r[3], r[4], r[5]*cal.sc]);
+    S.dt = D.tk.map(t => [t[0], t[1], t[2]*cal.st, t[3]]);
+    S.duka = true; rebuild();
+    setStatus(liveLabel(sym, src), COL.buy);
+  }catch(e){ console.warn('duka', e); if (my === S.sess) setStatus('LIVE · Dukascopy relay not reachable — check URL in ⚙', COL.gold); }
+}
+// ───────── keep live: recover after the phone sleeps / app switch / network drop ─────────
+S.lastMsg = Date.now();
+function reopenWS(){
+  if (!S.src) return;
+  if (S.ws){ clearInterval(S.ws._ping); S.ws.onclose = null; try{ S.ws.close(); }catch(e){} }
+  openWS(S.src, S.sym, S.sess);
+}
+let catching = false;
+async function catchUp(){
+  if (!S.src || S.back || catching) return;
+  catching = true; const my = S.sess, src = S.src, sym = S.sym;
+  setStatus('syncing…', COL.gold);
+  S.lastMsg = Date.now(); reopenWS();
+  try{
+    const lastT = Math.max(S.trades.length ? S.trades[S.trades.length-1][0] : 0, S.k1.length ? S.k1[S.k1.length-1][0] : 0);
+    const rows = await fetchK1(src, sym, {start: Math.floor(lastT/60000)*60000});
+    if (my === S.sess && rows.length){ mergeK1(rows); rebuild(); }
+  }catch(e){ console.warn('catch-up', e); }
+  catching = false;
+  if (my === S.sess) setStatus(liveLabel(sym, src), COL.buy);
+}
+let hiddenAt = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) hiddenAt = Date.now();
+  else if (hiddenAt && Date.now() - hiddenAt > 2000){ hiddenAt = 0; catchUp(); }
+});
+window.addEventListener('pageshow', e => { if (e.persisted) catchUp(); });
+window.addEventListener('online', () => catchUp());
+setInterval(() => {   // watchdog: no data for a while = dead connection
+  if (!S.src || S.back || document.hidden) return;
+  const limit = S.src.kind === 'by' ? 30000 : 60000;
+  if (Date.now() - S.lastMsg > limit) catchUp();
+}, 5000);
 const liveLabel = (sym, src) => S.duka ? `LIVE · ${DUKA_MAP[sym]} · Dukascopy + ${src.name}` : `LIVE · ${sym} · ${src.name}`;
 function openWS(src, sym, my, hostIdx = 0, retry = 0){
   const url = src.kind === 'bn' ? `${src.ws[hostIdx]}/ws/${sym.toLowerCase()}@aggTrade` : src.ws[hostIdx];
-  const s = new WebSocket(url); S.ws = s; let opened = false, ping = null;
+  const s = new WebSocket(url); S.ws = s; let opened = false, ping = null; S.lastMsg = Date.now();
   const handle = x => S.back ? S.wsBuf.push(x) : S.push(x);
   s.onopen = () => {
     opened = true; retry = 0;
-    if (src.kind === 'by'){ s.send(JSON.stringify({op:'subscribe', args:['publicTrade.' + sym]})); ping = setInterval(() => s.readyState === 1 && s.send('{"op":"ping"}'), 20000); }
+    if (src.kind === 'by'){ s.send(JSON.stringify({op:'subscribe', args:['publicTrade.' + sym]})); ping = setInterval(() => s.readyState === 1 && s.send('{"op":"ping"}'), 20000); s._ping = ping; }
     if (!S.back) setStatus(liveLabel(sym, src), COL.buy);
   };
   s.onmessage = ev => {
+    S.lastMsg = Date.now();
     const m = JSON.parse(ev.data);
     if (src.kind === 'bn'){ if (m.e === 'aggTrade') handle(m); }
     else if (m.topic && Array.isArray(m.data)) for (const t of m.data) handle({id:t.i, T:+t.T, p:+t.p, q:+t.v, sell:t.S === 'Sell'});
@@ -936,7 +998,7 @@ $('row').onchange = e => { const v = parseFloat(e.target.value); if (v > 0 && (S
 // ───────── loop ─────────
 let lastDerive = 0;
 function loop(ts){
-  if (derivedDirty && ts - lastDerive > 600){ lastDerive = ts; derive(); dirty = true; }
+  if (derivedDirty && ts - lastDerive > 900){ lastDerive = ts; derive(); dirty = true; }
   if (dirty) draw();
   requestAnimationFrame(loop);
 }
