@@ -18,7 +18,7 @@
   #indCount{background:var(--acc);color:#03121f;border-radius:9px;padding:0 6px;margin-left:4px;font-size:11px}
   #status{display:flex;align-items:center;gap:6px;margin-left:auto;font-size:11px;color:var(--dim)}
   #dot{width:8px;height:8px;border-radius:50%;background:#555}
-  .menu{position:absolute;z-index:30;background:#111827;border:1px solid #263043;border-radius:10px;padding:8px;display:none;box-shadow:0 10px 30px rgba(0,0,0,.6);min-width:210px}
+  .menu{position:absolute;z-index:30;max-height:75vh;overflow:auto;background:#111827;border:1px solid #263043;border-radius:10px;padding:8px;display:none;box-shadow:0 10px 30px rgba(0,0,0,.6);min-width:210px}
   .menu.open{display:block}
   .menu .t{font-size:11px;color:var(--gold);margin:2px 4px 6px;font-weight:700}
   .menu label{display:flex;align-items:center;gap:10px;padding:7px 6px;border-radius:6px;cursor:pointer}
@@ -59,6 +59,7 @@
   .g{color:var(--buy)}.s{color:var(--sell)}
   #fol{position:absolute;left:8px;bottom:26px;display:flex;gap:4px;z-index:7}
   #fol button{background:#111827;color:var(--txt);border:1px solid #263043;border-radius:6px;padding:4px 10px;font-size:12px}
+  #fol button{min-width:34px}
   #fol button.on{background:var(--acc);color:#03121f;border-color:var(--acc);font-weight:700}
   @media (max-width:600px){#kl{width:148px;right:76px;top:4px;font-size:10px;padding:5px 7px}#kl .row .p{width:56px}#kl .h{margin:3px 0 2px}}
 </style>
@@ -89,7 +90,13 @@
   <label>XRay shows <select id="mode"><option value="delta">Delta</option><option value="ba">Sell x Buy</option><option value="vol">Volume</option></select></label>
   <label>Big prints shown <input id="np" type="number" value="6" min="0" max="30"></label>
   <label>Big trade mark ≥ $ <input id="big" type="number" value="250000" step="10000"></label>
-  <label>History (minutes) <input id="hist" type="number" value="90" min="0" max="720"></label>
+  <label>Chart history (days) <input id="days" type="number" value="3" min="1" max="14"></label>
+  <div class="t" style="margin-top:8px">Dukascopy (gold & silver history)</div>
+  <label>Use Dukascopy <input id="useDuka" type="checkbox" checked></label>
+  <label style="flex-direction:column;align-items:stretch;gap:4px">Relay URL <input id="dukaUrl" type="text" placeholder="https://….workers.dev" style="width:100%"></label>
+  <label>History days <input id="dDays" type="number" value="7" min="1" max="60"></label>
+  <label>Tick detail (last hours) <input id="dHours" type="number" value="12" min="0" max="72"></label>
+  <label>Trade history, Binance (min) <input id="hist" type="number" value="60" min="0" max="720"></label>
 </div>
 
 <div id="wrap">
@@ -103,7 +110,7 @@
   </div>
   <div id="pop"></div>
   <div id="tip"></div>
-  <div id="fol"><button id="bFollow" class="on">Follow</button><button id="bFixed">Fixed</button></div>
+  <div id="fol"><button id="bFollow" class="on">Follow</button><button id="bFixed">Fixed</button><button id="bAuto" class="on" title="Auto-fit price">Auto</button><button id="bOut">−</button><button id="bIn">+</button></div>
 </div>
 
 <script>
@@ -115,14 +122,14 @@ const tip = $('tip'), pop = $('pop'), kl = $('kl');
 const COL = {buy:'#1fd38a', sell:'#ff4d5e', acc:'#4fb3ff', dim:'#6b7689', txt:'#d3dae6', gold:'#ffb02e'};
 
 // ───────── state ─────────
-const S = {trades:[], candles:[], tfMs:60000, row:0, dec:2, mode:'delta', bigTh:250000, nPrints:6,
+const S = {trades:[], k1:[], dk:[], dt:[], off:0, duka:false, candles:[], tfMs:60000, row:0, dec:2, mode:'delta', bigTh:250000, nPrints:6,
            ws:null, wsBuf:[], back:false, lastId:-1, sess:0};
-const V = {cw:9, panX:0, follow:true, W:0, H:0, dpr:1, lo:0, hi:1};
+const V = {cw:9, panX:0, follow:true, auto:true, W:0, H:0, dpr:1, lo:0, hi:1};
 const ON = {xray:true, prints:true, levels:true, senti:true};
 let lens = null, prints = [], keyLv = [], buyPct = 50;
 let hover = {x:-1, y:-1, in:false}, pinned = null, panelHover = null;
 let dirty = true, derivedDirty = true;
-const MAX_TRADES = 1500000, MAX_CANDLES = 600;
+const MAX_TRADES = 1500000, MAX_CANDLES = 12000;
 
 // ───────── helpers ─────────
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -155,14 +162,48 @@ function addTrade(tr){
   if (isSell){ L.s += v; c.sell += v; } else { L.b += v; c.buy += v; }
   L.n++; c.n++; if (v > L.big) L.big = v;
 }
-function rebuild(){ S.candles = []; for (const tr of S.trades) addTrade(tr); derivedDirty = dirty = true; }
+// 1-minute candles from the exchange give long history; their volume is spread across the
+// candle's price range and counted as buying (green) or selling (red). Marked as estimated.
+function addKline(m){
+  const [t, o, h, l, c, v] = m, t0 = Math.floor(t/S.tfMs)*S.tfMs;
+  let C = S.candles[S.candles.length-1];
+  if (!C || t0 > C.t){ C = {t:t0, o, h, l, c, buy:0, sell:0, n:0, lv:new Map(), est:true}; S.candles.push(C);
+    if (S.candles.length > MAX_CANDLES){ S.candles.shift(); if (lens) lens.ci -= 1; } }
+  else if (t0 < C.t) return;
+  if (h > C.h) C.h = h; if (l < C.l) C.l = l; C.c = c; C.est = true;
+  if (!(v > 0)) return;
+  const k0 = Math.floor(l/S.row + 1e-9), k1 = Math.floor(h/S.row + 1e-9), n = Math.min(40, k1 - k0 + 1), part = v/n;
+  const bf = c > o ? 1 : c < o ? 0 : 0.5;
+  for (let j = 0; j < n; j++){
+    const k = k0 + Math.round(j*(k1 - k0)/Math.max(1, n - 1));
+    let L = C.lv.get(k); if (!L){ L = {b:0, s:0, n:0, big:0}; C.lv.set(k, L); }
+    L.b += part*bf; L.s += part*(1 - bf);
+  }
+  C.buy += v*bf; C.sell += v*(1 - bf);
+}
+// Order of data: Dukascopy 1-min candles → Dukascopy ticks → exchange 1-min candles → live trades
+function rebuild(){
+  S.candles = [];
+  const cut = S.trades.length ? Math.floor(S.trades[0][0]/60000)*60000 : Infinity;
+  const tStart = S.dt.length ? Math.floor(S.dt[0][0]/60000)*60000 : Infinity;
+  let end = -Infinity;
+  for (const m of S.dk) if (m[0] < tStart && m[0] < cut){ addKline(m); end = m[0] + 60000; }
+  for (const t of S.dt) if (t[0] < cut && t[0] >= end){
+    addTrade([t[0], t[1], t[2]/t[1], t[3]]); S.candles[S.candles.length-1].est = true;
+    end = Math.max(end, Math.floor(t[0]/60000)*60000 + 60000);
+  }
+  for (const m of S.k1) if (m[0] >= end && m[0] < cut) addKline(m);
+  for (const tr of S.trades) if (tr[0] >= cut) addTrade(tr);
+  derivedDirty = dirty = true;
+}
 
 // prints, key levels, pressure
 function derive(){
   derivedDirty = false;
   const C = S.candles; if (!C.length) return;
   const cells = [];
-  C.forEach((c, i) => { for (const [k, L] of c.lv) cells.push([L.b + L.s, i, k, L.b - L.s]); });
+  const from = Math.max(0, C.length - 300);
+  for (let i = from; i < C.length; i++) for (const [k, L] of C[i].lv) cells.push([L.b + L.s, i, k, L.b - L.s]);
   cells.sort((a, b) => b[0] - a[0]);
   prints = [];
   for (const [v, i, k, d] of cells){
@@ -190,6 +231,171 @@ function renderKL(){
   kl.innerHTML = h;
 }
 
+// ───────── Dukascopy history (through your relay) ─────────
+const DUKA_RELAY_DEFAULT = '';   // optional: paste your relay URL here, e.g. 'https://duka-relay.yourname.workers.dev'
+const DUKA_MAP = {XAUUSDT:'XAUUSD', XAGUSDT:'XAGUSD'};
+// Minimal LZMA ("alone" .lzma / Dukascopy .bi5) decoder, port of LzmaSpec.
+function lzmaDecode(buf){
+  const inp = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  if (inp.length < 13) return new Uint8Array(0);
+  let d = inp[0];
+  if (d >= 225) throw new Error('bad lzma props');
+  const lc = d % 9; d = (d / 9) | 0; const lp = d % 5, pb = (d / 5) | 0;
+  let unpackSize = 0, unknown = true;
+  for (let i = 0; i < 8; i++){ if (inp[5 + i] !== 0xFF) unknown = false; }
+  if (!unknown){ for (let i = 7; i >= 0; i--) unpackSize = unpackSize * 256 + inp[5 + i]; }
+  let ip = 13;
+  // output
+  let out = new Uint8Array(unknown ? Math.max(1024, inp.length * 4) : unpackSize), op = 0;
+  const put = b => { if (op >= out.length){ const n = new Uint8Array(out.length * 2); n.set(out); out = n; } out[op++] = b; };
+  // range decoder
+  let range = 0xFFFFFFFF, code = 0;
+  ip++; // first byte is always 0
+  for (let i = 0; i < 4; i++) code = (code * 256 + inp[ip++]) >>> 0;
+  const norm = () => { if (range < 0x1000000){ range = (range * 256) >>> 0; code = ((code * 256) + (ip < inp.length ? inp[ip++] : 0)) >>> 0; } };
+  const bit = (p, i) => {
+    const v = p[i], bound = (range >>> 11) * v;
+    let r;
+    if (code < bound){ p[i] = v + ((2048 - v) >>> 5); range = bound >>> 0; r = 0; }
+    else { p[i] = v - (v >>> 5); code = (code - bound) >>> 0; range = (range - bound) >>> 0; r = 1; }
+    norm(); return r;
+  };
+  const direct = n => { let res = 0; for (; n > 0; n--){ range = range >>> 1; let b = 0; if (code >= range){ code = (code - range) >>> 0; b = 1; } res = ((res * 2) + b) >>> 0; norm(); } return res; };
+  const probs = n => new Uint16Array(n).fill(1024);
+  const tree = (p, off, nb) => { let m = 1; for (let i = 0; i < nb; i++) m = (m << 1) + bit(p, off + m); return m - (1 << nb); };
+  const rtree = (p, off, nb) => { let m = 1, s = 0; for (let i = 0; i < nb; i++){ const b = bit(p, off + m); m = (m << 1) + b; s |= b << i; } return s; };
+  const lenDec = () => ({ch: probs(2), low: probs(16 << 3), mid: probs(16 << 3), high: probs(256)});
+  const decLen = (L, ps) => {
+    if (!bit(L.ch, 0)) return tree(L.low, ps << 3, 3);
+    if (!bit(L.ch, 1)) return 8 + tree(L.mid, ps << 3, 3);
+    return 16 + tree(L.high, 0, 8);
+  };
+  const lit = probs(0x300 << (lc + lp));
+  const posSlot = probs(4 << 6), posDec = probs(115), align = probs(16);
+  const isMatch = probs(192), isRep = probs(12), isRepG0 = probs(12), isRepG1 = probs(12), isRepG2 = probs(12), isRep0Long = probs(192);
+  const LD = lenDec(), RLD = lenDec();
+  let rep0 = 0, rep1 = 0, rep2 = 0, rep3 = 0, state = 0;
+  const pbMask = (1 << pb) - 1, lpMask = (1 << lp) - 1;
+  const getByte = dist => out[op - dist];
+  const decDist = len => {
+    const ls = Math.min(len, 3), slot = tree(posSlot, ls << 6, 6);
+    if (slot < 4) return slot;
+    const nd = (slot >>> 1) - 1;
+    let dist = ((2 | (slot & 1)) << nd) >>> 0;
+    if (slot < 14) dist = (dist + rtree(posDec, dist - slot, nd)) >>> 0;
+    else { dist = (dist + direct(nd - 4) * 16) >>> 0; dist = (dist + rtree(align, 0, 4)) >>> 0; }
+    return dist;
+  };
+  while (true){
+    if (!unknown && op >= unpackSize) break;
+    const ps = op & pbMask;
+    if (!bit(isMatch, (state << 4) + ps)){
+      const prev = op > 0 ? out[op - 1] : 0;
+      const base = 0x300 * (((op & lpMask) << lc) + (prev >>> (8 - lc)));
+      let sym = 1;
+      if (state >= 7){
+        let mb = getByte(rep0 + 1);
+        do { const mbit = (mb >>> 7) & 1; mb <<= 1; const b = bit(lit, base + ((1 + mbit) << 8) + sym); sym = (sym << 1) | b; if (mbit !== b) break; } while (sym < 0x100);
+      }
+      while (sym < 0x100) sym = (sym << 1) | bit(lit, base + sym);
+      put(sym - 0x100);
+      state = state < 4 ? 0 : state < 10 ? state - 3 : state - 6;
+      continue;
+    }
+    let len;
+    if (bit(isRep, state)){
+      if (op === 0) throw new Error('lzma data error');
+      if (!bit(isRepG0, state)){
+        if (!bit(isRep0Long, (state << 4) + ps)){ state = state < 7 ? 9 : 11; put(getByte(rep0 + 1)); continue; }
+      } else {
+        let dist;
+        if (!bit(isRepG1, state)) dist = rep1;
+        else { if (!bit(isRepG2, state)) dist = rep2; else { dist = rep3; rep3 = rep2; } rep2 = rep1; }
+        rep1 = rep0; rep0 = dist;
+      }
+      len = decLen(RLD, ps); state = state < 7 ? 8 : 11;
+    } else {
+      rep3 = rep2; rep2 = rep1; rep1 = rep0;
+      len = decLen(LD, ps); state = state < 7 ? 7 : 10;
+      rep0 = decDist(len);
+      if (rep0 === 0xFFFFFFFF) break; // end marker
+      if (rep0 >= op) throw new Error('lzma data error');
+    }
+    len += 2;
+    for (let i = 0; i < len; i++){ if (!unknown && op >= unpackSize) break; put(getByte(rep0 + 1)); }
+  }
+  return out.subarray(0, op);
+}
+
+const dukaRelay = () => (($('dukaUrl').value || DUKA_RELAY_DEFAULT).trim()).replace(/\/+$/, '');
+async function dukaFile(path){
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 25000);
+  try{
+    const r = await fetch(dukaRelay() + '/?p=' + encodeURIComponent(path), {signal:ctl.signal}); clearTimeout(to);
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error('relay HTTP ' + r.status);
+    const b = new Uint8Array(await r.arrayBuffer());
+    return b.length ? lzmaDecode(b) : new Uint8Array(0);
+  }catch(e){ clearTimeout(to); throw e; }
+}
+const z2 = n => String(n).padStart(2, '0');
+async function pool(tasks, n, onDone){
+  const res = new Array(tasks.length); let i = 0, done = 0;
+  await Promise.all(Array.from({length:n}, async () => { while (i < tasks.length){ const k = i++;
+    try{ res[k] = await tasks[k](); }catch(e){ res[k] = {err:e}; } if (onDone) onDone(++done, tasks.length); } }));
+  return res;
+}
+async function loadDuka(dsym, refPx, my){
+  const days = clamp(+$('dDays').value || 7, 1, 60), hours = clamp(+$('dHours').value || 12, 0, 72);
+  const now = Date.now(), today0 = Math.floor(now/86400000)*86400000, h0 = Math.floor(now/3600000)*3600000;
+  const tasks = [];
+  for (let d = days; d >= 1; d--){ const t0 = today0 - d*86400000, D = new Date(t0);
+    const path = `${dsym}/${D.getUTCFullYear()}/${z2(D.getUTCMonth())}/${z2(D.getUTCDate())}/BID_candles_min_1.bi5`;
+    tasks.push(async () => ({kind:'d', t0, raw: await dukaFile(path)})); }
+  for (let h = hours; h >= 1; h--){ const t0 = h0 - h*3600000, D = new Date(t0);
+    const path = `${dsym}/${D.getUTCFullYear()}/${z2(D.getUTCMonth())}/${z2(D.getUTCDate())}/${z2(D.getUTCHours())}h_ticks.bi5`;
+    tasks.push(async () => ({kind:'h', t0, raw: await dukaFile(path)})); }
+  const res = await pool(tasks, 6, (a, b) => { if (my === S.sess) setStatus(`Dukascopy history ${a}/${b}…`, COL.gold); });
+  if (my !== S.sess) return null;
+  const errs = res.filter(r => r && r.err);
+  if (errs.length === res.length) throw errs[0].err;
+  let rows = [], ticks = [];
+  for (const r of res){
+    if (!r || r.err || !r.raw) continue;
+    const dv = new DataView(r.raw.buffer, r.raw.byteOffset, r.raw.byteLength);
+    if (r.kind === 'd') for (let i = 0, n = Math.floor(r.raw.length/24); i < n; i++){ const o = i*24;
+      rows.push([r.t0 + dv.getUint32(o)*1000, dv.getUint32(o + 4), dv.getUint32(o + 8), dv.getUint32(o + 12), dv.getUint32(o + 16), dv.getFloat32(o + 20)]); }
+    else for (let i = 0, n = Math.floor(r.raw.length/20); i < n; i++){ const o = i*20;
+      ticks.push([r.t0 + dv.getUint32(o), (dv.getUint32(o + 4) + dv.getUint32(o + 8))/2, dv.getFloat32(o + 12) + dv.getFloat32(o + 16)]); }
+  }
+  rows.sort((a, b) => a[0] - b[0]); ticks.sort((a, b) => a[0] - b[0]);
+  if (!rows.length && !ticks.length) return null;
+  // column order of the 4 prices differs between sources: detect it
+  let oclh = 0, ohlc = 0;
+  for (const [, a, b, c, d] of rows){ if (c <= Math.min(a, b) && d >= Math.max(a, b)) oclh++; if (b >= Math.max(a, d) && c <= Math.min(a, d)) ohlc++; }
+  // price scale: pick the divisor that lands next to the live price
+  const sample = ticks.length ? ticks[ticks.length-1][1] : rows[rows.length-1][1];
+  let div = 1000, best = Infinity;
+  for (const x of [1, 10, 100, 1000, 10000, 100000]){ const e = Math.abs(Math.log(sample/x/refPx)); if (e < best){ best = e; div = x; } }
+  const k1 = rows.map(([t, a, b, c, d, v]) => oclh >= ohlc ? [t, a/div, d/div, c/div, b/div, v] : [t, a/div, b/div, c/div, d/div, v]);
+  // tick rule: price ticking up = buying, ticking down = selling
+  let prev = 0, sell = false; const tk = [];
+  for (const [T, m, v] of ticks){ const p = m/div; if (p > prev) sell = false; else if (p < prev) sell = true; prev = p; tk.push([T, p, v > 0 ? v : 1, sell]); }
+  return {k1, tk};
+}
+// line Dukascopy up with the exchange: price gap and volume units
+function calibrate(D){
+  const med = a => { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; };
+  const ex = new Map(S.k1.map(r => [r[0], r])), diffs = [];
+  for (const r of D.k1){ const e = ex.get(r[0]); if (e) diffs.push(e[4] - r[4]); }
+  const tmin = new Map(), tv = new Map();
+  for (const [T, p, v] of D.tk){ const m = Math.floor(T/60000)*60000; tmin.set(m, p); tv.set(m, (tv.get(m) || 0) + v); }
+  for (const [m, p] of tmin){ const e = ex.get(m); if (e) diffs.push(e[4] - p); }
+  const exV = med(S.k1.map(r => r[5]).filter(v => v > 0));
+  const dkV = med(D.k1.map(r => r[5]).filter(v => v > 0)), tkV = med([...tv.values()]);
+  return {off: med(diffs), n: diffs.length, sc: dkV && exV ? exV/dkV : 1, st: tkV && exV ? exV/tkV : 1};
+}
+
 // ───────── data sources (with automatic backup addresses) ─────────
 const SRC = {
   spot:{kind:'bn', name:'Binance', pre:'/api/v3', pages:120,
@@ -214,7 +420,7 @@ async function getJSON(src, path){
   throw Object.assign(new Error('unreachable'), {net:true});
 }
 function pushRaw(T, p, q, isSell){
-  const tr = [T, p, q, isSell];
+  const tr = [T, p - S.off, q, isSell];
   S.trades.push(tr);
   if (S.trades.length > MAX_TRADES) S.trades.splice(0, S.trades.length - (MAX_TRADES*0.8|0));
   addTrade(tr); dirty = derivedDirty = true;
@@ -244,7 +450,7 @@ const ALT = {spot:'bys', fut:'byl', bys:'spot', byl:'fut'};
 async function connect(){
   const my = ++S.sess;
   if (S.ws){ S.ws.onclose = null; S.ws.close(); S.ws = null; }
-  S.trades = []; S.candles = []; S.wsBuf = []; S.lastId = -1; seen.clear(); lens = null; pinned = null; setFollow(true);
+  S.trades = []; S.candles = []; S.dk = []; S.dt = []; S.off = 0; S.duka = false; S.wsBuf = []; S.lastId = -1; seen.clear(); lens = null; pinned = null; setFollow(true);
   // fix common symbol names: XAUUSD -> XAUUSDT, BTC/USDT -> BTCUSDT
   let sym = $('sym').value.trim().toUpperCase().replace(/[\/\-\s_.]/g, '');
   if (/USD$/.test(sym)) sym += 'T';
@@ -270,8 +476,47 @@ async function connect(){
   if (info.tick && S.row < info.tick) S.row = info.tick;
   S.dec = Math.max(decFor(S.row), info.tick ? decFor(info.tick) : 0, 2);
   $('row').placeholder = 'auto ' + S.row;
+  S.k1 = [];
   S.back = true; openWS(src, sym, my);
   const mins = Math.max(0, +$('hist').value || 0);
+  // chart history: 1-minute candles, 1000 per page
+  const pagesK = clamp(Math.ceil((+$('days').value || 3)*1440/1000), 1, 20);
+  try{
+    let end = Date.now(), got = [];
+    for (let pg = 0; pg < pagesK && my === S.sess; pg++){
+      let rows;
+      if (src.kind === 'bn'){
+        const arr = await getJSON(src, `${src.pre}/klines?symbol=${sym}&interval=1m&limit=1000&endTime=${end}`);
+        rows = arr.map(k => [+k[0], +k[1], +k[2], +k[3], +k[4], +k[7]]);
+      } else {
+        const j = await getJSON(src, `/v5/market/kline?category=${src.cat}&symbol=${sym}&interval=1&limit=1000&end=${end}`);
+        rows = ((j.result && j.result.list) || []).map(k => [+k[0], +k[1], +k[2], +k[3], +k[4], +k[6]]);
+      }
+      if (!rows.length) break;
+      got = got.concat(rows);
+      end = Math.min(...rows.map(r => r[0])) - 1;
+      setStatus(`chart history ${pg + 1}/${pagesK}…`, COL.gold);
+      if (rows.length < 900) break;
+    }
+    const uniq = new Map(); for (const r of got) uniq.set(r[0], r);
+    S.k1 = [...uniq.values()].sort((a, b) => a[0] - b[0]);
+    rebuild();
+  }catch(e){ console.warn('klines', e); }
+  const dsym = DUKA_MAP[sym];
+  if (dsym && dukaRelay() && $('useDuka').checked){
+    try{
+      const D = await loadDuka(dsym, info.px, my);
+      if (my !== S.sess) return;
+      if (D){
+        const cal = calibrate(D);
+        S.off = cal.n >= 5 ? cal.off : 0;
+        S.k1 = S.k1.map(r => [r[0], r[1] - S.off, r[2] - S.off, r[3] - S.off, r[4] - S.off, r[5]]);
+        S.dk = D.k1.map(r => [r[0], r[1], r[2], r[3], r[4], r[5]*cal.sc]);
+        S.dt = D.tk.map(t => [t[0], t[1], t[2]*cal.st, t[3]]);
+        S.duka = true; rebuild();
+      }
+    }catch(e){ console.warn('duka', e); setStatus('Dukascopy relay not reachable — check the URL in ⚙', COL.sell); await new Promise(r => setTimeout(r, 1500)); }
+  }
   try{
     if (src.kind === 'bn' && mins > 0){
       let start = Date.now() - mins*60000, fromId = null, pages = 0;
@@ -293,8 +538,10 @@ async function connect(){
   }catch(e){ console.warn('history', e); }
   if (my !== S.sess) return;
   S.back = false; for (const a of S.wsBuf) S.push(a); S.wsBuf = [];
-  setStatus(`LIVE · ${sym} · ${src.name}`, COL.buy);
+  rebuild(); lens = null;
+  setStatus(liveLabel(sym, src), COL.buy);
 }
+const liveLabel = (sym, src) => S.duka ? `LIVE · ${DUKA_MAP[sym]} · Dukascopy + ${src.name}` : `LIVE · ${sym} · ${src.name}`;
 function openWS(src, sym, my, hostIdx = 0, retry = 0){
   const url = src.kind === 'bn' ? `${src.ws[hostIdx]}/ws/${sym.toLowerCase()}@aggTrade` : src.ws[hostIdx];
   const s = new WebSocket(url); S.ws = s; let opened = false, ping = null;
@@ -302,7 +549,7 @@ function openWS(src, sym, my, hostIdx = 0, retry = 0){
   s.onopen = () => {
     opened = true; retry = 0;
     if (src.kind === 'by'){ s.send(JSON.stringify({op:'subscribe', args:['publicTrade.' + sym]})); ping = setInterval(() => s.readyState === 1 && s.send('{"op":"ping"}'), 20000); }
-    if (!S.back) setStatus(`LIVE · ${sym} · ${src.name}`, COL.buy);
+    if (!S.back) setStatus(liveLabel(sym, src), COL.buy);
   };
   s.onmessage = ev => {
     const m = JSON.parse(ev.data);
@@ -372,7 +619,8 @@ function draw(){
   let lo = Infinity, hi = -Infinity, vmax = 0;
   for (let i = a; i <= b; i++){ lo = Math.min(lo, C[i].l); hi = Math.max(hi, C[i].h); vmax = Math.max(vmax, C[i].buy + C[i].sell); }
   if (!isFinite(lo)){ lo = C[N-1].l; hi = C[N-1].h; }
-  const pad = Math.max((hi - lo)*0.08, S.row*2); V.lo = lo - pad; V.hi = hi + pad;
+  if (V.auto){ const pad = Math.max((hi - lo)*0.08, S.row*2); V.lo = lo - pad; V.hi = hi + pad; }
+  $('bAuto').classList.toggle('on', V.auto);
   if (ON.xray && !lens) initLens();
 
   // grid + price axis
@@ -437,6 +685,10 @@ function draw(){
   // axis tags
   ctx.font = 'bold 11px ui-monospace,monospace'; ctx.textAlign = 'left';
   ctx.fillStyle = lc; ctx.fillRect(PW, ly - 9, AX, 18); ctx.fillStyle = '#03121f'; ctx.fillText(P(last.c), PW + 6, ly);
+  { const now = Date.now(), left = Math.max(0, (Math.floor(now/S.tfMs) + 1)*S.tfMs - now), sec = Math.floor(left/1000);
+    const hh = Math.floor(sec/3600), mm = Math.floor(sec%3600/60), ss = sec%60, z = n => String(n).padStart(2, '0');
+    ctx.fillStyle = '#1b2230'; ctx.fillRect(PW, ly + 9, AX, 16); ctx.fillStyle = '#fff'; ctx.font = '11px ui-monospace,monospace';
+    ctx.fillText((hh ? z(hh) + ':' : '') + z(mm) + ':' + z(ss), PW + 6, ly + 17); ctx.font = 'bold 11px ui-monospace,monospace'; }
   if (hover.in && hover.y < PH - VH && hover.x < PW){
     const hp = V.hi - (hover.y - TOP)*ppp();
     ctx.fillStyle = '#2b3547'; ctx.fillRect(PW, hover.y - 9, AX, 18); ctx.fillStyle = '#fff'; ctx.fillText(P(hp), PW + 6, hover.y);
@@ -503,7 +755,7 @@ function drawPanel(){
   }
   if (hv){ g.strokeStyle = COL.acc; g.lineWidth = 1.5; g.strokeRect(hv.x + 10.5, hv.y + 1, cwp - 14, rh - 2); }
   const mid = C[Math.round((i0 + i1)/2)];
-  $('xpT').textContent = `${tStr(mid.t)}   ${P(lens.cp)}`;
+  $('xpT').textContent = `${tStr(mid.t)}   ${P(lens.cp)}${C[i1].est || C[i0].est ? '  ~est' : ''}`;
   $('xpZ').textContent = (w/Math.max(14, lens.wc*V.cw)).toFixed(1) + 'x';
   if (panelHover){
     if (hv){
@@ -515,7 +767,7 @@ function drawPanel(){
         <div class="r"><span>Total</span><span>$${fmt(tot)}</span></div>
         <div class="r"><span>% of candle</span><span>${(100*tot/Math.max(1, hv.cd.buy + hv.cd.sell)).toFixed(1)}%</span></div>
         <div class="r"><span>Trades</span><span>${cl.n}</span></div>
-        <div class="r"><span>Biggest trade</span><span>$${fmt(cl.big)}</span></div>`, panelHover.cx, panelHover.cy);
+        ${hv.cd.est ? '<div class="r"><span style="color:#ffb02e">Estimated (history, not live trades)</span><span></span></div>' : `<div class="r"><span>Biggest trade</span><span>$${fmt(cl.big)}</span></div>`}`, panelHover.cx, panelHover.cy);
     } else hideTip();
   }
 }
@@ -567,31 +819,53 @@ function mainHover(){
     <div class="r"><span>L / C</span><span class="mono">${P(c.l)} / ${P(c.c)}</span></div>
     <div class="r"><span>Volume</span><span>$${fmt(c.buy + c.sell)}</span></div>
     <div class="r"><span>Delta</span><span class="${d>=0?'g':'s'}">${sgn(d)}</span></div>
-    <div class="r"><span>POC</span><span class="mono">${poc != null ? P((poc + .5)*S.row) : '-'}</span></div>`, hover.x + r.left, hover.y + r.top);
+    <div class="r"><span>POC</span><span class="mono">${poc != null ? P((poc + .5)*S.row) : '-'}</span></div>
+    ${c.est ? '<div style="color:#ffb02e;font-size:11px">footprint estimated (history, not live trades)</div>' : ''}`, hover.x + r.left, hover.y + r.top);
 }
 
 // ───────── interaction: main chart ─────────
-const ptrs = new Map(); let act = null, pinch = null;
+const ptrs = new Map(); let act = null, pinch = null, lastAxisTap = 0;
+function zoomX(f, x){ const i0 = iAt(x); V.cw = clamp(V.cw*f, 1.5, 80); if (!V.follow) V.panX = x - pw() + 80 + (S.candles.length - 1 - i0)*V.cw; dirty = true; }
 const pos = e => { const r = cv.getBoundingClientRect(); return {x:e.clientX - r.left, y:e.clientY - r.top}; };
 function setFollow(f){ V.follow = f; $('bFollow').classList.toggle('on', f); $('bFixed').classList.toggle('on', !f); if (f) V.panX = 0; dirty = true; }
 cv.addEventListener('pointerdown', e => {
   closeMenus(); cv.setPointerCapture(e.pointerId);
   const p = pos(e); ptrs.set(e.pointerId, p); hover = {...p, in:true};
-  if (ptrs.size === 2){ const [a, b] = [...ptrs.values()]; pinch = {d:Math.abs(a.x - b.x) || 1, cw:V.cw}; act = null; return; }
+  if (ptrs.size === 2){ const [a, b] = [...ptrs.values()];
+    pinch = {dx:Math.abs(a.x - b.x), dy:Math.abs(a.y - b.y), cw:V.cw, lo:V.lo, hi:V.hi}; act = null; return; }
+  // price axis: drag to stretch / squash, double-tap to auto-fit
+  if (p.x >= pw() && p.y < ph()){
+    const now = Date.now(); if (now - lastAxisTap < 350){ V.auto = true; dirty = true; act = null; return; }
+    lastAxisTap = now; act = {m:'ys', y:p.y, lo:V.lo, hi:V.hi}; return;
+  }
+  // time axis: drag to widen / narrow candles
+  if (p.y >= ph()){ act = {m:'xs', x:p.x, cw:V.cw, i0:iAt(p.x)}; return; }
   const L = ON.xray ? lensRect() : null;
   if (L && Math.abs(p.x - L.x2) < 14 && Math.abs(p.y - L.y2) < 14) act = {m:'rs'};
   else if (L && p.x >= L.x1 - 4 && p.x <= L.x2 + 4 && p.y >= L.y1 - 4 && p.y <= L.y2 + 4) act = {m:'mv', x:p.x, y:p.y, ci:lens.ci, cp:lens.cp};
-  else { const pr = hitPrint(p); if (pr){ pinned = pr; act = null; } else act = {m:'pan', x:p.x, px:V.panX, moved:false}; }
+  else { const pr = hitPrint(p); if (pr){ pinned = pr; act = null; } else act = {m:'pan', x:p.x, y:p.y, px:V.panX, lo:V.lo, hi:V.hi, moved:false}; }
   dirty = true;
 });
 cv.addEventListener('pointermove', e => {
   const p = pos(e); if (ptrs.has(e.pointerId)) ptrs.set(e.pointerId, p);
   hover = {...p, in:true}; panelHover = null;
-  if (pinch && ptrs.size === 2){ const [a, b] = [...ptrs.values()]; V.cw = clamp(pinch.cw*(Math.abs(a.x - b.x) || 1)/pinch.d, 2, 60); }
+  if (pinch && ptrs.size === 2){ const [a, b] = [...ptrs.values()];
+    if (pinch.dx > 30) V.cw = clamp(pinch.cw*Math.abs(a.x - b.x)/pinch.dx, 1.5, 80);
+    if (pinch.dy > 50){ const f = pinch.dy/Math.max(10, Math.abs(a.y - b.y)), mid = (pinch.lo + pinch.hi)/2, half = (pinch.hi - pinch.lo)/2*f;
+      V.auto = false; V.lo = mid - half; V.hi = mid + half; } }
   else if (act){
     if (act.m === 'mv'){ lens.ci = act.ci + (p.x - act.x)/V.cw; lens.cp = act.cp - (p.y - act.y)*ppp(); }
     else if (act.m === 'rs'){ lens.wc = Math.max(0.6, 2*Math.abs(p.x - xF(lens.ci))/V.cw); lens.hp = Math.max(S.row, 2*Math.abs(p.y - yOf(lens.cp))*ppp()); }
-    else if (act.m === 'pan'){ const dx = p.x - act.x; if (Math.abs(dx) > 4) act.moved = true; if (act.moved){ V.panX = act.px + dx; if (V.follow) setFollow(false); } }
+    else if (act.m === 'pan'){
+      const dx = p.x - act.x, dy = p.y - act.y;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) act.moved = true;
+      if (act.moved){
+        if (Math.abs(dx) > 4){ V.panX = act.px + dx; if (V.follow) setFollow(false); }
+        if (!V.auto || Math.abs(dy) > 25){ const pp = (act.hi - act.lo)/priceH(); V.auto = false; V.lo = act.lo + dy*pp; V.hi = act.hi + dy*pp; }
+      } }
+    else if (act.m === 'ys'){ const f = Math.exp((p.y - act.y)*0.008), mid = (act.lo + act.hi)/2, half = (act.hi - act.lo)/2*f;
+      V.auto = false; V.lo = mid - half; V.hi = mid + half; }
+    else if (act.m === 'xs'){ V.cw = clamp(act.cw*Math.exp((p.x - act.x)*0.008), 1.5, 80); }
   }
   dirty = true;
 });
@@ -601,7 +875,8 @@ cv.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse'){ hover
 cv.addEventListener('wheel', e => {
   e.preventDefault(); const p = pos(e), f = e.deltaY < 0 ? 1.12 : 1/1.12, L = ON.xray ? lensRect() : null;
   if (L && p.x >= L.x1 && p.x <= L.x2 && p.y >= L.y1 && p.y <= L.y2){ lens.wc = Math.max(0.6, lens.wc/f); lens.hp = Math.max(S.row, lens.hp/f); }
-  else { const i0 = iAt(p.x); V.cw = clamp(V.cw*f, 2, 60); if (!V.follow) V.panX = p.x - pw() + 80 + (S.candles.length - 1 - i0)*V.cw; }
+  else if (e.shiftKey || e.ctrlKey || p.x >= pw()){ const mid = (V.lo + V.hi)/2, half = (V.hi - V.lo)/2/f; V.auto = false; V.lo = mid - half; V.hi = mid + half; }
+  else zoomX(f, p.x);
   dirty = true;
 }, {passive:false});
 window.addEventListener('keydown', e => {
@@ -646,13 +921,17 @@ function setInd(k, v){
 document.querySelectorAll('#indMenu input').forEach(cb => cb.onchange = () => setInd(cb.dataset.k, cb.checked));
 $('bFollow').onclick = () => setFollow(true);
 $('bFixed').onclick = () => setFollow(false);
+$('bAuto').onclick = () => { V.auto = true; dirty = true; };
+$('bIn').onclick = () => zoomX(1.25, pw() - 80);
+$('bOut').onclick = () => zoomX(1/1.25, pw() - 80);
+setInterval(() => { dirty = true; }, 1000);  // bar-close countdown
 $('go').onclick = connect;
 $('sym').addEventListener('keydown', e => { if (e.key === 'Enter') connect(); });
 $('tf').onchange = e => { S.tfMs = +e.target.value*1000; lens = null; rebuild(); };
 $('mode').onchange = e => { S.mode = e.target.value; dirty = true; };
 $('big').onchange = e => { S.bigTh = +e.target.value || 0; dirty = true; };
 $('np').onchange = e => { S.nPrints = clamp(+e.target.value || 0, 0, 30); derivedDirty = dirty = true; };
-$('row').onchange = e => { const v = parseFloat(e.target.value); if (v > 0 && S.trades.length){ S.row = v; S.dec = Math.max(decFor(v), 2); rebuild(); } };
+$('row').onchange = e => { const v = parseFloat(e.target.value); if (v > 0 && (S.trades.length || S.k1.length)){ S.row = v; S.dec = Math.max(decFor(v), 2); rebuild(); } };
 
 // ───────── loop ─────────
 let lastDerive = 0;
@@ -661,6 +940,8 @@ function loop(ts){
   if (dirty) draw();
   requestAnimationFrame(loop);
 }
+try{ $('dukaUrl').value = localStorage.getItem('dukaUrl') || ''; }catch(e){}
+$('dukaUrl').onchange = e => { try{ localStorage.setItem('dukaUrl', e.target.value.trim()); }catch(err){} };
 layout(); requestAnimationFrame(loop);
 })();
 </script>
