@@ -227,7 +227,9 @@
   <label>Bottom pane <select id="botPane"><option value="delta">Delta per candle</option><option value="vol">Volume</option></select></label>
   <label>Position size (0 = auto: gold 100 oz) <input id="posQty" type="number" value="0" min="0" step="any"></label>
   <div class="t" style="margin-top:8px">AI (optional)</div>
-  <label style="flex-direction:column;align-items:stretch;gap:4px">Claude API key — for the written AI analysis (saved on this device only) <input id="aiKey" type="password" placeholder="sk-ant-…" style="width:100%"></label>
+  <label>Written analysis by <select id="aiProv"><option value="gemini">Google Gemini (free key)</option><option value="claude">Claude (paid key)</option></select></label>
+  <label style="flex-direction:column;align-items:stretch;gap:4px">API key — saved on this device only <input id="aiKey" type="password" placeholder="Gemini: AIza…  ·  Claude: sk-ant-…" style="width:100%"></label>
+  <label>Gemini model <input id="aiModel" type="text" value="gemini-flash-latest" style="width:150px"></label>
   <div class="t" style="margin-top:8px">Forex live (optional)</div>
   <label style="flex-direction:column;align-items:stretch;gap:4px">Finnhub API key (free at finnhub.io) <input id="fhKey" type="text" placeholder="paste key for live forex ticks" style="width:100%"></label>
   <label>Trade history, Binance (min) <input id="hist" type="number" value="60" min="0" max="720"></label>
@@ -2392,7 +2394,11 @@ try{ lensFollow = localStorage.getItem('lensF') === '1'; bigOn = localStorage.ge
   const pm = localStorage.getItem('ppMin'); if (pm === '1' || (pm == null && window.innerWidth < 600)) pp.classList.add('min');
   const bp = localStorage.getItem('botPane'); if (bp) $('botPane').value = bp;
   const pq = localStorage.getItem('posQty'); if (pq) $('posQty').value = pq;
-  const ak = localStorage.getItem('aiKey'); if (ak) $('aiKey').value = ak; }catch(e){}
+  const ak = localStorage.getItem('aiKey'); if (ak) $('aiKey').value = ak;
+  const ap = localStorage.getItem('aiProv'); if (ap) $('aiProv').value = ap; else if (ak && ak.startsWith('sk-ant')) $('aiProv').value = 'claude';
+  const am = localStorage.getItem('aiModel'); if (am) $('aiModel').value = am; }catch(e){}
+$('aiProv').onchange = e => { try{ localStorage.setItem('aiProv', e.target.value); }catch(err){} };
+$('aiModel').onchange = e => { try{ localStorage.setItem('aiModel', e.target.value.trim()); }catch(err){} };
 $('botPane').onchange = e => { try{ localStorage.setItem('botPane', e.target.value); }catch(err){} dirty = true; };
 $('posQty').onchange = e => { try{ localStorage.setItem('posQty', e.target.value); }catch(err){} dirty = true; };
 $('aiKey').onchange = e => { try{ localStorage.setItem('aiKey', e.target.value.trim()); }catch(err){} };
@@ -2451,8 +2457,8 @@ function renderAI(){
     <span class="pill" style="background:${hexA(bc, .2)};color:${bc}">${r.bias === 'WAIT' ? 'WAIT — no clean edge' : r.bias + ' bias'} (score ${r.sc > 0 ? '+' : ''}${r.sc})</span>
     <ul>${r.F.map(f => `<li style="color:${f.s > 0 ? COL.buy : f.s < 0 ? COL.sell : 'var(--txt)'}">${f.s > 0 ? '▲' : f.s < 0 ? '▼' : '•'} ${f.t}</li>`).join('')}</ul>`;
   if (r.plan) h += `<div class="pl">${r.plan.side.toUpperCase()} idea<br>Entry ${P(r.plan.e)}<br><span style="color:${COL.buy}">TP ${P(r.plan.tp)}</span><br><span style="color:${COL.sell}">SL ${P(r.plan.sl)}</span><br>RR ${r.plan.rr.toFixed(2)}</div>`;
-  h += `<div class="bt">${r.plan ? '<button class="pri" id="aiDraw">Draw on chart</button>' : ''}<button id="aiRef">Refresh</button><button id="aiAsk">Ask Claude ✦</button></div><div id="aiOut"></div>
-    <div class="fn">Rule-based read of this chart's order flow — not financial advice. "Ask Claude" sends these numbers to Claude with your own API key (⚙ → AI).</div>`;
+  h += `<div class="bt">${r.plan ? '<button class="pri" id="aiDraw">Draw on chart</button>' : ''}<button id="aiRef">Refresh</button><button id="aiAsk">Ask AI ✦</button></div><div id="aiOut"></div>
+    <div class="fn">Rule-based read of this chart's order flow — not financial advice. "Ask AI" sends these numbers to Gemini (free key) or Claude with your own key (⚙ → AI).</div>`;
   aiBox.innerHTML = h;
   $('aiX').onclick = () => aiBox.style.display = 'none';
   $('aiRef').onclick = renderAI;
@@ -2461,17 +2467,25 @@ function renderAI(){
   $('aiAsk').onclick = () => askClaude(r);
 }
 async function askClaude(r){
-  const out = $('aiOut'), key = ($('aiKey').value || '').trim();
-  if (!key){ out.textContent = 'Paste your Claude API key in ⚙ → AI to get a written analysis. The read above works without it.'; return; }
-  out.textContent = 'Claude is reading the chart…';
+  const out = $('aiOut'), key = ($('aiKey').value || '').trim(), prov = key.startsWith('sk-ant') ? 'claude' : $('aiProv').value;
+  if (!key){ out.textContent = 'Paste a free Gemini key (aistudio.google.com → Get API key) in ⚙ → AI to get a written analysis. The read above works without it.'; return; }
+  const prompt = 'You are an order-flow (footprint) trading analyst. From the chart data below write, in short plain English:\n1) Market read (3-4 lines)\n2) What the large traders did\n3) One trade idea with entry, stop and target — or say "no trade" and why\n4) What would prove the idea wrong.\nUse the actual price levels. Keep it under 180 words. Data (recentBars = time, open, high, low, close, delta in $):\n' + JSON.stringify(r.data);
+  out.textContent = (prov === 'claude' ? 'Claude' : 'Gemini') + ' is reading the chart…';
   try{
-    const res = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'content-type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-5-5', max_tokens:800, messages:[{role:'user', content:
-        'You are an order-flow (footprint) trading analyst. From the chart data below write, in short plain English:\n1) Market read (3-4 lines)\n2) What the large traders did\n3) One trade idea with entry, stop and target — or say "no trade" and why\n4) What would prove the idea wrong.\nUse the actual price levels. Keep it under 180 words. Data (recentBars = time, open, high, low, close, delta in $):\n' + JSON.stringify(r.data)}]})});
-    const j = await res.json();
-    if (!res.ok) throw new Error((j.error && j.error.message) || res.status);
-    out.textContent = (j.content || []).map(c => c.text || '').join('\n');
-  }catch(e){ out.textContent = 'Claude request failed: ' + (e.message || e); }
+    if (prov === 'claude'){
+      const res = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'content-type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-sonnet-5-5', max_tokens:800, messages:[{role:'user', content:prompt}]})});
+      const j = await res.json(); if (!res.ok) throw new Error((j.error && j.error.message) || res.status);
+      out.textContent = (j.content || []).map(c => c.text || '').join('\n');
+    } else {
+      const model = ($('aiModel').value || 'gemini-flash-latest').trim();
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {method:'POST', headers:{'content-type':'application/json', 'x-goog-api-key':key},
+        body:JSON.stringify({contents:[{role:'user', parts:[{text:prompt}]}]})});
+      const j = await res.json(); if (!res.ok) throw new Error((j.error && j.error.message) || res.status);
+      const c = j.candidates && j.candidates[0];
+      out.textContent = c && c.content ? c.content.parts.map(x => x.text || '').join('\n') : 'No answer (blocked or empty) — try again.';
+    }
+  }catch(e){ out.textContent = 'AI request failed: ' + (e.message || e) + (prov === 'gemini' ? '\nIf it says the model is not found, change "Gemini model" in ⚙ (e.g. gemini-3.5-flash).' : ''); }
 }
 $('aiBtn').onclick = e => { e.stopPropagation(); if (aiBox.style.display === 'block'){ aiBox.style.display = 'none'; return; } aiBox.style.display = 'block'; renderAI(); };
 aiBox.addEventListener('pointerdown', e => e.stopPropagation());
