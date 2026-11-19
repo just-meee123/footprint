@@ -114,6 +114,43 @@
   #xp .hd button{background:none;border:0;color:var(--dim);font-size:14px;padding:0 4px;cursor:pointer}
   #xp.min{height:auto!important} #xp.min #xc,#xp.min .ft,#xp.min .rs{display:none}
   #dkStat{font-size:11px;color:var(--dim);padding:2px 6px 6px}
+  /* top-left indicator legend (like the video) */
+  #legend{position:absolute;left:54px;top:6px;z-index:6;font-size:12px;color:var(--txt);max-width:calc(100% - 300px);min-width:150px;user-select:none}
+  #legend .lg{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:1px 6px;border-radius:6px;line-height:22px}
+  #legend .lg{background:color-mix(in srgb, var(--bg) 72%, transparent);width:max-content;max-width:100%} #legend .lg:hover{background:var(--ovl)}
+  #legend .lg b{font-weight:700;white-space:nowrap} #legend .lg .pm{color:var(--dim);font-family:ui-monospace,Menlo,monospace;font-size:11px;white-space:nowrap}
+  #legend .lg button{background:none;border:0;color:var(--dim);cursor:pointer;font-size:13px;padding:0 3px;line-height:20px}
+  #legend .lg button:hover{color:var(--txt)}
+  #legend .hd0{font-weight:700;font-size:13px;cursor:pointer;padding:1px 6px} #legend .hd0 span{color:var(--dim);font-weight:400;margin-left:6px}
+  #legend.min .lg{display:none}
+  #legend input[type=range]{width:110px;accent-color:#7c8cff;height:16px;margin:0;padding:0;border:0;background:none;flex:none;min-width:0}
+  #legend input[type=checkbox]{width:auto;margin:0;flex:none} #legend label>span{min-width:34px}
+  #legend label{display:flex;align-items:center;gap:4px;color:var(--dim);font-size:11px;white-space:nowrap}
+  @media (max-width:600px){#legend{left:50px;max-width:calc(100% - 140px);font-size:11px} #legend input[type=range]{width:80px}}
+  /* Print Pro panel */
+  #pp{position:absolute;right:80px;bottom:30px;z-index:7;background:var(--ovl);border:1px solid var(--line2);border-radius:12px;padding:8px 10px;width:250px;box-shadow:0 10px 30px rgba(0,0,0,.5);font-size:12px;display:none}
+  #pp .ph{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;cursor:pointer} #pp .ph i{font-style:normal;color:var(--acc)} #pp .ph .cv{margin-left:auto;color:var(--dim);font-weight:400}
+  #pp .rw{display:flex;align-items:center;gap:6px;margin-top:7px}
+  #pp button{background:var(--mbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer}
+  #pp button.on{background:var(--acc);color:#03121f;border-color:var(--acc);font-weight:700}
+  #pp input{width:82px;background:var(--mbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:4px 8px;text-align:right;font-family:ui-monospace,Menlo,monospace}
+  #pp .hlp{display:none;color:var(--dim);font-size:11px;line-height:1.45;margin-top:7px} #pp.help .hlp{display:block}
+  #pp.min .rw,#pp.min .hlp{display:none}
+  #pp.min{width:auto} @media (max-width:600px){#pp{right:auto;left:50px;bottom:auto;top:34px;width:220px;padding:6px 8px} #pp button{padding:3px 7px;font-size:11px}}
+  /* whale tooltip */
+  .wt{display:flex;align-items:center;gap:8px;margin-bottom:6px} .wt b{font-size:15px;font-family:ui-monospace,Menlo,monospace}
+  .bd{padding:2px 8px;border-radius:6px;font-weight:800;font-size:12px} .bd.g{background:rgba(31,211,138,.18);color:var(--buy)} .bd.s{background:rgba(255,77,94,.18);color:var(--sell)}
+  /* AI panel */
+  #aiBtn small{font-size:9px;border:1px solid var(--line2);border-radius:4px;padding:0 3px;margin-left:3px;color:var(--dim)}
+  #aiBox{position:absolute;right:80px;top:8px;z-index:10;width:min(340px,92vw);max-height:calc(100% - 70px);overflow:auto;background:var(--ovl);border:1px solid var(--line2);border-radius:12px;padding:10px 12px;box-shadow:0 14px 40px rgba(0,0,0,.6);font-size:12px;display:none}
+  #aiBox .ah{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px} #aiBox .ah button{margin-left:auto;background:none;border:0;color:var(--dim);font-size:15px;cursor:pointer}
+  #aiBox .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-weight:800;margin:8px 0 4px}
+  #aiBox ul{margin:6px 0;padding-left:16px} #aiBox li{margin:3px 0;line-height:1.4}
+  #aiBox .pl{background:var(--mbg);border-radius:8px;padding:7px 9px;margin:6px 0;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.6}
+  #aiBox .bt{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0} #aiBox .bt button{background:var(--mbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+  #aiBox .bt button.pri{background:var(--acc);color:#03121f;border-color:var(--acc);font-weight:700}
+  #aiOut{white-space:pre-wrap;line-height:1.45;margin-top:6px} #aiBox .fn{color:var(--dim);font-size:10.5px;margin-top:8px}
+  @media (max-width:600px){#aiBox{right:6px;left:6px;width:auto;top:6px}}
 </style>
 </head>
 <body>
@@ -122,6 +159,7 @@
   <input id="sym" value="BTCUSDT" title="Search symbol" readonly>
   <select id="tf"><option value="60" selected>1m</option><option value="180">3m</option><option value="300">5m</option><option value="900">15m</option><option value="1800">30m</option><option value="3600">1h</option></select>
   <button id="indBtn">Indicators<span id="indCount">4</span></button>
+  <button id="aiBtn" title="AI read of the order flow">✦ AI<small>Beta</small></button>
   <button id="setBtn" title="Settings">⚙</button>
   <button id="thBtn" title="Switch theme">◐</button>
   <button id="alBtn" title="Price alert: tap, then tap the chart at a price">🔔 <span id="alCount">0/5</span></button>
@@ -185,6 +223,11 @@
   <label>History days <input id="dDays" type="number" value="7" min="1" max="60"></label>
   <label>Tick detail (last hours) <input id="dHours" type="number" value="12" min="0" max="72"></label>
   <div id="dkStat">Dukascopy: not loaded yet</div>
+  <div class="t" style="margin-top:8px">Chart</div>
+  <label>Bottom pane <select id="botPane"><option value="delta">Delta per candle</option><option value="vol">Volume</option></select></label>
+  <label>Position size (0 = auto: gold 100 oz) <input id="posQty" type="number" value="0" min="0" step="any"></label>
+  <div class="t" style="margin-top:8px">AI (optional)</div>
+  <label style="flex-direction:column;align-items:stretch;gap:4px">Claude API key — for the written AI analysis (saved on this device only) <input id="aiKey" type="password" placeholder="sk-ant-…" style="width:100%"></label>
   <div class="t" style="margin-top:8px">Forex live (optional)</div>
   <label style="flex-direction:column;align-items:stretch;gap:4px">Finnhub API key (free at finnhub.io) <input id="fhKey" type="text" placeholder="paste key for live forex ticks" style="width:100%"></label>
   <label>Trade history, Binance (min) <input id="hist" type="number" value="60" min="0" max="720"></label>
@@ -206,6 +249,15 @@
   <button id="dClr" title="Remove all drawings"><svg viewBox="0 0 20 20"><path d="M4 4l12 12M16 4L4 16"/></svg></button>
 </div>
   <div id="kl"></div>
+  <div id="legend"></div>
+  <div id="pp">
+    <div class="ph" id="ppH"><i>☷</i>Print Pro<span class="cv" id="ppCv">▾</span></div>
+    <div class="rw"><button id="ppLoupe">Loupe</button><button id="ppFollow">Follow</button><button id="ppFixed">Fixed</button></div>
+    <div class="rw"><button id="ppBig">Big prints</button><span>$</span><input id="ppBigV" value="250k" title="e.g. 500k, 1M"></div>
+    <div class="rw"><button data-m="ba">Classic</button><button data-m="delta">Delta</button><button data-m="vol">Volume</button><button id="ppHelp" style="margin-left:auto">?</button></div>
+    <div class="hlp"><b>Loupe</b> — a magnifier over the chart. <b>Follow</b>: the lens moves with the cursor, click pins it. <b>Fixed</b>: drag the rectangle on the chart (a corner or the wheel over it resizes it), the lens stays put. <b>[ ]</b> less / more magnification, <b>Esc</b> turns it off.<br><b>Big prints</b> — boxes every footprint row and trade bigger than the $ amount (type 500k or 1M).<br><b>Classic</b> sell×buy · <b>Delta</b> buy−sell · <b>Volume</b> total.</div>
+  </div>
+  <div id="aiBox"></div>
   <div id="xp">
     <div class="hd mono"><span id="xpT">XRay</span><span><span id="xpZ">1.0x</span><button id="xpMin" title="Minimise">—</button></span></div>
     <canvas id="xc"></canvas>
@@ -250,11 +302,11 @@ function applyTheme(name, custom){
 function saveTheme(custom){ try{ localStorage.setItem('fpTheme', JSON.stringify({name:$('theme').value, custom, grid:gridOn})); }catch(e){} }
 
 // ───────── state ─────────
-const S = {fpMin:0, whales:[], trades:[], k1:[], dk:[], dt:[], off:0, duka:false, candles:[], tfMs:60000, row:0, dec:2, mode:'delta', bigTh:250000, nPrints:6,
+const S = {rowMul:1, baseRow:0, fpMin:0, whales:[], trades:[], k1:[], dk:[], dt:[], off:0, duka:false, candles:[], tfMs:60000, row:0, dec:2, mode:'delta', bigTh:250000, nPrints:6,
            ws:null, wsBuf:[], back:false, lastId:-1, sess:0, unit:'$'};
 const V = {cw:9, panX:0, follow:true, auto:true, W:0, H:0, dpr:1, lo:0, hi:1};
 const ON = {xray:true, fp:false, whales:false, vp:false, liq:false, heat:false, umb:false, lux:false, aur:false, zones:false, binlex:false, brk:false, prints:true, levels:true, senti:true};
-let lens = null, prints = [], keyLv = [], buyPct = 50;
+let lens = null, prints = [], keyLv = [], buyPct = 50, lensFollow = false, lensPin = false, bigOn = true;
 let hover = {x:-1, y:-1, in:false}, pinned = null, panelHover = null;
 let dirty = true, derivedDirty = true;
 const MAX_TRADES = 400000, MAX_CANDLES = 12000, WHALE_MIN = 5000;
@@ -636,6 +688,7 @@ async function connectFx(sym, my){
   const last = D.tk.length ? D.tk[D.tk.length-1][1] : D.k1[D.k1.length-1][4];
   const user = parseFloat($('row').value);
   S.row = user > 0 ? user : niceStep(last*0.00004);
+  S.baseRow = S.row; if (!(user > 0)) S.row = +(S.baseRow*S.rowMul).toPrecision(8);
   S.dec = Math.max(decFor(S.row), last < 20 ? 5 : last < 300 ? 3 : 2);
   $('row').placeholder = 'auto ' + S.row;
   const med = a => { if (!a.length) return 0; const z = [...a].sort((x, y) => x - y); return z[z.length >> 1]; };
@@ -701,6 +754,7 @@ async function connect(){
   const user = parseFloat($('row').value);
   S.row = user > 0 ? user : Math.max(niceStep(info.px*0.00006), info.tick || 0);
   if (info.tick && S.row < info.tick) S.row = info.tick;
+  S.baseRow = S.row; if (!(user > 0)) S.row = +(S.baseRow*S.rowMul).toPrecision(8);
   S.dec = Math.max(decFor(S.row), info.tick ? decFor(info.tick) : 0, 2);
   $('row').placeholder = 'auto ' + S.row;
   S.k1 = []; S.src = src; S.sym = sym; loadDraw();
@@ -871,6 +925,27 @@ function lensRect(){
   if (y2 - y1 < 14){ const m = (y1 + y2)/2; y1 = m - 7; y2 = m + 7; }
   return {x1, x2, y1, y2};
 }
+function lensHandles(L){
+  const mx = (L.x1 + L.x2)/2, my = (L.y1 + L.y2)/2;
+  return [{k:'tl', x:L.x1, y:L.y1}, {k:'tr', x:L.x2, y:L.y1}, {k:'bl', x:L.x1, y:L.y2}, {k:'br', x:L.x2, y:L.y2},
+          {k:'t', x:mx, y:L.y1}, {k:'b', x:mx, y:L.y2}, {k:'l', x:L.x1, y:my}, {k:'r', x:L.x2, y:my}];
+}
+function lensHit(L, x, y, touch){
+  const r = touch ? 18 : 10; let best = null, bd = r;
+  for (const h of lensHandles(L)){ const d = Math.hypot(h.x - x, h.y - y); if (d < bd){ bd = d; best = h.k; } }
+  if (best) return best;
+  if (Math.abs(x - L.x1) < 6 && y > L.y1 && y < L.y2) return 'l'; if (Math.abs(x - L.x2) < 6 && y > L.y1 && y < L.y2) return 'r';
+  if (Math.abs(y - L.y1) < 6 && x > L.x1 && x < L.x2) return 't'; if (Math.abs(y - L.y2) < 6 && x > L.x1 && x < L.x2) return 'b';
+  if (x >= L.x1 && x <= L.x2 && y >= L.y1 && y <= L.y2) return 'in';
+  return null;
+}
+const LENS_CUR = {tl:'nwse-resize', br:'nwse-resize', tr:'nesw-resize', bl:'nesw-resize', t:'ns-resize', b:'ns-resize', l:'ew-resize', r:'ew-resize', in:'move'};
+function lensResize(a, x, y){   // drag one side / corner, the opposite side stays put
+  let i1 = a.i1, i2 = a.i2, p1 = a.p1, p2 = a.p2; const k = a.k, mi = 0.6, mp = S.row;
+  if (k.includes('l')) i1 = Math.min(iAt(x), i2 - mi); if (k.includes('r')) i2 = Math.max(iAt(x), i1 + mi);
+  if (k.includes('t')) p2 = Math.max(pAt(y), p1 + mp); if (k.includes('b')) p1 = Math.min(pAt(y), p2 - mp);
+  lens.ci = (i1 + i2)/2; lens.wc = i2 - i1; lens.cp = (p1 + p2)/2; lens.hp = p2 - p1;
+}
 function initLens(){
   const C = S.candles; if (!C.length) return;
   const last = C[Math.max(0, C.length - 8)];
@@ -912,8 +987,9 @@ function draw(){
   fpCnt = {rows:0, hidden:0};
   // autoscale on visible candles
   const a = clamp(Math.floor(iAt(0)), 0, N - 1), b = clamp(Math.ceil(iAt(PW)), 0, N - 1);
-  let lo = Infinity, hi = -Infinity, vmax = 0;
-  for (let i = a; i <= b; i++){ lo = Math.min(lo, C[i].l); hi = Math.max(hi, C[i].h); vmax = Math.max(vmax, C[i].buy + C[i].sell); }
+  let lo = Infinity, hi = -Infinity, vmax = 0, dmax = 0;
+  for (let i = a; i <= b; i++){ lo = Math.min(lo, C[i].l); hi = Math.max(hi, C[i].h); vmax = Math.max(vmax, C[i].buy + C[i].sell); dmax = Math.max(dmax, Math.abs(C[i].buy - C[i].sell)); }
+  posX = []; const dPane = $('botPane').value === 'delta';
   if (!isFinite(lo)){ lo = C[N-1].l; hi = C[N-1].h; }
   if (V.auto){ const pad = Math.max((hi - lo)*0.08, S.row*2); V.lo = lo - pad; V.hi = hi + pad; }
   $('bAuto').classList.toggle('on', V.auto);
@@ -940,8 +1016,12 @@ function draw(){
   const bw = Math.max(1, V.cw*0.7);
   for (let i = a; i <= b; i++){
     const c = C[i], x = xF(i), up = c.c >= c.o, col = up ? COL.buy : COL.sell;
-    const vh = vmax ? (c.buy + c.sell)/vmax*(VH - 6) : 0;
-    ctx.fillStyle = hexA(up ? COL.buy : COL.sell, .45); ctx.fillRect(x - bw/2, PH - vh, bw, vh);
+    if (dPane){ const dd = c.buy - c.sell, mid = PH - VH/2, hh = dmax ? Math.abs(dd)/dmax*(VH/2 - 5) : 0;
+      ctx.fillStyle = hexA(dd >= 0 ? COL.buy : COL.sell, .7); ctx.fillRect(x - bw/2, dd >= 0 ? mid - hh : mid, bw, Math.max(1, hh));
+      if (V.cw >= 34 && dd){ ctx.font = '600 9px ui-monospace,Menlo,monospace'; ctx.textAlign = 'center'; ctx.fillStyle = dd >= 0 ? COL.buy : COL.sell;
+        ctx.fillText(sgn(dd), x, dd >= 0 ? mid + 7 : mid - 7); ctx.textBaseline = 'middle'; } }
+    else { const vh = vmax ? (c.buy + c.sell)/vmax*(VH - 6) : 0;
+      ctx.fillStyle = hexA(up ? COL.buy : COL.sell, .45); ctx.fillRect(x - bw/2, PH - vh, bw, vh); }
     if (ON.fp && V.cw >= 14 && drawFpCandle(c, x)) continue;
     ctx.fillStyle = col; ctx.fillRect(Math.round(x) - .5, yOf(c.h), 1, Math.max(1, yOf(c.l) - yOf(c.h)));
     const yo = yOf(c.o), yc = yOf(c.c); ctx.fillRect(x - bw/2, Math.min(yo, yc), bw, Math.max(1, Math.abs(yc - yo)));
@@ -984,7 +1064,9 @@ function draw(){
     ctx.fillStyle = 'rgba(79,179,255,.10)'; ctx.fillRect(L.x1, L.y1, L.x2 - L.x1, L.y2 - L.y1);
     ctx.strokeStyle = COL.acc; ctx.lineWidth = 2;
     ctx.strokeRect(L.x1, L.y1, L.x2 - L.x1, L.y2 - L.y1); ctx.lineWidth = 1;
-    ctx.fillStyle = COL.acc; ctx.fillRect(L.x2 - 4, L.y2 - 4, 8, 8);
+    if (!(lensFollow && !lensPin)) for (const h of lensHandles(L)){   // resize handles: corners + side middles
+      ctx.fillStyle = TH.bg; ctx.strokeStyle = COL.acc; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(h.x, h.y, h.k.length > 1 ? 4.5 : 4, 0, 7); ctx.fill(); ctx.stroke(); }
+    ctx.lineWidth = 1;
   }
 
   // crosshair
@@ -1122,10 +1204,13 @@ function mainHover(){
   if (!hover.in || act){ if (!pinned) pop.style.display = 'none'; if (!panelHover) hideTip(); return; }
   if (panelHover) return;
   const wh = hitWhale(hover);
+  if (wh !== hovWh){ hovWh = wh; dirty = true; }
   if (wh){ const r = wrap.getBoundingClientRect(); if (!pinned) pop.style.display = 'none';
-    showTip(`<div class="h">${wh.sell ? '🔴 Whale SELL' : '🟢 Whale BUY'}</div>
-      <div class="r"><span>Size</span><b>$${fmt(wh.v)}</b></div><div class="r"><span>Price</span><span class="mono">${P(wh.p)}</span></div>
-      <div class="r"><span>Time</span><span class="mono">${new Date(wh.T).toLocaleTimeString()}</span></div>`, hover.x + r.left, hover.y + r.top); return; }
+    const unit = /^X(AU|AG)/.test(S.sym || '') ? 'oz' : (S.sym || '').replace(/USDT$/, ''), q = wh.v/wh.p;
+    showTip(`<div class="wt"><span class="bd ${wh.sell ? 's' : 'g'}">${wh.sell ? 'SELL' : 'BUY'}</span><b>$${money(wh.v)}</b></div>
+      <div class="r"><span>Price</span><span class="mono">${(+P(wh.p)).toLocaleString(undefined, {minimumFractionDigits:S.dec})}</span></div>
+      <div class="r"><span>Qty</span><span class="mono">${q >= 100 ? Math.round(q).toLocaleString() : q.toFixed(q >= 1 ? 1 : 4)} ${unit}</span></div>
+      <div class="r"><span>Time</span><span class="mono">${new Date(wh.T).toISOString().replace('T', ' ').slice(0, 19)} UTC</span></div>`, hover.x + r.left, hover.y + r.top); return; }
   const pr = hitPrint(hover);
   if (pr && !pinned){ showPop(pr, hover.x, hover.y, false); hideTip(); return; }
   if (!pinned) pop.style.display = 'none';
@@ -1459,6 +1544,18 @@ function setTool(t){
   if (t === 'image'){ tool = 'cursor'; pickImage(r => { if (!r) return; tool = 'image'; pendingImg = r; toast('Tap the chart where the image should go'); }); }
   cv.style.cursor = t === 'cursor' ? 'default' : 'crosshair'; dirty = true;
 }
+let posX = [];
+function posQty(e){ const u = +$('posQty').value; if (u > 0) return u; const s = S.sym || '';
+  if (/^XAU/.test(s)) return 100; if (/^XAG/.test(s)) return 5000; if (S.src && S.src.kind === 'fx') return 100000; return 100000/e; }
+function posState(d, e, tp, sl, up){   // did price reach target or stop first (inside the box)?
+  const C = S.candles, N = C.length, t0 = d.pts[0].t, t1 = Math.max(d.pts[1].t, t0), key = [t0, t1, e, tp, sl, N, C[N - 1].h, C[N - 1].l].join();
+  if (d._st && d._st.k === key) return d._st;
+  let r = {k:key, hit:null, px:0}, i = N - 1; while (i > 0 && C[i - 1].t >= t0) i--;
+  for (; i < N && C[i].t <= t1; i++){ const c = C[i]; if (c.t < t0) continue;
+    const sH = up ? c.l <= sl : c.h >= sl, tH = up ? c.h >= tp : c.l <= tp;
+    if (sH){ r.hit = 'SL'; r.px = sl; break; } if (tH){ r.hit = 'TP'; r.px = tp; break; } }
+  Object.defineProperty(d, '_st', {value:r, writable:true, enumerable:false, configurable:true}); return r;
+}
 function posPts(d){   // long / short: entry, target, stop
   if (d.pts.length >= 3) return d.pts;
   const e = d.pts[0], b = d.pts[1] || e, up = d.type === 'long';
@@ -1528,10 +1625,27 @@ function drawDrawings(PW, PH){
         ctx.fillStyle = hexA(COL.buy, .2); ctx.fillRect(x1, Math.min(E.y, T.y), x2 - x1, Math.abs(T.y - E.y));
         ctx.fillStyle = hexA(COL.sell, .2); ctx.fillRect(x1, Math.min(E.y, Sx.y), x2 - x1, Math.abs(Sx.y - E.y));
         ctx.strokeStyle = TH.dim; seg({x:x1, y:E.y}, {x:x2, y:E.y});
-        const e = pp[0].p, tp = pp[1].p, sl = pp[2].p, rr = Math.abs(tp - e)/Math.max(1e-12, Math.abs(e - sl)), xm = (x1 + x2)/2;
-        label(`Target ${P(tp)} (${(100*(tp - e)/e).toFixed(2)}%)`, xm, T.y + (T.y < E.y ? -12 : 12), COL.buy, '#03121f');
-        label(`Stop ${P(sl)} (${(100*(sl - e)/e).toFixed(2)}%)`, xm, Sx.y + (Sx.y < E.y ? -12 : 12), COL.sell, '#fff');
-        label(`${d.type === 'long' ? 'Long' : 'Short'} · RR ${rr.toFixed(2)}`, xm, E.y, TH.tag, TH.txt); break; }
+        const e = pp[0].p, tp = pp[1].p, sl = pp[2].p, rr = Math.abs(tp - e)/Math.max(1e-12, Math.abs(e - sl)), upP = d.type === 'long';
+        ctx.strokeStyle = hexA(COL.buy, .8); seg({x:x1, y:T.y}, {x:x2, y:T.y}); ctx.strokeStyle = hexA(COL.sell, .8); seg({x:x1, y:Sx.y}, {x:x2, y:Sx.y});
+        ctx.font = '600 11px -apple-system,Segoe UI,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        const pc = p => `${p >= e ? '+' : ''}${(100*(p - e)/e).toFixed(2)}%`;
+        ctx.fillStyle = COL.buy; ctx.fillText(`TP ${P(tp)} (${pc(tp)})`, x1 + 6, T.y + (T.y < E.y ? 11 : -11));
+        ctx.fillStyle = COL.sell; ctx.fillText(`SL ${P(sl)} (${pc(sl)})`, x1 + 6, Sx.y + (Sx.y < E.y ? 11 : -11));
+        ctx.fillStyle = TH.txt; ctx.fillText(`RR ${rr.toFixed(2)}`, x1 + 6, E.y + (upP ? 10 : -10));
+        if (S.candles.length && !d.preview && d.pts.length >= 2){
+          const st = posState(d, e, tp, sl, upP), px = st.hit ? st.px : S.candles[S.candles.length - 1].c, q = posQty(e);
+          const pnl = (px - e)*q*(upP ? 1 : -1), pr = 100*(px - e)/e*(upP ? 1 : -1), qc = /USDT?$/.test(S.sym || '') ? 'USD' : (S.sym || '').slice(-3);
+          const txt = `${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)} ${qc} (${pr >= 0 ? '+' : ''}${pr.toFixed(2)}%)`;
+          ctx.font = '700 11px ui-monospace,Menlo,monospace'; let bx = x2 + 6; const by = E.y - 10, pcol = pnl >= 0 ? COL.buy : COL.sell;
+          if (st.hit){ const hc = st.hit === 'TP' ? COL.buy : COL.sell, tw2 = ctx.measureText(st.hit).width + 14;
+            ctx.fillStyle = hexA(TH.bg, .92); ctx.fillRect(bx, by, tw2, 20); ctx.strokeStyle = hc; ctx.lineWidth = 1.5; ctx.strokeRect(bx + .5, by + .5, tw2 - 1, 19);
+            ctx.fillStyle = hc; ctx.textAlign = 'center'; ctx.fillText(st.hit, bx + tw2/2, by + 10.5); bx += tw2 + 5; }
+          const tw = ctx.measureText(txt).width;
+          ctx.fillStyle = hexA(TH.bg, .92); ctx.fillRect(bx, by, tw + 30, 20); ctx.strokeStyle = pcol; ctx.lineWidth = 1.5; ctx.strokeRect(bx + .5, by + .5, tw + 29, 19);
+          ctx.fillStyle = pcol; ctx.textAlign = 'left'; ctx.fillText(txt, bx + 7, by + 10.5); ctx.fillStyle = TH.dim; ctx.fillText('×', bx + tw + 15, by + 10.5);
+          posX.push({x:bx + tw + 10, y:by, w:20, h:20, d}); ctx.lineWidth = 1;
+        }
+        break; }
       case 'text': { ctx.font = 'bold 13px -apple-system,Segoe UI,sans-serif'; const tx = d.text || 'Text', w = ctx.measureText(tx).width;
         ctx.fillStyle = hexA(TH.bg, .75); ctx.fillRect(A.x - 4, A.y - 11, w + 8, 22); ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.fillText(tx, A.x, A.y); break; }
       case 'brush': { ctx.beginPath(); Q.forEach((q, k) => k ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); ctx.stroke(); break; }
@@ -1716,7 +1830,9 @@ function drawPanes(PW){
 
 // ═════════════ extra indicators ═════════════
 // ── whale bubbles ──
-let whTh = 0;
+let whTh = 0, hovWh = null;
+const money = v => { const a = Math.abs(v); return a >= 1e9 ? (v/1e9).toFixed(2) + 'B' : a >= 1e6 ? (v/1e6).toFixed(2) + 'M' : a >= 1e3 ? (v/1e3).toFixed(1) + 'k' : v.toFixed(0); };
+const parseMoney = t => { const m = String(t).trim().toLowerCase().replace(/[$,\s]/g, '').match(/^([\d.]+)([kmb]?)$/); if (!m) return NaN; return +m[1]*({k:1e3, m:1e6, b:1e9}[m[2]] || 1); };
 function whaleCut(){
   const user = +$('whTh').value || 0;
   if (user > 0){ whTh = user; return; }
@@ -1738,6 +1854,8 @@ function drawWhales(PW, PH){
     ctx.fillStyle = hexA(col, .22); ctx.strokeStyle = hexA(col, .85); ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.stroke();
     ctx.fillStyle = hexA(col, .9); ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 7); ctx.fill();
+    if (w === hovWh){ ctx.save(); ctx.shadowColor = '#5fd8ff'; ctx.shadowBlur = 16; ctx.strokeStyle = '#5fd8ff'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(x, y, r + 6, 0, 7); ctx.stroke(); ctx.fillStyle = 'rgba(95,216,255,.18)'; ctx.fill(); ctx.restore(); }
   }
 }
 function hitWhale(p){
@@ -1778,12 +1896,12 @@ function drawFpCandle(c, x){
     const bx = left + 7, barMax = Math.max(6, (V.cw - 12)*0.22), tx = bx + 2, fs = clamp(hRow - 3, 8, 11.5);
     ctx.font = `600 ${fs}px ui-monospace,Menlo,monospace`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
     for (const [gk, r] of rows){
-      const d = r.b - r.s, y = yRow(gk), h = Math.max(1, hRow - 1.5), cy = y + hRow/2 + .5, txt = sgn(d), tw = ctx.measureText(txt).width;
+      const d = r.b - r.s, y = yRow(gk), h = Math.max(1, hRow - 1.5), cy = y + hRow/2 + .5, txt = S.mode === 'vol' ? fmt(r.b + r.s) : S.mode === 'ba' ? fmt(r.s) + '×' + fmt(r.b) : sgn(d), tw = ctx.measureText(txt).width;
       fpCnt.rows++;
       if (S.fpMin > 0 && Math.abs(d) < S.fpMin){ fpCnt.hidden++; ctx.fillStyle = hexA(d >= 0 ? COL.buy : COL.sell, .18); ctx.fillRect(bx, y + .75, Math.max(2, (maxD ? barMax*Math.abs(d)/maxD : 2)), h); continue; }
       const bw = maxD ? barMax*Math.abs(d)/maxD : 0;
       ctx.fillStyle = hexA(d >= 0 ? COL.buy : COL.sell, .55); ctx.fillRect(bx, y + .75, bw, h);   // delta bar behind the number
-      const big = (r.b + r.s) >= bigRowTh || r.big >= S.bigTh || (S.fpMin > 0 && Math.abs(d) >= S.fpMin);
+      const big = bigOn && ((r.b + r.s) >= bigRowTh || r.big >= S.bigTh || Math.abs(d) >= S.bigTh || (S.fpMin > 0 && Math.abs(d) >= S.fpMin));
       if (gk === maxDk || big){ ctx.fillStyle = gk === maxDk ? 'rgba(232,180,255,.92)' : hexA(d >= 0 ? COL.buy : COL.sell, .9); ctx.fillRect(tx - 2, y + .75, tw + 6, h);
         ctx.fillStyle = '#1a1030'; } else ctx.fillStyle = d >= 0 ? COL.buy : COL.sell;
       ctx.fillText(txt, tx + 1, cy);
@@ -1989,6 +2107,7 @@ cv.addEventListener('pointerdown', e => {
   }
   // time axis: drag to widen / narrow candles
   if (p.y >= ph()){ act = {m:'xs', x:p.x, cw:V.cw, i0:iAt(p.x)}; return; }
+  for (const bx of posX) if (p.x >= bx.x && p.x <= bx.x + bx.w && p.y >= bx.y && p.y <= bx.y + bx.h){ drawings = drawings.filter(z => z !== bx.d); selId = null; saveDraw(); dirty = true; act = null; return; }
   // drawing tools
   if (tool === 'eraser'){ const hd = hitDraw(p.x, p.y, e.pointerType !== 'mouse'); if (hd){ drawings = drawings.filter(z => z !== hd.d); selId = null; saveDraw(); alertCount(); dirty = true; } act = null; return; }
   if (tool !== 'cursor' && S.candles.length){
@@ -2007,9 +2126,10 @@ cv.addEventListener('pointerdown', e => {
       if ((hd.d.type === 'long' || hd.d.type === 'short') && hd.d.pts.length < 3) hd.d.pts = posPts(hd.d);
       dirty = true; return; }
     if (selId){ selId = null; dirty = true; } }
-  const L = ON.xray ? lensRect() : null;
-  if (L && Math.abs(p.x - L.x2) < 14 && Math.abs(p.y - L.y2) < 14) act = {m:'rs'};
-  else if (L && p.x >= L.x1 - 4 && p.x <= L.x2 + 4 && p.y >= L.y1 - 4 && p.y <= L.y2 + 4) act = {m:'mv', x:p.x, y:p.y, ci:lens.ci, cp:lens.cp};
+  const L = ON.xray && !(lensFollow && !lensPin) ? lensRect() : null;
+  const lk = L ? lensHit(L, p.x, p.y, e.pointerType !== 'mouse') : null;
+  if (lk && lk !== 'in') act = {m:'rs', k:lk, i1:lens.ci - lens.wc/2, i2:lens.ci + lens.wc/2, p1:lens.cp - lens.hp/2, p2:lens.cp + lens.hp/2};
+  else if (lk === 'in') act = {m:'mv', x:p.x, y:p.y, ci:lens.ci, cp:lens.cp};
   else { const pr = hitPrint(p); if (pr){ pinned = pr; act = null; } else act = {m:'pan', x:p.x, y:p.y, px:V.panX, lo:V.lo, hi:V.hi, moved:false}; }
   dirty = true;
 });
@@ -2021,12 +2141,15 @@ cv.addEventListener('pointermove', e => {
     if (pinch.dy > 50){ const f = pinch.dy/Math.max(10, Math.abs(a.y - b.y)), mid = (pinch.lo + pinch.hi)/2, half = (pinch.hi - pinch.lo)/2*f;
       V.auto = false; V.lo = mid - half; V.hi = mid + half; } }
   else if (!act && draft && draft.pts.length && nOf(draft.type) !== 0 && nOf(draft.type) !== 1){ draft.preview = ptAt(p.x, p.y); }
+  else if (!act && ON.xray && lens && lensFollow && !lensPin && tool === 'cursor' && p.x < pw() && p.y < ph() - VH){ lens.ci = iAt(p.x); lens.cp = pAt(p.y); }
+  if (!act && tool === 'cursor' && e.pointerType === 'mouse'){ const L = ON.xray && lens && !(lensFollow && !lensPin) ? lensRect() : null, k = L ? lensHit(L, p.x, p.y, false) : null;
+    const cur = k ? LENS_CUR[k] : 'default'; if (cv.style.cursor !== cur) cv.style.cursor = cur; }
   else if (act){
     if (act.m === 'mk'){ if (Math.hypot(p.x - act.x, p.y - act.y) > 8){ act.moved = true; if (draft) draft.preview = ptAt(p.x, p.y); } }
     else if (act.m === 'brush'){ const l = draft.pts[draft.pts.length - 1]; if (Math.abs(tX(l.t) - p.x) + Math.abs(yOf(l.p) - p.y) > 3) draft.pts.push({t: idxT(iAt(p.x)), p: pAt(p.y)}); }
     else if (act.m === 'dr') editDrawing(act, p.x, p.y);
     else if (act.m === 'mv'){ lens.ci = act.ci + (p.x - act.x)/V.cw; lens.cp = act.cp - (p.y - act.y)*ppp(); }
-    else if (act.m === 'rs'){ lens.wc = Math.max(0.6, 2*Math.abs(p.x - xF(lens.ci))/V.cw); lens.hp = Math.max(S.row, 2*Math.abs(p.y - yOf(lens.cp))*ppp()); }
+    else if (act.m === 'rs') lensResize(act, p.x, p.y);
     else if (act.m === 'pan'){
       const dx = p.x - act.x, dy = p.y - act.y;
       if (Math.abs(dx) > 4 || Math.abs(dy) > 4) act.moved = true;
@@ -2045,6 +2168,7 @@ const endPtr = e => {
   if (act && act.m === 'mk' && act.moved && draft && draft.preview){ draft.pts.push(draft.preview); draft.preview = null; if (nOf(draft.type) === 2) finishDraft(); }
   if (act && act.m === 'brush') finishDraft();
   if (act && act.m === 'dr') saveDraw();
+  if (act && act.m === 'pan' && !act.moved && ON.xray && lensFollow && lens){ lensPin = !lensPin; if (!lensPin){ const p = pos(e); lens.ci = iAt(p.x); lens.cp = pAt(p.y); } toast(lensPin ? 'Loupe pinned — click again to let it follow' : 'Loupe follows the cursor'); }
   act = null; dirty = true;
 };
 cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
@@ -2098,7 +2222,7 @@ function setInd(k, v){
   $('indCount').textContent = Object.values(ON).filter(Boolean).length;
   if (k === 'xray'){ if (v) initLens(); else { panelHover = null; hideTip(); } }
   if (k === 'fp'){ $('bFp').classList.toggle('on', v); if (v && V.cw < 70) zoomX(70/V.cw, pw() - 80); }
-  renderKL(); dirty = true;
+  renderKL(); dirty = true; if (window.__ui){ syncPP(); renderLegend(true); }
 }
 document.querySelectorAll('#indMenu input[data-k]').forEach(cb => cb.onchange = () => setInd(cb.dataset.k, cb.checked));
 $('bFollow').onclick = () => setFollow(true);
@@ -2190,6 +2314,168 @@ document.querySelectorAll('.mtabs button').forEach(b => b.onclick = () => { symG
 $('bAuto').onclick = () => { V.auto = true; dirty = true; };
 $('bFp').onclick = () => setInd('fp', !ON.fp);
 try{ S.fpMin = +(localStorage.getItem('fpMin') || 0); $('fpMin').value = S.fpMin || 0; }catch(e){}
+// ── top-left legend: symbol, active indicators, quick sliders ──
+const IND_NAME = {xray:'Loupe', fp:'Print Pro', whales:'Whales Map', vp:'Volume Profile', liq:'Inside Levels', heat:'Pulse', umb:'Umbrella', lux:'Binary Lux', aur:'Aurora', zones:'Saga', binlex:'Binlex', brk:'Breakout', prints:'Big Prints', levels:'Key Levels', senti:'Pressure'};
+const legend = $('legend');
+const wSl = v => Math.round(100*(Math.log10(Math.max(1e4, v)) - 4)/3.3);   // slider 0..100 → $10k..$20M
+const slW = s => Math.pow(10, 4 + 3.3*s/100);
+function legParams(k){
+  switch (k){
+    case 'fp': return `${Math.round(V.cw)} ${S.row} ${S.mode === 'ba' ? 'Classic' : S.mode === 'vol' ? 'Volume' : 'Delta'}`;
+    case 'xray': return lensFollow ? (lensPin ? 'pinned' : 'follow') : 'fixed';
+    case 'heat': return `${$('hmWin').value}`;
+    case 'prints': return `${$('np').value} $${money(S.bigTh)}`;
+    case 'vp': return $('vpMode').value;
+    default: return '';
+  }
+}
+function renderLegend(force){
+  const keys = Object.keys(ON).filter(k => ON[k] && IND_NAME[k] && k !== 'levels' && k !== 'senti');
+  const sig = keys.join() + '|' + (S.sym || '') + $('tf').value + legend.classList.contains('min');
+  if (force || legend._sig !== sig){
+    legend._sig = sig;
+    let h = `<div class="hd0" id="lgHd">${(S.sym || '—')}<span>${$('tf').selectedOptions[0].text} · ${keys.length} ${legend.classList.contains('min') ? '▸' : '▾'}</span></div>`;
+    for (const k of keys){
+      h += `<div class="lg" data-k="${k}"><b>${IND_NAME[k]}</b><span class="pm" data-p="${k}"></span>`;
+      if (k === 'fp') h += `<label>Ticks <input type="range" id="lgTick" min="1" max="20" step="1" value="${S.rowMul}"><span id="lgTickV">${S.rowMul}</span></label>`;
+      if (k === 'whales') h += `<label>Threshold ($) <input type="range" id="lgWh" min="0" max="100" step="1"><span id="lgWhV" class="pm"></span></label><label><input type="checkbox" id="lgWhA"> Auto</label>`;
+      h += `<button data-g="${k}" title="Settings">⚙</button><button data-x="${k}" title="Hide">×</button></div>`;
+    }
+    legend.innerHTML = h;
+    const tk = $('lgTick'); if (tk){ tk.oninput = () => setText($('lgTickV'), tk.value); tk.onchange = () => setRowMul(+tk.value); }
+    const ws = $('lgWh'); if (ws){
+      ws.oninput = () => { const v = Math.round(slW(+ws.value)/1000)*1000; $('whTh').value = v; $('lgWhA').checked = false; whaleCut(); setText($('lgWhV'), money(v)); dirty = true; };
+      $('lgWhA').onchange = e => { $('whTh').value = e.target.checked ? 0 : Math.round(isFinite(whTh) ? whTh : 1e5); whaleCut(); legend._w = null; dirty = true; };
+    }
+  }
+  for (const el of legend.querySelectorAll('[data-p]')) setText(el, legParams(el.dataset.p));
+  const ws = $('lgWh');
+  if (ws && document.activeElement !== ws){ const auto = !(+$('whTh').value > 0); $('lgWhA').checked = auto;
+    if (isFinite(whTh)){ const sv = String(wSl(whTh)); if (ws.value !== sv) ws.value = sv; setText($('lgWhV'), money(whTh)); } else setText($('lgWhV'), '—'); }
+}
+legend.addEventListener('click', e => {
+  if (e.target.closest('#lgHd')){ legend.classList.toggle('min'); try{ localStorage.setItem('lgMin', legend.classList.contains('min') ? '1' : '0'); }catch(err){} renderLegend(true); return; }
+  const x = e.target.closest('[data-x]'); if (x){ setInd(x.dataset.x, false); renderLegend(true); return; }
+  const g = e.target.closest('[data-g]'); if (g){ e.stopPropagation(); $('setBtn').click(); }
+});
+legend.addEventListener('pointerdown', e => e.stopPropagation());
+try{ const m = localStorage.getItem('lgMin'); if (m === '1' || (m == null && window.innerWidth < 600)) legend.classList.add('min'); }catch(e){}
+function setRowMul(m){
+  S.rowMul = clamp(Math.round(m) || 1, 1, 50); try{ localStorage.setItem('rowMul', S.rowMul); }catch(e){}
+  if (S.baseRow && !(parseFloat($('row').value) > 0)){ S.row = +(S.baseRow*S.rowMul).toPrecision(8); S.dec = Math.max(S.dec, decFor(S.baseRow)); rebuild(); lens = null; }
+  renderLegend(true); dirty = true;
+}
+try{ S.rowMul = clamp(+localStorage.getItem('rowMul') || 1, 1, 50); }catch(e){}
+setInterval(() => renderLegend(), 700);
+
+// ── Print Pro panel ──
+const pp = $('pp');
+function syncPP(){
+  pp.style.display = (ON.fp || ON.xray) ? 'block' : 'none';
+  $('ppLoupe').classList.toggle('on', ON.xray); $('ppFollow').classList.toggle('on', lensFollow); $('ppFixed').classList.toggle('on', !lensFollow);
+  $('ppBig').classList.toggle('on', bigOn); if (document.activeElement !== $('ppBigV')) $('ppBigV').value = money(S.bigTh);
+  pp.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === S.mode));
+  $('ppCv').textContent = pp.classList.contains('min') ? '▸' : '▾';
+}
+$('ppH').onclick = () => { pp.classList.toggle('min'); try{ localStorage.setItem('ppMin', pp.classList.contains('min') ? '1' : '0'); }catch(e){} syncPP(); };
+$('ppLoupe').onclick = () => { setInd('xray', !ON.xray); syncPP(); };
+$('ppFollow').onclick = () => { lensFollow = true; lensPin = false; if (!ON.xray) setInd('xray', true); try{ localStorage.setItem('lensF', '1'); }catch(e){} syncPP(); dirty = true; };
+$('ppFixed').onclick = () => { lensFollow = false; lensPin = false; try{ localStorage.setItem('lensF', '0'); }catch(e){} syncPP(); dirty = true; };
+$('ppBig').onclick = () => { bigOn = !bigOn; try{ localStorage.setItem('bigOn', bigOn ? '1' : '0'); }catch(e){} syncPP(); dirty = true; };
+$('ppBigV').onchange = e => { const v = parseMoney(e.target.value); if (v > 0){ S.bigTh = v; $('big').value = v; try{ localStorage.setItem('bigTh', v); }catch(err){} derivedDirty = true; } syncPP(); dirty = true; };
+pp.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { S.mode = b.dataset.m; $('mode').value = S.mode; try{ localStorage.setItem('fpMode', S.mode); }catch(e){} syncPP(); dirty = true; });
+$('ppHelp').onclick = () => pp.classList.toggle('help');
+pp.addEventListener('pointerdown', e => e.stopPropagation());
+try{ lensFollow = localStorage.getItem('lensF') === '1'; bigOn = localStorage.getItem('bigOn') !== '0';
+  const bt = +localStorage.getItem('bigTh'); if (bt > 0){ S.bigTh = bt; $('big').value = bt; }
+  const md = localStorage.getItem('fpMode'); if (md){ S.mode = md; $('mode').value = md; }
+  const pm = localStorage.getItem('ppMin'); if (pm === '1' || (pm == null && window.innerWidth < 600)) pp.classList.add('min');
+  const bp = localStorage.getItem('botPane'); if (bp) $('botPane').value = bp;
+  const pq = localStorage.getItem('posQty'); if (pq) $('posQty').value = pq;
+  const ak = localStorage.getItem('aiKey'); if (ak) $('aiKey').value = ak; }catch(e){}
+$('botPane').onchange = e => { try{ localStorage.setItem('botPane', e.target.value); }catch(err){} dirty = true; };
+$('posQty').onchange = e => { try{ localStorage.setItem('posQty', e.target.value); }catch(err){} dirty = true; };
+$('aiKey').onchange = e => { try{ localStorage.setItem('aiKey', e.target.value.trim()); }catch(err){} };
+$('mode').addEventListener('change', syncPP); $('big').addEventListener('change', () => { S.bigTh = +$('big').value || S.bigTh; syncPP(); });
+syncPP(); window.__ui = true;
+
+// ── AI read (Beta): rule-based order-flow read, optional written analysis by Claude ──
+const aiBox = $('aiBox');
+let aiLast = null;
+function aiRead(){
+  const C = S.candles, N = C.length; if (N < 40) return null;
+  const px = C[N - 1].c, closes = C.map(c => c.c);
+  const emaAt = (n, end) => { const k = 2/(n + 1), st = Math.max(0, end - n*4); let e = closes[st]; for (let i = st; i <= end; i++) e = closes[i]*k + e*(1 - k); return e; };
+  const e20 = emaAt(20, N - 1), e50 = emaAt(50, N - 1), e20p = emaAt(20, N - 11);
+  const W = C.slice(-20), d20 = W.reduce((s, c) => s + c.buy - c.sell, 0), v20 = W.reduce((s, c) => s + c.buy + c.sell, 0);
+  const ch20 = px - C[N - 21].c, rng = Math.max(...C.slice(-60).map(c => c.h)) - Math.min(...C.slice(-60).map(c => c.l));
+  const W60 = C.slice(-60), avgV = W60.reduce((s, c) => s + c.buy + c.sell, 0)/W60.length, abs = [];
+  for (const c of C.slice(-30)){ const v = c.buy + c.sell, r = c.h - c.l, body = Math.abs(c.c - c.o), dl = c.buy - c.sell;
+    if (v > 1.8*avgV && r > 0 && body < 0.4*r){ if (dl < 0 && c.c >= c.o) abs.push({side:1, p:c.l, t:c.t, v}); else if (dl > 0 && c.c <= c.o) abs.push({side:-1, p:c.h, t:c.t, v}); } }
+  const t0 = C[Math.max(0, N - 60)].t, cut = isFinite(whTh) ? whTh : 1e5; let wb = 0, ws = 0; const big = [];
+  for (const w of S.whales) if (w.t >= t0 && w.v >= cut){ if (w.sell) ws += w.v; else wb += w.v; big.push(w); }
+  big.sort((a, b) => b.v - a.v);
+  const above = keyLv.filter(l => l.p > px).sort((a, b) => a.p - b.p)[0], below = keyLv.filter(l => l.p < px).sort((a, b) => b.p - a.p)[0];
+  const lo12 = Math.min(...C.slice(-12).map(c => c.l)), hi12 = Math.max(...C.slice(-12).map(c => c.h));
+  const F = []; let sc = 0; const add = (s, t) => { sc += s; F.push({s, t}); };
+  if (e20 > e50 && e20 > e20p) add(1, 'Trend up — fast average above slow and rising');
+  else if (e20 < e50 && e20 < e20p) add(-1, 'Trend down — fast average below slow and falling');
+  else add(0, 'No clear trend — averages flat / crossing');
+  if (v20 > 0){ const r = d20/v20; if (r > 0.06) add(1, `Buyers in control: last 20 bars delta ${S.unit}${sgn(d20)} (${(100*r).toFixed(0)}% of volume)`);
+    else if (r < -0.06) add(-1, `Sellers in control: last 20 bars delta ${S.unit}${sgn(d20)} (${(100*r).toFixed(0)}% of volume)`);
+    else add(0, `Balanced flow: last 20 bars delta ${S.unit}${sgn(d20)}`); }
+  if (ch20 > 0 && d20 < 0) add(-1, 'Divergence: price up but net selling — rally may be weak');
+  if (ch20 < 0 && d20 > 0) add(1, 'Divergence: price down but net buying — sellers being absorbed');
+  if (buyPct >= 56) add(1, `Pressure ${buyPct.toFixed(0)}% buy`); else if (buyPct <= 44) add(-1, `Pressure ${(100 - buyPct).toFixed(0)}% sell`);
+  if (abs.length){ const a = abs[abs.length - 1]; add(a.side, a.side > 0 ? `Absorption: heavy selling absorbed near ${P(a.p)} (bullish)` : `Absorption: heavy buying absorbed near ${P(a.p)} (bearish)`); }
+  if (wb + ws > 0){ const r = (wb - ws)/(wb + ws); if (r > 0.25) add(1, `Big players buying: $${money(wb)} buy vs $${money(ws)} sell in large trades`);
+    else if (r < -0.25) add(-1, `Big players selling: $${money(ws)} sell vs $${money(wb)} buy in large trades`);
+    else add(0, `Large trades mixed: $${money(wb)} buy / $${money(ws)} sell`); }
+  const bias = sc >= 2 ? 'LONG' : sc <= -2 ? 'SHORT' : 'WAIT';
+  let plan = null; const pad = Math.max(S.row*2, rng*0.02);
+  if (bias === 'LONG'){ const sl = Math.min(below ? below.p : lo12, lo12) - pad, risk = px - sl, tp = above && above.p - px > risk*1.5 ? above.p : px + risk*2; plan = {side:'long', e:px, sl, tp}; }
+  if (bias === 'SHORT'){ const sl = Math.max(above ? above.p : hi12, hi12) + pad, risk = sl - px, tp = below && px - below.p > risk*1.5 ? below.p : px - risk*2; plan = {side:'short', e:px, sl, tp}; }
+  if (plan) plan.rr = Math.abs(plan.tp - plan.e)/Math.abs(plan.e - plan.sl);
+  const data = {symbol:S.sym, timeframe:$('tf').selectedOptions[0].text, price:+P(px), ema20:+P(e20), ema50:+P(e50), delta20:Math.round(d20), volume20:Math.round(v20), buyPressurePct:+buyPct.toFixed(1),
+    absorption:abs.slice(-4).map(a => ({side:a.side > 0 ? 'bullish' : 'bearish', price:+P(a.p), time:new Date(a.t).toISOString()})),
+    largeTrades:big.slice(0, 6).map(w => ({side:w.sell ? 'sell' : 'buy', usd:Math.round(w.v), price:+P(w.p), time:new Date(w.T).toISOString()})),
+    keyLevels:keyLv.slice(0, 8).map(l => ({price:+P(l.p), side:l.d >= 0 ? 'buyers' : 'sellers', volume:Math.round(l.v)})),
+    recentBars:C.slice(-30).map(c => [new Date(c.t).toISOString().slice(11, 16), +P(c.o), +P(c.h), +P(c.l), +P(c.c), Math.round(c.buy - c.sell)]), ruleBias:bias, ruleScore:sc};
+  return {bias, sc, F, plan, data, px};
+}
+function renderAI(){
+  const r = aiLast = aiRead();
+  if (!r){ aiBox.innerHTML = `<div class="ah">✦ AI read <small>Beta</small><button id="aiX">✕</button></div><p>Connect and wait for at least 40 candles.</p>`; $('aiX').onclick = () => aiBox.style.display = 'none'; return; }
+  const bc = r.bias === 'LONG' ? COL.buy : r.bias === 'SHORT' ? COL.sell : COL.gold;
+  let h = `<div class="ah">✦ AI read <small style="font-weight:400;color:var(--dim)">${S.sym} · ${$('tf').selectedOptions[0].text}</small><button id="aiX">✕</button></div>
+    <span class="pill" style="background:${hexA(bc, .2)};color:${bc}">${r.bias === 'WAIT' ? 'WAIT — no clean edge' : r.bias + ' bias'} (score ${r.sc > 0 ? '+' : ''}${r.sc})</span>
+    <ul>${r.F.map(f => `<li style="color:${f.s > 0 ? COL.buy : f.s < 0 ? COL.sell : 'var(--txt)'}">${f.s > 0 ? '▲' : f.s < 0 ? '▼' : '•'} ${f.t}</li>`).join('')}</ul>`;
+  if (r.plan) h += `<div class="pl">${r.plan.side.toUpperCase()} idea<br>Entry ${P(r.plan.e)}<br><span style="color:${COL.buy}">TP ${P(r.plan.tp)}</span><br><span style="color:${COL.sell}">SL ${P(r.plan.sl)}</span><br>RR ${r.plan.rr.toFixed(2)}</div>`;
+  h += `<div class="bt">${r.plan ? '<button class="pri" id="aiDraw">Draw on chart</button>' : ''}<button id="aiRef">Refresh</button><button id="aiAsk">Ask Claude ✦</button></div><div id="aiOut"></div>
+    <div class="fn">Rule-based read of this chart's order flow — not financial advice. "Ask Claude" sends these numbers to Claude with your own API key (⚙ → AI).</div>`;
+  aiBox.innerHTML = h;
+  $('aiX').onclick = () => aiBox.style.display = 'none';
+  $('aiRef').onclick = renderAI;
+  if (r.plan) $('aiDraw').onclick = () => { const C = S.candles, N = C.length, t2 = idxT(N - 1 + 25);
+    drawings.push({id:Date.now() + '' + Math.random(), type:r.plan.side, color:drawColor, pts:[{t:C[N - 1].t, p:r.plan.e}, {t:t2, p:r.plan.tp}, {t:t2, p:r.plan.sl}]}); saveDraw(); dirty = true; toast('Trade idea drawn — drag its handles to adjust'); };
+  $('aiAsk').onclick = () => askClaude(r);
+}
+async function askClaude(r){
+  const out = $('aiOut'), key = ($('aiKey').value || '').trim();
+  if (!key){ out.textContent = 'Paste your Claude API key in ⚙ → AI to get a written analysis. The read above works without it.'; return; }
+  out.textContent = 'Claude is reading the chart…';
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'content-type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-5-5', max_tokens:800, messages:[{role:'user', content:
+        'You are an order-flow (footprint) trading analyst. From the chart data below write, in short plain English:\n1) Market read (3-4 lines)\n2) What the large traders did\n3) One trade idea with entry, stop and target — or say "no trade" and why\n4) What would prove the idea wrong.\nUse the actual price levels. Keep it under 180 words. Data (recentBars = time, open, high, low, close, delta in $):\n' + JSON.stringify(r.data)}]})});
+    const j = await res.json();
+    if (!res.ok) throw new Error((j.error && j.error.message) || res.status);
+    out.textContent = (j.content || []).map(c => c.text || '').join('\n');
+  }catch(e){ out.textContent = 'Claude request failed: ' + (e.message || e); }
+}
+$('aiBtn').onclick = e => { e.stopPropagation(); if (aiBox.style.display === 'block'){ aiBox.style.display = 'none'; return; } aiBox.style.display = 'block'; renderAI(); };
+aiBox.addEventListener('pointerdown', e => e.stopPropagation());
+
 const fpLabel = () => { $('bFp').textContent = S.fpMin > 0 ? 'FP ≥' + fmt(S.fpMin) : 'FP'; };
 $('fpMin').onchange = e => { S.fpMin = Math.max(0, +e.target.value || 0); try{ localStorage.setItem('fpMin', S.fpMin); }catch(err){} fpLabel(); dirty = true; };
 fpLabel();
