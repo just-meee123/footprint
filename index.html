@@ -100,7 +100,20 @@
   #dtb svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
   #dtb hr{border:0;border-top:1px solid var(--line2);margin:2px 3px}
   #dtb input[type=color]{width:26px;height:24px;border:0;padding:0;background:none;margin:3px auto}
-  @media (max-width:600px){#kl{width:148px;right:76px;top:4px;font-size:10px;padding:5px 7px}#kl .row .p{width:56px}#kl .h{margin:3px 0 2px}}
+  @media (max-width:600px){#kl{width:150px;right:76px;top:6px;font-size:10px;padding:5px 7px}#kl .row .p{width:56px}#kl .h{margin:3px 0 2px}
+    #top{gap:4px;padding:4px 6px;padding-top:max(4px, env(safe-area-inset-top))}
+    #top input,#top select,#top button{padding:4px 6px;font-size:12px}
+    #sym{width:86px} #mkt{max-width:118px}
+    #status{flex-basis:100%;margin-left:0;justify-content:flex-end;font-size:10px;min-width:0}
+    #stxt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+    #fol{bottom:24px;gap:3px} #fol button{padding:3px 7px;font-size:11px;min-width:28px}
+    #xp .ft{display:none} #dtb button{width:30px;height:28px}}
+  @media (max-height:500px){#kl{display:none!important}}
+  #kl{pointer-events:auto}
+  #kl.min>*:not(.ttl){display:none} #kl .ttl{display:flex;justify-content:space-between;align-items:center;font-weight:700;cursor:pointer;margin-bottom:4px} #kl.min .ttl{margin:0}
+  #xp .hd button{background:none;border:0;color:var(--dim);font-size:14px;padding:0 4px;cursor:pointer}
+  #xp.min{height:auto!important} #xp.min #xc,#xp.min .ft,#xp.min .rs{display:none}
+  #dkStat{font-size:11px;color:var(--dim);padding:2px 6px 6px}
 </style>
 </head>
 <body>
@@ -171,6 +184,7 @@
   <label style="flex-direction:column;align-items:stretch;gap:4px">Relay URL <input id="dukaUrl" type="text" placeholder="https://….workers.dev" style="width:100%"></label>
   <label>History days <input id="dDays" type="number" value="7" min="1" max="60"></label>
   <label>Tick detail (last hours) <input id="dHours" type="number" value="12" min="0" max="72"></label>
+  <div id="dkStat">Dukascopy: not loaded yet</div>
   <div class="t" style="margin-top:8px">Forex live (optional)</div>
   <label style="flex-direction:column;align-items:stretch;gap:4px">Finnhub API key (free at finnhub.io) <input id="fhKey" type="text" placeholder="paste key for live forex ticks" style="width:100%"></label>
   <label>Trade history, Binance (min) <input id="hist" type="number" value="60" min="0" max="720"></label>
@@ -193,7 +207,7 @@
 </div>
   <div id="kl"></div>
   <div id="xp">
-    <div class="hd mono"><span id="xpT">XRay</span><span id="xpZ">1.0x</span></div>
+    <div class="hd mono"><span id="xpT">XRay</span><span><span id="xpZ">1.0x</span><button id="xpMin" title="Minimise">—</button></span></div>
     <canvas id="xc"></canvas>
     <div class="ft mono">drag frame · corner / wheel resize · [ ] zoom · Esc off</div>
     <div class="rs"></div>
@@ -357,7 +371,7 @@ function derive(){
 function renderKL(){
   if (!(ON.levels || ON.senti) || !S.candles.length){ kl.style.display = 'none'; return; }
   kl.style.display = 'block';
-  let h = '';
+  let h = `<div class="ttl"><span>${ON.senti ? 'Pressure ' + buyPct.toFixed(0) + '% / ' + (100 - buyPct).toFixed(0) + '%' : 'Key Levels'}</span><span style="color:var(--dim)">${kl.classList.contains('min') ? '▸' : '▾'}</span></div>`;
   if (ON.senti) h += `<div class="h">Buy / Sell pressure <span style="color:var(--dim);font-weight:400">(30 bars)</span></div>
      <div class="bar"><i style="width:${buyPct.toFixed(1)}%"></i><span style="left:5px">${buyPct.toFixed(1)}%</span><span style="right:5px;color:#fff">${(100-buyPct).toFixed(1)}%</span></div>`;
   if (ON.levels && keyLv.length){
@@ -368,6 +382,7 @@ function renderKL(){
 }
 
 // ───────── Dukascopy history (through your relay) ─────────
+const dkStat = t => { const el = document.getElementById('dkStat'); if (el) el.textContent = t; };
 const DUKA_RELAY_DEFAULT = '';   // optional: paste your relay URL here, e.g. 'https://duka-relay.yourname.workers.dev'
 const DUKA_MAP = {XAUUSDT:'XAUUSD', XAGUSDT:'XAGUSD'};
 // Minimal LZMA ("alone" .lzma / Dukascopy .bi5) decoder, port of LzmaSpec.
@@ -751,9 +766,14 @@ async function backgroundHistory(src, sym, info, my){
   }catch(e){ console.warn('older klines', e); }
   if (my === S.sess) rebuild();
   const dsym = DUKA_MAP[sym];
-  if (my !== S.sess || !(dsym && dukaRelay() && $('useDuka').checked)) return;
+  if (my !== S.sess) return;
+  if (!dsym){ dkStat(`Dukascopy: only used for gold & silver (XAUUSD / XAGUSD) — not for ${sym}`); return; }
+  if (!$('useDuka').checked){ dkStat('Dukascopy: switched off (tick "Use Dukascopy")'); return; }
+  if (!dukaRelay()){ dkStat('Dukascopy: no relay URL on this device — paste it above (each phone / PC needs it once)'); return; }
+  dkStat('Dukascopy: loading…');
   try{
     const D = await loadDuka(dsym, info.px, my, true);
+    if (my === S.sess && !D) dkStat('Dukascopy: relay answered but no data came back — check the relay URL ends with .workers.dev');
     if (my !== S.sess || !D) return;
     const cal = calibrate(D), off = cal.n >= 5 ? cal.off : 0;
     // shift exchange prices onto the XAUUSD (Dukascopy) price level
@@ -765,8 +785,9 @@ async function backgroundHistory(src, sym, info, my){
     S.dk = D.k1.map(r => [r[0], r[1], r[2], r[3], r[4], r[5]*cal.sc]);
     S.dt = D.tk.map(t => [t[0], t[1], t[2]*cal.st, t[3]]);
     S.duka = true; rebuild();
+    dkStat(`Dukascopy: ✓ loaded ${D.k1.length.toLocaleString()} one-minute candles + ${D.tk.length.toLocaleString()} ticks`);
     setStatus(liveLabel(sym, src), COL.buy);
-  }catch(e){ console.warn('duka', e); if (my === S.sess) setStatus('LIVE · Dukascopy relay not reachable — check URL in ⚙', COL.gold); }
+  }catch(e){ console.warn('duka', e); if (my === S.sess){ setStatus('LIVE · Dukascopy relay not reachable — check URL in ⚙', COL.gold); dkStat('Dukascopy: ✕ relay not reachable (' + (e.message || e) + '). Open the relay link in this browser — it should say "Dukascopy relay is running."'); } }
 }
 // ───────── keep live: recover after the phone sleeps / app switch / network drop ─────────
 S.lastMsg = Date.now();
@@ -868,13 +889,15 @@ function layout(){
   V.dpr = Math.min(2, window.devicePixelRatio || 1); V.W = wrap.clientWidth; V.H = wrap.clientHeight;
   cv.width = V.W*V.dpr; cv.height = V.H*V.dpr; ctx.setTransform(V.dpr, 0, 0, V.dpr, 0, 0);
   if (!xp.dataset.placed){
-    const w = Math.min(360, V.W*0.62), h = Math.min(380, V.H*0.5);
+    const small = V.W < 600, w = small ? Math.min(250, V.W*0.6) : Math.min(360, V.W*0.62), h = small ? Math.min(240, V.H*0.32) : Math.min(380, V.H*0.5);
     Object.assign(xp.style, {width:w + 'px', height:h + 'px', left:'46px', top:(V.H - h - 60) + 'px'});
     xp.dataset.placed = 1;
   }
   dirty = true;
 }
 window.addEventListener('resize', layout);
+try{ new ResizeObserver(() => layout()).observe($('top')); }catch(e){}   // top bar wraps on small screens -> keep chart below it
+window.addEventListener('orientationchange', () => setTimeout(layout, 300));
 
 function draw(){
   dirty = false;
@@ -886,6 +909,7 @@ function draw(){
     xp.style.display = 'none'; kl.style.display = 'none'; return;
   }
   if (V.follow) V.panX = 0;
+  fpCnt = {rows:0, hidden:0};
   // autoscale on visible candles
   const a = clamp(Math.floor(iAt(0)), 0, N - 1), b = clamp(Math.ceil(iAt(PW)), 0, N - 1);
   let lo = Infinity, hi = -Infinity, vmax = 0;
@@ -943,6 +967,10 @@ function draw(){
     }
   }
 
+  if (ON.fp && S.fpMin > 0 && fpNums && fpCnt.rows && fpCnt.rows === fpCnt.hidden){
+    const msg = PW < 560 ? `Filter ≥${S.unit}${fmt(S.fpMin)} hides all rows — lower it in ⚙` : `Footprint filter ≥ ${S.unit}${fmt(S.fpMin)} hides every row on screen — lower it in ⚙ (try ${S.unit}${fmt(S.fpMin/10)})`;
+    ctx.font = 'bold 12px -apple-system,Segoe UI,sans-serif'; const w = Math.min(PW - 20, ctx.measureText(msg).width + 20);
+    ctx.fillStyle = hexA(COL.gold, .95); const by = PH - 70; ctx.fillRect((PW - w)/2, by, w, 26); ctx.fillStyle = '#1a1200'; ctx.textAlign = 'center'; ctx.fillText(msg, PW/2, by + 17, w - 12); }
   drawDrawings(PW, PH);
   drawPanes(PW);
 
@@ -1720,7 +1748,7 @@ function hitWhale(p){
 }
 
 // ── footprint candles ──
-let fpG = 1, fpNums = false, bigRowTh = Infinity;
+let fpG = 1, fpNums = false, bigRowTh = Infinity, fpCnt = {rows:0, hidden:0};
 function drawFpCandle(c, x){
   const rowPx = S.row/ppp(), nums = V.cw >= 44, g = Math.max(1, Math.ceil((nums ? 12 : 5)/rowPx)), rows = new Map(); let tot = 0;
   fpG = g; fpNums = nums;
@@ -1751,7 +1779,8 @@ function drawFpCandle(c, x){
     ctx.font = `600 ${fs}px ui-monospace,Menlo,monospace`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
     for (const [gk, r] of rows){
       const d = r.b - r.s, y = yRow(gk), h = Math.max(1, hRow - 1.5), cy = y + hRow/2 + .5, txt = sgn(d), tw = ctx.measureText(txt).width;
-      if (S.fpMin > 0 && Math.abs(d) < S.fpMin){ ctx.fillStyle = hexA(d >= 0 ? COL.buy : COL.sell, .18); ctx.fillRect(bx, y + .75, Math.max(2, (maxD ? barMax*Math.abs(d)/maxD : 2)), h); continue; }
+      fpCnt.rows++;
+      if (S.fpMin > 0 && Math.abs(d) < S.fpMin){ fpCnt.hidden++; ctx.fillStyle = hexA(d >= 0 ? COL.buy : COL.sell, .18); ctx.fillRect(bx, y + .75, Math.max(2, (maxD ? barMax*Math.abs(d)/maxD : 2)), h); continue; }
       const bw = maxD ? barMax*Math.abs(d)/maxD : 0;
       ctx.fillStyle = hexA(d >= 0 ? COL.buy : COL.sell, .55); ctx.fillRect(bx, y + .75, bw, h);   // delta bar behind the number
       const big = (r.b + r.s) >= bigRowTh || r.big >= S.bigTh || (S.fpMin > 0 && Math.abs(d) >= S.fpMin);
@@ -2161,7 +2190,13 @@ document.querySelectorAll('.mtabs button').forEach(b => b.onclick = () => { symG
 $('bAuto').onclick = () => { V.auto = true; dirty = true; };
 $('bFp').onclick = () => setInd('fp', !ON.fp);
 try{ S.fpMin = +(localStorage.getItem('fpMin') || 0); $('fpMin').value = S.fpMin || 0; }catch(e){}
-$('fpMin').onchange = e => { S.fpMin = Math.max(0, +e.target.value || 0); try{ localStorage.setItem('fpMin', S.fpMin); }catch(err){} dirty = true; };
+const fpLabel = () => { $('bFp').textContent = S.fpMin > 0 ? 'FP ≥' + fmt(S.fpMin) : 'FP'; };
+$('fpMin').onchange = e => { S.fpMin = Math.max(0, +e.target.value || 0); try{ localStorage.setItem('fpMin', S.fpMin); }catch(err){} fpLabel(); dirty = true; };
+fpLabel();
+kl.addEventListener('click', e => { if (!e.target.closest('.ttl')) return; kl.classList.toggle('min'); kl._h = ''; renderKL(); try{ localStorage.setItem('klMin', kl.classList.contains('min') ? '1' : '0'); }catch(err){} });
+try{ const m = localStorage.getItem('klMin'); if (m === '1' || (m == null && window.innerWidth < 600)) kl.classList.add('min'); }catch(e){}
+$('xpMin').onclick = e => { e.stopPropagation(); xp.classList.toggle('min'); $('xpMin').textContent = xp.classList.contains('min') ? '▢' : '—'; dirty = true; };
+$('xpMin').addEventListener('pointerdown', e => e.stopPropagation());
 $('bFp').classList.toggle('on', ON.fp);
 $('bIn').onclick = () => zoomX(1.25, pw() - 80);
 $('bOut').onclick = () => zoomX(1/1.25, pw() - 80);
