@@ -101,204 +101,6 @@
   #dtb hr{border:0;border-top:1px solid var(--line2);margin:2px 3px}
   #dtb input[type=color]{width:26px;height:24px;border:0;padding:0;background:none;margin:3px auto}
   @media (max-width:600px){#kl{width:148px;right:76px;top:4px;font-size:10px;padding:5px 7px}#kl .row .p{width:56px}#kl .h{margin:3px 0 2px}}
-
-
-  /* iOS-inspired motion polish — visual only; no controls or app logic changed */
-  :root {
-    --ios-ease: cubic-bezier(.22, 1, .36, 1);
-    --ios-spring: cubic-bezier(.2, .85, .25, 1.18);
-  }
-
-  button, select, input, .si, .tpi, #fol button, #dtb button {
-    transition:
-      background-color .2s var(--ios-ease),
-      border-color .2s var(--ios-ease),
-      color .2s var(--ios-ease),
-      box-shadow .24s var(--ios-ease),
-      opacity .2s var(--ios-ease),
-      transform .24s var(--ios-spring);
-  }
-
-  button:active, #fol button:active, #dtb button:active, .tpi:active, .si:active {
-    transform: scale(.96);
-  }
-
-  button:focus-visible, select:focus-visible, input:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--acc) 75%, transparent);
-    outline-offset: 2px;
-  }
-
-  #top {
-    -webkit-backdrop-filter: saturate(150%) blur(18px);
-    backdrop-filter: saturate(150%) blur(18px);
-  }
-
-  .menu {
-    transform-origin: top left;
-    opacity: 0;
-    transform: translateY(-7px) scale(.97);
-  }
-  .menu.open {
-    animation: ios-menu-in .28s var(--ios-ease) both;
-  }
-  @keyframes ios-menu-in {
-    from { opacity: 0; transform: translateY(-7px) scale(.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  .modal {
-    -webkit-backdrop-filter: blur(0);
-    backdrop-filter: blur(0);
-    transition: backdrop-filter .32s var(--ios-ease);
-  }
-  .modal.open {
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-  }
-  .mbox {
-    transform: translateY(18px) scale(.97);
-    opacity: 0;
-  }
-  .modal.open .mbox {
-    animation: ios-sheet-in .42s var(--ios-spring) both;
-  }
-  @keyframes ios-sheet-in {
-    0%   { opacity: 0; transform: translateY(22px) scale(.965); }
-    72%  { opacity: 1; transform: translateY(-2px) scale(1.006); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  #xp, #pop, #tip, #kl, #dtb, #fol {
-    transition:
-      opacity .24s var(--ios-ease),
-      box-shadow .28s var(--ios-ease),
-      border-color .24s var(--ios-ease);
-  }
-  #xp {
-    transition:
-      opacity .28s var(--ios-ease),
-      transform .34s var(--ios-spring),
-      box-shadow .28s var(--ios-ease);
-    transform: scale(.985);
-    transform-origin: center;
-  }
-  #xp[style*="display: flex"], #xp[style*="display:flex"] {
-    animation: ios-panel-in .32s var(--ios-spring) both;
-  }
-  @keyframes ios-panel-in {
-    from { opacity: 0; transform: scale(.965) translateY(8px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
-  }
-
-  #pop[style*="display: block"], #pop[style*="display:block"] {
-    animation: ios-pop-in .24s var(--ios-spring) both;
-  }
-  #tip[style*="display: block"], #tip[style*="display:block"] {
-    animation: ios-tip-in .16s var(--ios-ease) both;
-  }
-  @keyframes ios-pop-in {
-    from { opacity: 0; transform: translateY(7px) scale(.96); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  @keyframes ios-tip-in {
-    from { opacity: 0; transform: translateY(4px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  #toast {
-    animation: none;
-  }
-  #toast[style*="display: block"], #toast[style*="display:block"] {
-    animation: ios-toast-in .38s var(--ios-spring) both;
-  }
-  @keyframes ios-toast-in {
-    from { opacity: 0; transform: translate(-50%, -10px) scale(.94); }
-    to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  }
-
-  #dtb, #fol button, #top button {
-    -webkit-tap-highlight-color: transparent;
-  }
-  #dtb {
-    box-shadow: 0 8px 28px rgba(0,0,0,.22);
-  }
-  #dtb button.on, #fol button.on, .mtabs button.on {
-    transition: background-color .22s var(--ios-ease), color .22s var(--ios-ease), transform .22s var(--ios-spring);
-  }
-  .tpi:hover, .si:hover {
-    transform: translateY(-1px);
-  }
-  #xp .hd, #dtG {
-    touch-action: pan-y;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: .01ms !important;
-      animation-iteration-count: 1 !important;
-      scroll-behavior: auto !important;
-      transition-duration: .01ms !important;
-    }
-  }
-
-
-  /* Professional dark trading palette — visual styling only */
-  :root {
-    color-scheme: dark;
-    --bg: #0b1220;
-    --panel: #111c2e;
-    --line: #26364d;
-    --txt: #e6edf7;
-    --dim: #91a0b5;
-    --buy: #28c997;
-    --sell: #f07178;
-    --acc: #63a7e8;
-    --gold: #d6ad62;
-    --inbg: #0d1727;
-    --mbg: #142137;
-    --line2: #30445f;
-    --ovl: rgba(12, 21, 36, .97);
-    --hov: #1b2b43;
-  }
-
-  body { background: var(--bg); color: var(--txt); }
-  #top {
-    background: linear-gradient(180deg, #142137 0%, #111c2e 100%);
-    border-bottom-color: #30445f;
-    box-shadow: 0 5px 20px rgba(0,0,0,.18);
-  }
-  #top input, #top select, #top button, .menu input, .menu select {
-    background: #0d1727;
-    color: #e6edf7;
-    border-color: #30445f;
-    border-radius: 9px;
-  }
-  #top input:focus, #top select:focus, .menu input:focus, .menu select:focus {
-    outline: none;
-    border-color: #63a7e8;
-    box-shadow: 0 0 0 3px rgba(99,167,232,.14);
-  }
-  .pri {
-    background: #397fbd !important;
-    color: #f7fbff !important;
-    border-color: #5599d2 !important;
-  }
-  #indBtn { color: #83bdf0 !important; }
-  #indCount { background: #397fbd; color: #fff; }
-  .menu, #xp, #kl, #pop, #dtG, #dtb {
-    border-color: #30445f;
-    box-shadow: 0 16px 42px rgba(0,0,0,.36);
-  }
-  .menu { background: #142137; }
-  .menu .t, #kl .h { color: #d6ad62; }
-  .menu label:hover { background: #1b2b43; }
-  #xp .hd { background: #17263d; border-bottom-color: #30445f; }
-  #xp .ft { border-top-color: #30445f; }
-  #xp .rs { background: linear-gradient(135deg, transparent 50%, #63a7e8 50%); }
-  #kl { background: rgba(15,27,45,.96); }
-  #dot { box-shadow: 0 0 0 3px rgba(145,160,181,.12); }
-  button, select, input { accent-color: #63a7e8; }
-
 </style>
 </head>
 <body>
@@ -353,6 +155,8 @@
   <label>Up candle <input id="upCol" type="color" value="#1fd38a"></label>
   <label>Down candle <input id="dnCol" type="color" value="#ff4d5e"></label>
   <label>Grid lines <input id="gridOn" type="checkbox" checked></label>
+  <div class="t" style="margin-top:8px">Footprint filter</div>
+  <label>Show only rows with buy/sell pressure (|Δ|) ≥ <input id="fpMin" type="number" value="0" step="100000" min="0" placeholder="e.g. 1000000"></label>
   <div class="t" style="margin-top:8px">Indicators</div>
   <label>Whale size ≥ $ (0 = auto) <input id="whTh" type="number" value="0" step="10000" min="0"></label>
   <label>Volume profile <select id="vpMode"><option value="visible">Visible range</option><option value="session">Each day</option></select></label>
@@ -397,7 +201,7 @@
   <div id="pop"></div>
   <div id="toast"></div>
   <div id="tip"></div>
-  <div id="fol"><button id="bFollow" class="on">Follow</button><button id="bFixed">Fixed</button><button id="bAuto" class="on" title="Auto-fit price">Auto</button><button id="bOut">−</button><button id="bIn">+</button></div>
+  <div id="fol"><button id="bFollow" class="on">Follow</button><button id="bFixed">Fixed</button><button id="bAuto" class="on" title="Auto-fit price">Auto</button><button id="bOut">−</button><button id="bIn">+</button><button id="bFp" title="Footprint numbers on every candle">FP</button></div>
 </div>
 
 <script>
@@ -432,7 +236,7 @@ function applyTheme(name, custom){
 function saveTheme(custom){ try{ localStorage.setItem('fpTheme', JSON.stringify({name:$('theme').value, custom, grid:gridOn})); }catch(e){} }
 
 // ───────── state ─────────
-const S = {whales:[], trades:[], k1:[], dk:[], dt:[], off:0, duka:false, candles:[], tfMs:60000, row:0, dec:2, mode:'delta', bigTh:250000, nPrints:6,
+const S = {fpMin:0, whales:[], trades:[], k1:[], dk:[], dt:[], off:0, duka:false, candles:[], tfMs:60000, row:0, dec:2, mode:'delta', bigTh:250000, nPrints:6,
            ws:null, wsBuf:[], back:false, lastId:-1, sess:0, unit:'$'};
 const V = {cw:9, panX:0, follow:true, auto:true, W:0, H:0, dpr:1, lo:0, hi:1};
 const ON = {xray:true, fp:false, whales:false, vp:false, liq:false, heat:false, umb:false, lux:false, aur:false, zones:false, binlex:false, brk:false, prints:true, levels:true, senti:true};
@@ -477,7 +281,7 @@ function addTrade(tr){
 // 1-minute candles from the exchange give long history; their volume is spread across the
 // candle's price range and counted as buying (green) or selling (red). Marked as estimated.
 function addKline(m){
-  const [t, o, h, l, c, v] = m, t0 = Math.floor(t/S.tfMs)*S.tfMs;
+  const [t, o, h, l, c, v, bq] = m, t0 = Math.floor(t/S.tfMs)*S.tfMs;
   let C = S.candles[S.candles.length-1];
   if (!C || t0 > C.t){ C = {t:t0, o, h, l, c, buy:0, sell:0, n:0, lv:new Map(), est:true}; S.candles.push(C);
     if (S.candles.length > MAX_CANDLES){ S.candles.shift(); if (lens) lens.ci -= 1; } }
@@ -485,7 +289,8 @@ function addKline(m){
   if (h > C.h) C.h = h; if (l < C.l) C.l = l; C.c = c; C.est = true;
   if (!(v > 0)) return;
   const k0 = Math.floor(l/S.row + 1e-9), k1 = Math.floor(h/S.row + 1e-9), n = Math.min(40, k1 - k0 + 1);
-  const bf = c > o ? 1 : c < o ? 0 : 0.5, mid = ((o + c)/2)/S.row, half = Math.max(1, (k1 - k0 + 1)/2);
+  // real taker-buy share when the exchange gives it (Binance), otherwise where the close sits in the candle's range
+  const bf = bq != null && v > 0 ? clamp(bq/v, 0, 1) : h > l ? clamp((c - l)/(h - l), 0.05, 0.95) : 0.5, mid = ((o + c)/2)/S.row, half = Math.max(1, (k1 - k0 + 1)/2);
   const ks = [], ws = []; let wsum = 0;
   for (let j = 0; j < n; j++){
     const k = k0 + Math.round(j*(k1 - k0)/Math.max(1, n - 1)), w = 1 + 2*Math.max(0, 1 - Math.abs(k + .5 - mid)/half);
@@ -542,6 +347,7 @@ function derive(){
   keyLv = [...agg.entries()].sort((a, b) => b[1].v - a[1].v).slice(0, 5).map(([g, a]) => ({p:(g*G + G/2)*S.row, v:a.v, d:a.d}));
   let b = 0, s = 0; for (const c of C.slice(-30)){ b += c.buy; s += c.sell; }
   buyPct = b + s ? 100*b/(b + s) : 50;
+  bigRowTh = prints.length ? prints[prints.length - 1].vol : Infinity;
   if (ON.whales) whaleCut();
   if (ON.liq) calcLiq();
   if (ON.heat) calcHeat();
@@ -924,13 +730,13 @@ async function fetchK1(src, sym, {start, end}){
   if (src.kind === 'bn'){
     const q = start != null ? `startTime=${start}` : `endTime=${end}`;
     const arr = await getJSON(src, `${src.pre}/klines?symbol=${sym}&interval=1m&limit=1000&${q}`);
-    rows = arr.map(k => [+k[0], +k[1], +k[2], +k[3], +k[4], +k[7]]);
+    rows = arr.map(k => [+k[0], +k[1], +k[2], +k[3], +k[4], +k[7], +k[10]]);
   } else {
     const q = start != null ? `start=${start}&end=${Date.now()}` : `end=${end}`;
     const j = await getJSON(src, `/v5/market/kline?category=${src.cat}&symbol=${sym}&interval=1&limit=1000&${q}`);
     rows = ((j.result && j.result.list) || []).map(k => [+k[0], +k[1], +k[2], +k[3], +k[4], +k[6]]);
   }
-  return rows.map(r => [r[0], r[1] - S.off, r[2] - S.off, r[3] - S.off, r[4] - S.off, r[5]]).sort((a, b) => a[0] - b[0]);
+  return rows.map(r => [r[0], r[1] - S.off, r[2] - S.off, r[3] - S.off, r[4] - S.off, r[5], r[6]]).sort((a, b) => a[0] - b[0]);
 }
 function mergeK1(rows){ const m = new Map(S.k1.map(r => [r[0], r])); for (const r of rows) m.set(r[0], r); S.k1 = [...m.values()].sort((a, b) => a[0] - b[0]); }
 async function backgroundHistory(src, sym, info, my){
@@ -951,7 +757,7 @@ async function backgroundHistory(src, sym, info, my){
     if (my !== S.sess || !D) return;
     const cal = calibrate(D), off = cal.n >= 5 ? cal.off : 0;
     // shift exchange prices onto the XAUUSD (Dukascopy) price level
-    S.k1 = S.k1.map(r => [r[0], r[1] - off, r[2] - off, r[3] - off, r[4] - off, r[5]]);
+    S.k1 = S.k1.map(r => [r[0], r[1] - off, r[2] - off, r[3] - off, r[4] - off, r[5], r[6]]);
     for (const tr of S.trades) tr[1] -= off;
     if (lens) lens.cp -= off;
     if (!V.auto){ V.lo -= off; V.hi -= off; }
@@ -1217,6 +1023,8 @@ function drawPanel(){
     g.fillRect(x + 2, Math.min(yo, yc), 6, Math.max(2, Math.abs(yc - yo)));
     grid[c].cells.forEach((cl, r) => {
       const y = r*rh, v = cl.b + cl.s, d = cl.b - cl.s; if (!v) return;
+      if (S.fpMin > 0 && Math.abs(d) < S.fpMin){ g.fillStyle = hexA(d >= 0 ? COL.buy : COL.sell, .12); g.fillRect(x + 11, y + 1.5, (cwp - 15)*v/maxV, rh - 3);
+        if (panelHover && panelHover.x >= x && panelHover.x < x + cwp && panelHover.y >= y && panelHover.y < y + rh) hv = {cl, cd, r, x, y}; return; }
       const bx = x + 11, bwid = (cwp - 15)*v/maxV;
       g.fillStyle = hexA(d >= 0 ? COL.buy : COL.sell, .32); g.fillRect(bx, y + 1.5, bwid, rh - 3);
       const isMax = r === grid[c].mi;
@@ -1295,6 +1103,7 @@ function mainHover(){
   if (!pinned) pop.style.display = 'none';
   const L = lensRect();
   if (ON.xray && L && hover.x >= L.x1 && hover.x <= L.x2 && hover.y >= L.y1 && hover.y <= L.y2){ hideTip(); return; }
+  if (fpRowTip()) return;
   const i = Math.round(iAt(hover.x)), C = S.candles;
   if (i < 0 || i >= C.length || hover.x > pw()){ hideTip(); return; }
   const c = C[i], d = c.buy - c.sell;
@@ -1911,36 +1720,73 @@ function hitWhale(p){
 }
 
 // ── footprint candles ──
+let fpG = 1, fpNums = false, bigRowTh = Infinity;
 function drawFpCandle(c, x){
-  const rowPx = S.row/ppp(), g = Math.max(1, Math.ceil(5/rowPx)), rows = new Map(); let tot = 0;
-  for (const [k, L] of c.lv){ const gk = Math.floor(k/g); let r = rows.get(gk); if (!r){ r = {b:0, s:0}; rows.set(gk, r); } r.b += L.b; r.s += L.s; tot += L.b + L.s; }
+  const rowPx = S.row/ppp(), nums = V.cw >= 44, g = Math.max(1, Math.ceil((nums ? 12 : 5)/rowPx)), rows = new Map(); let tot = 0;
+  fpG = g; fpNums = nums;
+  for (const [k, L] of c.lv){ const gk = Math.floor(k/g); let r = rows.get(gk); if (!r){ r = {b:0, s:0, big:0}; rows.set(gk, r); } r.b += L.b; r.s += L.s; r.big = Math.max(r.big, L.big); tot += L.b + L.s; }
   if (!tot) return false;
-  let maxV = 0, poc = null; for (const [gk, r] of rows){ const v = r.b + r.s; if (v > maxV){ maxV = v; poc = gk; } }
+  let maxV = 0, poc = null, maxD = 0, maxDk = null;
+  for (const [gk, r] of rows){ const v = r.b + r.s, d = Math.abs(r.b - r.s); if (v > maxV){ maxV = v; poc = gk; } if (d > maxD){ maxD = d; maxDk = gk; } }
   const keys = [...rows.keys()].sort((p, q) => p - q), vol = k => { const r = rows.get(k); return r.b + r.s; };
   let lo = keys.indexOf(poc), hi = lo, acc = maxV;
   while (acc < tot*0.7 && (lo > 0 || hi < keys.length - 1)){
     const vd = lo > 0 ? vol(keys[lo - 1]) : -1, vu = hi < keys.length - 1 ? vol(keys[hi + 1]) : -1;
     if (vu >= vd){ hi++; acc += vu; } else { lo--; acc += vd; }
   }
-  const hRow0 = g*S.row/ppp(), nums = V.cw >= 58 && hRow0 >= 10;
-  const left = x - V.cw/2 + 1, bx = left + 6, maxW = Math.max(4, (V.cw - 9)*(nums ? 0.5 : 1)), hRow = hRow0;
-  const yRow = gk => yOf((gk + 1)*g*S.row);
+  const hRow = g*S.row/ppp(), left = x - V.cw/2 + 1, yRow = gk => yOf((gk + 1)*g*S.row);
   const yT = yRow(keys[hi]), yB = yRow(keys[lo]) + hRow;
-  ctx.fillStyle = hexA(TH.txt, .07); ctx.fillRect(bx - 2, yT, maxW + 3, yB - yT);   // value area
-  for (const [gk, r] of rows){
-    const v = r.b + r.s, w = Math.max(1.5, maxW*v/maxV), y = yRow(gk) + .6, h = Math.max(1, hRow - 1.6), ws = w*r.s/v;
-    ctx.fillStyle = hexA(COL.sell, .85); ctx.fillRect(bx, y, ws, h);
-    ctx.fillStyle = hexA(COL.buy, .85); ctx.fillRect(bx + ws, y, w - ws, h);
-    if (gk === poc){ ctx.strokeStyle = COL.gold; ctx.lineWidth = 1.2; ctx.strokeRect(bx - .5, y - .5, w + 1, h + 1); ctx.fillStyle = COL.gold; ctx.fillRect(bx - 5, y, 3, h); }
-    if (nums){ const d = r.b - r.s; ctx.font = `${Math.min(11, h - 1)}px ui-monospace,Menlo,monospace`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillStyle = gk === poc ? COL.gold : d >= 0 ? COL.buy : COL.sell; ctx.fillText(sgn(d), bx + maxW + 4, y + h/2 + .5); }
+  ctx.fillStyle = hexA(TH.txt, .06); ctx.fillRect(left + 5, yT, V.cw - 7, yB - yT);   // value area band
+  const hovK = hover.in && Math.abs(hover.x - x) < V.cw/2 ? Math.floor(Math.floor(pAt(hover.y)/S.row)/g) : null;
+  if (!nums){
+    const bx = left + 6, maxW = Math.max(4, V.cw - 9);
+    for (const [gk, r] of rows){
+      const v = r.b + r.s, w = Math.max(1.5, maxW*v/maxV), y = yRow(gk) + .6, h = Math.max(1, hRow - 1.6), ws = w*r.s/v, fa = S.fpMin > 0 && Math.abs(r.b - r.s) < S.fpMin ? .18 : .85;
+      ctx.fillStyle = hexA(COL.sell, fa); ctx.fillRect(bx, y, ws, h);
+      ctx.fillStyle = hexA(COL.buy, fa); ctx.fillRect(bx + ws, y, w - ws, h);
+      if (gk === poc){ ctx.strokeStyle = COL.gold; ctx.lineWidth = 1.2; ctx.strokeRect(bx - .5, y - .5, w + 1, h + 1); ctx.fillStyle = COL.gold; ctx.fillRect(bx - 5, y, 3, h); }
+    }
+  } else {
+    const bx = left + 7, barMax = Math.max(6, (V.cw - 12)*0.22), tx = bx + 2, fs = clamp(hRow - 3, 8, 11.5);
+    ctx.font = `600 ${fs}px ui-monospace,Menlo,monospace`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    for (const [gk, r] of rows){
+      const d = r.b - r.s, y = yRow(gk), h = Math.max(1, hRow - 1.5), cy = y + hRow/2 + .5, txt = sgn(d), tw = ctx.measureText(txt).width;
+      if (S.fpMin > 0 && Math.abs(d) < S.fpMin){ ctx.fillStyle = hexA(d >= 0 ? COL.buy : COL.sell, .18); ctx.fillRect(bx, y + .75, Math.max(2, (maxD ? barMax*Math.abs(d)/maxD : 2)), h); continue; }
+      const bw = maxD ? barMax*Math.abs(d)/maxD : 0;
+      ctx.fillStyle = hexA(d >= 0 ? COL.buy : COL.sell, .55); ctx.fillRect(bx, y + .75, bw, h);   // delta bar behind the number
+      const big = (r.b + r.s) >= bigRowTh || r.big >= S.bigTh || (S.fpMin > 0 && Math.abs(d) >= S.fpMin);
+      if (gk === maxDk || big){ ctx.fillStyle = gk === maxDk ? 'rgba(232,180,255,.92)' : hexA(d >= 0 ? COL.buy : COL.sell, .9); ctx.fillRect(tx - 2, y + .75, tw + 6, h);
+        ctx.fillStyle = '#1a1030'; } else ctx.fillStyle = d >= 0 ? COL.buy : COL.sell;
+      ctx.fillText(txt, tx + 1, cy);
+      if (gk === poc){ ctx.strokeStyle = COL.gold; ctx.lineWidth = 1.2; ctx.strokeRect(tx - 2.5, y + .5, tw + 7, h + .5); }
+      if (gk === hovK){ ctx.strokeStyle = COL.acc; ctx.lineWidth = 1.5; ctx.strokeRect(left + 5, y + .25, V.cw - 7, h + 1); }
+    }
   }
   const up = c.c >= c.o, col = up ? COL.buy : COL.sell;
-  ctx.fillStyle = col; ctx.fillRect(left + 1, yOf(c.h), 1, Math.max(1, yOf(c.l) - yOf(c.h)));
-  const yo = yOf(c.o), yc = yOf(c.c); ctx.fillRect(left, Math.min(yo, yc), 3, Math.max(1, Math.abs(yc - yo)));
+  ctx.fillStyle = col; ctx.fillRect(left + 1.5, yOf(c.h), 1, Math.max(1, yOf(c.l) - yOf(c.h)));
+  const yo = yOf(c.o), yc = yOf(c.c); ctx.fillRect(left, Math.min(yo, yc), 4, Math.max(1, Math.abs(yc - yo)));
   return true;
 }
-
+// hover box for one footprint row
+function fpRowTip(){
+  if (!ON.fp || !fpNums || hover.x > pw()) return false;
+  const i = Math.round(iAt(hover.x)), c = S.candles[i]; if (!c) return false;
+  const gk = Math.floor(Math.floor(pAt(hover.y)/S.row)/fpG); let b = 0, sl = 0, big = 0, n = 0;
+  for (const [k, L] of c.lv) if (Math.floor(k/fpG) === gk){ b += L.b; sl += L.s; big = Math.max(big, L.big); n += L.n; }
+  if (!(b + sl)) return false;
+  const px = (gk + .5)*fpG*S.row, d = b - sl, isFx = S.unit !== '$';
+  const unit = /^X(AU|AG)/.test(S.sym || '') ? 'oz' : (S.sym || '').replace(/USDT$/, '');
+  const q = v => isFx ? '' : ` <span style="color:var(--dim)">(${(v/px).toLocaleString(undefined, {maximumFractionDigits: v/px < 10 ? 3 : 0})} ${unit})</span>`;
+  const m = v => isFx ? fmt(v) + ' ticks' : '$' + fmt(Math.abs(v));
+  const isBig = (b + sl) >= bigRowTh || big >= S.bigTh, r = wrap.getBoundingClientRect();
+  showTip(`<div class="h mono" style="color:var(--txt)">${P(px)} <span style="color:var(--dim);font-weight:400">price level · ${tStr(c.t)}</span></div>
+    <div class="r"><span>Δ</span><b class="mono ${d >= 0 ? 'g' : 's'}">${d < 0 ? '-' : '+'}${m(d)}${q(Math.abs(d))}</b></div>
+    <div class="r"><span>Bid (sellers)</span><span class="mono s">${m(sl)}${q(sl)}</span></div>
+    <div class="r"><span>Ask (buyers)</span><span class="mono g">${m(b)}${q(b)}</span></div>
+    <div class="r"><span>Big print</span><span style="color:${isBig ? '#b9a4ff' : 'var(--dim)'}">${isBig ? 'over the Big prints threshold' : '—'}</span></div>
+    ${c.est ? '<div style="color:#ffb02e;font-size:11px;margin-top:3px">estimated (history, not live trades)</div>' : ''}`, hover.x + r.left, hover.y + r.top);
+  return true;
+}
 // ── volume profile per day (session) ──
 function drawSessionProfiles(PW, a, b){
   const C = S.candles, br = Math.max(1, Math.ceil((V.hi - V.lo)/S.row/90));
@@ -2222,6 +2068,7 @@ function setInd(k, v){
   derivedDirty = true;
   $('indCount').textContent = Object.values(ON).filter(Boolean).length;
   if (k === 'xray'){ if (v) initLens(); else { panelHover = null; hideTip(); } }
+  if (k === 'fp'){ $('bFp').classList.toggle('on', v); if (v && V.cw < 70) zoomX(70/V.cw, pw() - 80); }
   renderKL(); dirty = true;
 }
 document.querySelectorAll('#indMenu input[data-k]').forEach(cb => cb.onchange = () => setInd(cb.dataset.k, cb.checked));
@@ -2312,6 +2159,10 @@ $('symQ').onkeydown = e => { if (e.key === 'Enter'){ const f = $('symList').quer
 $('symList').onclick = e => { const it = e.target.closest('.si[data-s]'); if (it) pickSym(it.dataset.s, it.dataset.m); };
 document.querySelectorAll('.mtabs button').forEach(b => b.onclick = () => { symGroup = b.dataset.g; document.querySelectorAll('.mtabs button').forEach(z => z.classList.toggle('on', z === b)); renderSyms(); });
 $('bAuto').onclick = () => { V.auto = true; dirty = true; };
+$('bFp').onclick = () => setInd('fp', !ON.fp);
+try{ S.fpMin = +(localStorage.getItem('fpMin') || 0); $('fpMin').value = S.fpMin || 0; }catch(e){}
+$('fpMin').onchange = e => { S.fpMin = Math.max(0, +e.target.value || 0); try{ localStorage.setItem('fpMin', S.fpMin); }catch(err){} dirty = true; };
+$('bFp').classList.toggle('on', ON.fp);
 $('bIn').onclick = () => zoomX(1.25, pw() - 80);
 $('bOut').onclick = () => zoomX(1/1.25, pw() - 80);
 setInterval(() => { dirty = true; }, 1000);  // bar-close countdown
