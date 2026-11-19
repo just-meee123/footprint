@@ -134,9 +134,11 @@
   #pp button{background:var(--mbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer}
   #pp button.on{background:var(--acc);color:#03121f;border-color:var(--acc);font-weight:700}
   #pp input{width:82px;background:var(--mbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:4px 8px;text-align:right;font-family:ui-monospace,Menlo,monospace}
+  #pp button.arm{outline:2px dashed var(--acc);outline-offset:1px}
   #pp .hlp{display:none;color:var(--dim);font-size:11px;line-height:1.45;margin-top:7px} #pp.help .hlp{display:block}
   #pp.min .rw,#pp.min .hlp{display:none}
-  #pp.min{width:auto} @media (max-width:600px){#pp{right:auto;left:50px;bottom:auto;top:34px;width:220px;padding:6px 8px} #pp button{padding:3px 7px;font-size:11px}}
+  #pp.min{width:auto}
+  #ppTip{position:absolute;z-index:12;max-width:300px;background:var(--ovl);border:1px solid var(--line2);border-radius:10px;padding:8px 11px;font-size:12px;font-weight:600;line-height:1.4;color:var(--txt);box-shadow:0 10px 30px rgba(0,0,0,.55);display:none;pointer-events:none} @media (max-width:600px){#pp{right:auto;left:50px;bottom:auto;top:34px;width:220px;padding:6px 8px} #pp button{padding:3px 7px;font-size:11px}}
   /* whale tooltip */
   .wt{display:flex;align-items:center;gap:8px;margin-bottom:6px} .wt b{font-size:15px;font-family:ui-monospace,Menlo,monospace}
   .bd{padding:2px 8px;border-radius:6px;font-weight:800;font-size:12px} .bd.g{background:rgba(31,211,138,.18);color:var(--buy)} .bd.s{background:rgba(255,77,94,.18);color:var(--sell)}
@@ -254,11 +256,12 @@
   <div id="legend"></div>
   <div id="pp">
     <div class="ph" id="ppH"><i>☷</i>Print Pro<span class="cv" id="ppCv">▾</span></div>
-    <div class="rw"><button id="ppLoupe">Loupe</button><button id="ppFollow">Follow</button><button id="ppFixed">Fixed</button></div>
-    <div class="rw"><button id="ppBig">Big prints</button><span>$</span><input id="ppBigV" value="250k" title="e.g. 500k, 1M"></div>
+    <div class="rw"><button id="ppLoupe" data-h="Loupe — a magnifier over the chart. Follow: the lens moves with the cursor, click pins it. Fixed: drag the rectangle on the chart (a corner or the wheel over it resizes it), the lens stays put. L toggles, [ ] less / more magnification">Loupe</button><button id="ppFollow" data-h="Follow — the lens moves with the cursor; click pins it, click again lets it follow">Follow</button><button id="ppFixed" data-h="Fixed — the lens stays put: drag it, pull a side or corner (or the wheel over it) to resize it, click on the chart moves it there. Shift+drag or ⬚ draws a new area">Fixed</button><button id="ppSel" data-h="Draw a new lens area: tap this, then drag a box on the chart" title="Draw lens area">⬚</button></div>
+    <div class="rw"><button id="ppBig" data-h="Big prints — boxes every footprint row and trade bigger than the $ amount (type 500k or 1M)">Big prints</button><span>$</span><input id="ppBigV" value="250k" title="e.g. 500k, 1M"></div>
     <div class="rw"><button data-m="ba">Classic</button><button data-m="delta">Delta</button><button data-m="vol">Volume</button><button id="ppHelp" style="margin-left:auto">?</button></div>
-    <div class="hlp"><b>Loupe</b> — a magnifier over the chart. <b>Follow</b>: the lens moves with the cursor, click pins it. <b>Fixed</b>: drag the rectangle on the chart (a corner or the wheel over it resizes it), the lens stays put. <b>[ ]</b> less / more magnification, <b>Esc</b> turns it off.<br><b>Big prints</b> — boxes every footprint row and trade bigger than the $ amount (type 500k or 1M).<br><b>Classic</b> sell×buy · <b>Delta</b> buy−sell · <b>Volume</b> total.</div>
+    <div class="hlp"><b>Loupe</b> — a magnifier over the chart. <b>Follow</b>: the lens moves with the cursor, click pins it. <b>Fixed</b>: the lens stays put — drag it, pull a side or corner (or the wheel over it) to resize, click on the chart moves it there, <b>Shift+drag</b> or <b>⬚</b> draws a new area. <b>L</b> toggles, <b>[ ]</b> less / more magnification, <b>Esc</b> turns it off.<br><b>Big prints</b> — boxes every footprint row and trade bigger than the $ amount (type 500k or 1M).<br><b>Classic</b> sell×buy · <b>Delta</b> buy−sell · <b>Volume</b> total.</div>
   </div>
+  <div id="ppTip"></div>
   <div id="aiBox"></div>
   <div id="xp">
     <div class="hd mono"><span id="xpT">XRay</span><span><span id="xpZ">1.0x</span><button id="xpMin" title="Minimise">—</button></span></div>
@@ -1071,6 +1074,9 @@ function draw(){
     ctx.lineWidth = 1;
   }
 
+  if (act && act.m === 'sel'){ ctx.setLineDash([5, 4]); ctx.strokeStyle = COL.acc; ctx.lineWidth = 1.5; ctx.fillStyle = 'rgba(79,179,255,.08)';
+    const x = Math.min(act.x, act.x0), y = Math.min(act.y, act.y0), w = Math.abs(act.x - act.x0), h = Math.abs(act.y - act.y0);
+    ctx.fillRect(x, y, w, h); ctx.strokeRect(x, y, w, h); ctx.setLineDash([]); ctx.lineWidth = 1; }
   // crosshair
   if (hover.in && hover.x < PW && hover.y < PH){
     ctx.strokeStyle = TH.cross; ctx.setLineDash([3, 3]);
@@ -2128,6 +2134,7 @@ cv.addEventListener('pointerdown', e => {
       if ((hd.d.type === 'long' || hd.d.type === 'short') && hd.d.pts.length < 3) hd.d.pts = posPts(hd.d);
       dirty = true; return; }
     if (selId){ selId = null; dirty = true; } }
+  if (ON.xray && (lensSelArm || e.shiftKey)){ act = {m:'sel', x0:p.x, y0:p.y, x:p.x, y:p.y}; dirty = true; return; }
   const L = ON.xray && !(lensFollow && !lensPin) ? lensRect() : null;
   const lk = L ? lensHit(L, p.x, p.y, e.pointerType !== 'mouse') : null;
   if (lk && lk !== 'in') act = {m:'rs', k:lk, i1:lens.ci - lens.wc/2, i2:lens.ci + lens.wc/2, p1:lens.cp - lens.hp/2, p2:lens.cp + lens.hp/2};
@@ -2152,6 +2159,7 @@ cv.addEventListener('pointermove', e => {
     else if (act.m === 'dr') editDrawing(act, p.x, p.y);
     else if (act.m === 'mv'){ lens.ci = act.ci + (p.x - act.x)/V.cw; lens.cp = act.cp - (p.y - act.y)*ppp(); }
     else if (act.m === 'rs') lensResize(act, p.x, p.y);
+    else if (act.m === 'sel'){ act.x = p.x; act.y = p.y; dirty = true; }
     else if (act.m === 'pan'){
       const dx = p.x - act.x, dy = p.y - act.y;
       if (Math.abs(dx) > 4 || Math.abs(dy) > 4) act.moved = true;
@@ -2170,6 +2178,10 @@ const endPtr = e => {
   if (act && act.m === 'mk' && act.moved && draft && draft.preview){ draft.pts.push(draft.preview); draft.preview = null; if (nOf(draft.type) === 2) finishDraft(); }
   if (act && act.m === 'brush') finishDraft();
   if (act && act.m === 'dr') saveDraw();
+  if (act && act.m === 'sel'){ const w = Math.abs(act.x - act.x0), h = Math.abs(act.y - act.y0);
+    if (w > 8 && h > 8){ if (!lens) initLens(); lens.ci = iAt((act.x + act.x0)/2); lens.wc = Math.max(0.6, w/V.cw); lens.cp = pAt((act.y + act.y0)/2); lens.hp = Math.max(S.row, h*ppp()); }
+    lensSelArm = false; $('ppSel').classList.remove('arm'); }
+  else if (act && act.m === 'pan' && !act.moved && ON.xray && !lensFollow && lens && e.pointerType === 'mouse'){ const p = pos(e); lens.ci = iAt(p.x); lens.cp = pAt(p.y); }   // Fixed: click moves the lens there
   if (act && act.m === 'pan' && !act.moved && ON.xray && lensFollow && lens){ lensPin = !lensPin; if (!lensPin){ const p = pos(e); lens.ci = iAt(p.x); lens.cp = pAt(p.y); } toast(lensPin ? 'Loupe pinned — click again to let it follow' : 'Loupe follows the cursor'); }
   act = null; dirty = true;
 };
@@ -2187,6 +2199,7 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Escape'){ if (draft || tool !== 'cursor') setTool('cursor'); else if (selId){ selId = null; dirty = true; } else setInd('xray', false); }
   if ((e.key === 'Delete' || e.key === 'Backspace') && selId){ e.preventDefault(); deleteSelected(); }
   if (e.key === 'Enter' && draft && nOf(draft.type) === -1 && draft.pts.length >= 2){ draft.preview = null; finishDraft(); }
+  if ((e.key === 'l' || e.key === 'L') && !e.ctrlKey && !e.metaKey){ setInd('xray', !ON.xray); }
   if ((e.key === '[' || e.key === ']') && lens){ const f = e.key === ']' ? 0.85 : 1/0.85; lens.wc = Math.max(0.6, lens.wc*f); lens.hp = Math.max(S.row, lens.hp*f); dirty = true; }
 });
 
@@ -2387,6 +2400,15 @@ $('ppBig').onclick = () => { bigOn = !bigOn; try{ localStorage.setItem('bigOn', 
 $('ppBigV').onchange = e => { const v = parseMoney(e.target.value); if (v > 0){ S.bigTh = v; $('big').value = v; try{ localStorage.setItem('bigTh', v); }catch(err){} derivedDirty = true; } syncPP(); dirty = true; };
 pp.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { S.mode = b.dataset.m; $('mode').value = S.mode; try{ localStorage.setItem('fpMode', S.mode); }catch(e){} syncPP(); dirty = true; });
 $('ppHelp').onclick = () => pp.classList.toggle('help');
+let lensSelArm = false;
+$('ppSel').onclick = () => { lensSelArm = !lensSelArm; if (lensSelArm){ lensFollow = false; lensPin = false; if (!ON.xray) setInd('xray', true); toast('Drag a box on the chart to set the lens area'); } $('ppSel').classList.toggle('arm', lensSelArm); syncPP(); };
+const ppTip = $('ppTip');
+pp.querySelectorAll('[data-h]').forEach(b => {
+  b.addEventListener('mouseenter', () => { ppTip.textContent = b.dataset.h; ppTip.style.display = 'block';
+    const wr = wrap.getBoundingClientRect(), br = b.getBoundingClientRect(), tw = ppTip.offsetWidth, th = ppTip.offsetHeight;
+    ppTip.style.left = clamp(br.left - wr.left, 6, wr.width - tw - 6) + 'px'; ppTip.style.top = Math.max(6, pp.getBoundingClientRect().top - wr.top - th - 8) + 'px'; });
+  b.addEventListener('mouseleave', () => ppTip.style.display = 'none');
+});
 pp.addEventListener('pointerdown', e => e.stopPropagation());
 try{ lensFollow = localStorage.getItem('lensF') === '1'; bigOn = localStorage.getItem('bigOn') !== '0';
   const bt = +localStorage.getItem('bigTh'); if (bt > 0){ S.bigTh = bt; $('big').value = bt; }
