@@ -121,6 +121,33 @@
   #xp .hd button{background:none;border:0;color:var(--dim);font-size:14px;padding:0 4px;cursor:pointer}
   #xp.min{height:auto!important} #xp.min #xc,#xp.min .ft,#xp.min .rs{display:none}
   #dkStat{font-size:11px;color:var(--dim);padding:2px 6px 6px}
+  #selBar{position:absolute;top:44px;left:50%;transform:translateX(-50%);z-index:11;display:none;align-items:center;gap:2px;background:var(--ovl);border:1px solid var(--line2);border-radius:12px;padding:4px 6px;box-shadow:0 10px 28px rgba(0,0,0,.5)}
+  #selBar button{background:none;border:0;color:var(--txt);font-size:15px;min-width:34px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  #selBar button:hover,#selBar button.on{background:var(--mbg)} #selBar .sg{color:var(--dim);cursor:grab;padding:0 4px;letter-spacing:-2px}
+  #sbColI{display:block;width:18px;height:18px;border-radius:5px;border:2px solid var(--line2)} #sbWI{display:block;width:20px;background:var(--txt)}
+  #sbPop{position:absolute;z-index:12;display:none;background:var(--ovl);border:1px solid var(--line2);border-radius:12px;padding:8px;box-shadow:0 14px 36px rgba(0,0,0,.6);font-size:13px;max-height:70%;overflow:auto}
+  #sbPop .it{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;white-space:nowrap} #sbPop .it:hover{background:var(--mbg)} #sbPop hr{border:0;border-top:1px solid var(--line2);margin:4px 0}
+  #sbPop .pal{display:grid;grid-template-columns:repeat(10,22px);gap:5px} #sbPop .pal i{width:22px;height:22px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.12)} #sbPop .pal i.on{outline:2px solid var(--acc);outline-offset:1px}
+  #hubBody{padding:12px;overflow:auto;flex:1}
+  .hg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px} .hg.two{grid-template-columns:repeat(2,1fr)}
+  .ht{background:var(--mbg);border:1px solid var(--line2);border-radius:14px;padding:14px 6px;text-align:center;cursor:pointer;font-size:13px;color:var(--txt)} .ht:hover{border-color:var(--acc)}
+  .ht i{display:block;font-style:normal;font-size:22px;margin-bottom:6px} .ht.dis{opacity:.45} .ht.brk{grid-column:1/-1;border:1.5px solid transparent;background:linear-gradient(var(--mbg),var(--mbg)) padding-box,linear-gradient(90deg,#e91e63,#7c4dff,#2962ff) border-box}
+  .hsec{color:var(--dim);font-size:12px;font-weight:700;letter-spacing:.08em;margin:6px 4px 8px} .hrow{display:flex;align-items:center;gap:8px;padding:9px 8px;border-bottom:1px solid var(--line2);font-size:13px}
+  .hrow .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .hrow button{background:none;border:0;color:var(--txt);font-size:15px;cursor:pointer;padding:2px 6px} .hrow .sw{width:12px;height:12px;border-radius:3px;flex:none}
+  .hback{background:none;border:0;color:var(--acc);font:inherit;font-size:13px;cursor:pointer;padding:0 0 10px}
+  .dstabs{display:flex;gap:18px;padding:4px 14px 0;border-bottom:1px solid var(--line2)} .dstabs button{background:none;border:0;color:var(--dim);font:inherit;font-size:15px;font-weight:600;padding:8px 0;border-bottom:3px solid transparent;cursor:pointer} .dstabs button.on{color:var(--txt);border-bottom-color:var(--txt)}
+  #dsBody{padding:12px 14px;overflow:auto;flex:1;font-size:13px}
+  #dsBody .r{display:flex;align-items:center;gap:10px;margin:7px 0;flex-wrap:wrap} #dsBody .r > label:first-child{min-width:110px}
+  #dsBody input[type=number],#dsBody input[type=text],#dsBody select{background:var(--inbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:6px 8px;font:inherit;width:96px}
+  #dsBody input[type=color]{width:34px;height:30px;border:1px solid var(--line2);border-radius:6px;background:none;padding:1px}
+  #dsBody .lvg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 18px;margin:6px 0 10px} #dsBody .lvg div{display:flex;align-items:center;gap:6px} #dsBody .lvg input[type=number]{width:74px}
+  #dsBody .lvg input:disabled{opacity:.45}
+  .dsft{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line2)} .mbtn.pri{background:var(--txt);color:var(--bg);font-weight:700;border-color:var(--txt)}
+  .gtabs{display:flex;gap:6px;padding:6px 10px} .gh{grid-column:1/-1;color:var(--dim);font-size:11px;letter-spacing:.08em;padding:8px 2px 0}
+  #tpGrid.glyph{grid-template-columns:repeat(auto-fill,minmax(44px,1fr))} #tpGrid.glyph .tpi{padding:6px 0} #tpGrid.glyph .tpi .nm{display:none} #tpGrid.glyph .tpi .ic{font-size:24px}
+  #tpGrid.stk{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))} #tpGrid.stk .tpi .nm{display:none}
+  #tpGrid.stk .tpi,#tpGrid.glyph .tpi{min-height:0!important;height:auto!important;padding:8px 2px!important} .stkp{white-space:nowrap} #tpGrid.glyph,#tpGrid.stk{align-content:start}
+  .stkp{display:inline-block;padding:4px 10px;border-radius:14px;font-weight:800;font-size:12px;color:#fff;letter-spacing:.03em}
   .mbtn{background:var(--mbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
   #rpBar{position:absolute;left:50%;transform:translateX(-50%);top:8px;z-index:9;display:none;gap:6px;align-items:center;background:var(--ovl);border:1px solid var(--acc);border-radius:12px;padding:6px 10px;box-shadow:0 10px 30px rgba(0,0,0,.5);font-size:12px}
   #rpBar button{background:var(--mbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:4px 10px;font-size:13px;cursor:pointer;min-width:34px}
@@ -171,8 +198,9 @@
 <div id="top">
   <select id="mkt" title="Data source"><option value="spot">Binance Spot</option><option value="fut">Binance Futures</option><option value="bys">Bybit Spot</option><option value="byl">Bybit Futures</option><option value="fx">Forex (Dukascopy)</option></select>
   <input id="sym" value="BTCUSDT" title="Search symbol" readonly>
-  <select id="tf"><option value="60" selected>1m</option><option value="180">3m</option><option value="300">5m</option><option value="900">15m</option><option value="1800">30m</option><option value="3600">1h</option></select>
+  <select id="tf"><option value="60" selected>1m</option><option value="180">3m</option><option value="300">5m</option><option value="900">15m</option><option value="1800">30m</option><option value="3600">1h</option><option value="14400">4h</option></select>
   <button id="indBtn">Indicators<span id="indCount">4</span></button>
+  <button id="hubBtn" title="Analysis hub: layouts, chart type, compare, object tree…">☰ Hub</button>
   <button id="aiBtn" title="AI read of the order flow">✦ AI<small>Beta</small></button>
   <button id="setBtn" title="Settings">⚙</button>
   <button id="thBtn" title="Switch theme">◐</button>
@@ -181,6 +209,16 @@
   <div id="status"><div id="dot"></div><span id="stxt">idle</span></div>
 </div>
 
+<div id="hubModal" class="modal"><div class="mbox" style="width:min(560px,96vw)">
+  <div class="mhd" style="align-items:center"><button id="hubShare" title="Share / snapshot">⇪</button><b id="hubTitle" style="flex:1;font-size:17px;text-align:center">Analysis hub</b><button id="hubX">✕</button></div>
+  <div id="hubBody"></div>
+</div></div>
+<div id="dsModal" class="modal"><div class="mbox" style="width:min(560px,96vw)">
+  <div class="mhd" style="align-items:center"><b id="dsTitle" style="flex:1;font-size:16px;padding-left:4px">Settings</b><button id="dsX">✕</button></div>
+  <div class="dstabs" id="dsTabs"></div>
+  <div id="dsBody"></div>
+  <div class="dsft"><button id="dsMore" class="mbtn">⋯ Template</button><span style="flex:1"></span><button id="dsCancel" class="mbtn">Cancel</button><button id="dsOk" class="mbtn pri">Ok</button></div>
+</div></div>
 <div id="toolModal" class="modal"><div class="mbox" style="width:min(640px,96vw)">
   <div class="mhd" style="align-items:center"><b style="flex:1;font-size:15px;padding-left:4px">Drawing tools</b><button id="tpX">✕</button></div>
   <div class="mtabs" id="tpTabs"></div>
@@ -292,6 +330,10 @@
     <div class="hlp"><b>Loupe</b> — a magnifier over the chart. <b>Follow</b>: the lens moves with the cursor, click pins it. <b>Fixed</b>: the lens stays put — drag it, pull a side or corner (or the wheel over it) to resize, click on the chart moves it there, <b>Shift+drag</b> or <b>⬚</b> draws a new area. <b>L</b> toggles, <b>[ ]</b> less / more magnification, <b>Esc</b> turns it off.<br><b>Big prints</b> — boxes every footprint row and trade bigger than the $ amount (type 500k or 1M).<br><b>Classic</b> sell×buy · <b>Delta</b> buy−sell · <b>Volume</b> total.</div>
   </div>
   <div id="ppTip"></div>
+  <div id="selBar"><span class="sg" title="Drag">⋮⋮</span><button id="sbTpl" title="Template">▦+</button><button id="sbCol" title="Colour"><i id="sbColI"></i></button>
+    <button id="sbW" title="Line width"><i id="sbWI"></i></button><button id="sbLs" title="Line style">┄</button><button id="sbLock" title="Lock">🔓</button>
+    <button id="sbSet" title="Settings">⚙</button><button id="sbDel" title="Remove">🗑</button><button id="sbMore" title="More">⋯</button></div>
+  <div id="sbPop"></div>
   <div id="aiBox"></div>
   <div id="xp">
     <div class="hd mono"><span id="xpT">XRay</span><span><span id="xpZ">1.0x</span><button id="xpMin" title="Minimise">—</button></span></div>
@@ -770,6 +812,8 @@ setInterval(() => { if (S.src && S.src.kind === 'fx' && !document.hidden) fxRefr
 const fhSym = s => 'OANDA:' + s.slice(0, 3) + '_' + s.slice(3);
 async function connect(){
   const my = ++S.sess;
+  try{ localStorage.setItem('fpLast', JSON.stringify({sym:$('sym').value, mkt:$('mkt').value, tf:$('tf').value})); }catch(e){}
+  cmp.data = new Map(); if (cmp.on) setTimeout(loadCompare, 4000);
   if (S.ws){ S.ws.onclose = null; S.ws.close(); S.ws = null; }
   S.trades = []; S.candles = []; S.dk = []; S.dt = []; S.ht = []; S.off = 0; S.duka = false; S.wsBuf = []; S.lastId = -1; seen.clear(); lens = null; pinned = null; setFollow(true);
   S.tfMs = +$('tf').value*1000;
@@ -1103,6 +1147,10 @@ function draw(){
 
   // volume + candles
   const bw = Math.max(1, V.cw*0.7);
+  const HA = [];
+  if (chartType === 'ha'){ const s0 = Math.max(0, a - 300); let po = C[s0].o, pc = C[s0].c;
+    for (let i = s0; i <= b; i++){ const c = C[i], hc = (c.o + c.h + c.l + c.c)/4, ho = i === s0 ? (c.o + c.c)/2 : (po + pc)/2;
+      if (i >= a) HA.push({o:ho, c:hc, h:Math.max(c.h, ho, hc), l:Math.min(c.l, ho, hc)}); po = ho; pc = hc; } }
   for (let i = a; i <= b; i++){
     const c = C[i], x = xF(i), up = c.c >= c.o, col = up ? COL.buy : COL.sell;
     if (dPane){ const dd = c.buy - c.sell, mid = PH - VH/2, hh = dmax ? Math.abs(dd)/dmax*(VH/2 - 5) : 0;
@@ -1112,9 +1160,23 @@ function draw(){
     else { const vh = vmax ? (c.buy + c.sell)/vmax*(VH - 6) : 0;
       ctx.fillStyle = hexA(up ? COL.buy : COL.sell, .45); ctx.fillRect(x - bw/2, PH - vh, bw, vh); }
     if (ON.fp && V.cw >= 14 && drawFpCandle(c, x)) continue;
-    ctx.fillStyle = col; ctx.fillRect(Math.round(x) - .5, yOf(c.h), 1, Math.max(1, yOf(c.l) - yOf(c.h)));
-    const yo = yOf(c.o), yc = yOf(c.c); ctx.fillRect(x - bw/2, Math.min(yo, yc), bw, Math.max(1, Math.abs(yc - yo)));
+    if (chartType === 'line' || chartType === 'area') continue;
+    const k = chartType === 'ha' ? HA[i - a] : c, kup = k.c >= k.o, kcol = chartType === 'ha' ? (kup ? COL.buy : COL.sell) : col;
+    ctx.fillStyle = kcol; ctx.strokeStyle = kcol;
+    if (chartType === 'bars'){ const xx = Math.round(x) + .5; ctx.lineWidth = Math.max(1, Math.min(2, V.cw/8)); ctx.beginPath(); ctx.moveTo(xx, yOf(k.h)); ctx.lineTo(xx, yOf(k.l));
+      ctx.moveTo(xx - bw/2, yOf(k.o)); ctx.lineTo(xx, yOf(k.o)); ctx.moveTo(xx, yOf(k.c)); ctx.lineTo(xx + bw/2, yOf(k.c)); ctx.stroke(); ctx.lineWidth = 1; continue; }
+    ctx.fillRect(Math.round(x) - .5, yOf(k.h), 1, Math.max(1, yOf(k.l) - yOf(k.h)));
+    const yo = yOf(k.o), yc = yOf(k.c);
+    if (chartType === 'hollow' && kup){ ctx.fillStyle = TH.bg; ctx.fillRect(x - bw/2, Math.min(yo, yc), bw, Math.max(1, Math.abs(yc - yo))); ctx.strokeRect(x - bw/2 + .5, Math.min(yo, yc) + .5, Math.max(1, bw - 1), Math.max(1, Math.abs(yc - yo) - 1)); }
+    else ctx.fillRect(x - bw/2, Math.min(yo, yc), bw, Math.max(1, Math.abs(yc - yo)));
   }
+  if ((chartType === 'line' || chartType === 'area') && b >= a){
+    ctx.beginPath(); for (let i = a; i <= b; i++){ const x = xF(i), y = yOf(C[i].c); i === a ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
+    if (chartType === 'area'){ const g = ctx.createLinearGradient(0, 0, 0, PH); g.addColorStop(0, hexA(COL.acc, .35)); g.addColorStop(1, hexA(COL.acc, 0));
+      ctx.save(); ctx.lineTo(xF(b), PH - VH); ctx.lineTo(xF(a), PH - VH); ctx.closePath(); ctx.fillStyle = g; ctx.fill(); ctx.restore();
+      ctx.beginPath(); for (let i = a; i <= b; i++){ const x = xF(i), y = yOf(C[i].c); i === a ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } }
+    ctx.strokeStyle = COL.acc; ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 1; }
+  if (cmp.on && cmp.data.size) drawCompare(PW, a, b);
   if (ON.vwap) drawVWAP(PW, a, b);
   if (ON.imb) drawImb(PW, a, b);
   if (ON.liq) drawLiq(PW);
@@ -1363,7 +1425,24 @@ const TL = {
   plabel:{n:1, name:'Price label', cat:7, g:'🏷'}, signpost:{n:1, name:'Signpost', cat:7, g:'⚑', txt:1}, flag:{n:1, name:'Flag mark', cat:7, g:'🚩'},
   idea:{n:1, name:'Idea', cat:7, g:'💡', txt:1}, image:{n:1, name:'Image', cat:7, g:'🖼'}, alert:{n:1, name:'Price alert', cat:7, g:'🔔'},
 };
-const GLYPHS = {emoji:['😀','😎','🤔','😱','🥳','😴','🤑','😡','👍','👎','👀','🙏'], sticker:['🚀','🔥','💎','🐂','🐻','🎯','💰','⚠️','✅','❌','🏆','⏰'], icon:['★','♥','▲','▼','●','■','◆','✚','✖','⚡','☂','⌛']};
+const GLYPH_SETS = {
+  emoji:{'Gestures & smileys':['😀','😁','😂','🤣','😊','😎','🤩','🤔','🤨','😐','😴','😱','😭','😡','🤯','🥳','🤑','😬','🙃','😇','👍','👎','👌','✌️','🤞','👏','🙏','💪','👀','🫡','🤝','👉','👈','👆','👇','☝️'],
+    'Symbols':['✅','❌','⚠️','❗','❓','💯','🔥','💥','⭐','🌟','✨','💎','🎯','🏁','🚩','📌','📍','🔔','🔕','⏰','⌛','🔒','🔓','💡','🧠','♻️'],
+    'Nature':['🐂','🐻','🐋','🦈','🐳','🦅','🐍','🦊','🌙','☀️','⚡','🌊','🌪️','❄️','🌱','🍀'],
+    'Money & objects':['💰','💵','💸','🪙','🏦','📈','📉','📊','🧾','💳','🚀','🛸','🎲','🏆','🥇','🧲','🔑','🛡️','⚔️','🧨','🎁','☕']},
+  sticker:{'Trade':['BUY','SELL','LONG','SHORT','ENTRY','EXIT','TP','SL','BE','RISK','HOLD','WAIT'],
+    'Smart money':['BOS','CHoCH','FVG','OB','BB','SWEEP','LIQ','EQH','EQL','MSS','IFVG','SIBI','BISI','PD ARRAY'],
+    'Mood':['🚀 MOON','PUMP','DUMP','FOMO','HODL','REKT','WHALE','TRAP','NEWS','NFP','CPI','FOMC']},
+  icon:{'Symbols & flags':['⚑','⚐','♥','♡','★','☆','✔','✖','✚','━','✱','❗','❓','ℹ','⚠','⊕','⊖','⊗','◉','◎','●','○','■','□','◆','◇','▲','△','▼','▽','⏻','⟳','⟲','⌖','⦿'],
+    'Nature':['☀','☾','☁','☂','❄','⚡','✿','❀','♣','♠'],
+    'Currency':['€','£','$','₹','¥','₽','₩','₺','₿','₦','¢'],
+    'Objects':['⌚','⏰','☎','✉','✎','✂','⚙','⚓','✈','⌛','⚖','⚒','☕','♛','♞','⚔','☯','☢','☣','⚛'],
+    'Arrows':['←','→','↑','↓','↖','↗','↘','↙','↔','↕','⇐','⇒','⇑','⇓','⬅','➡','⬆','⬇','⮜','⮞','⮝','⮟','↩','↪','⤴','⤵','⇧','⇩','⏫','⏬','➜','➤','⇄','⇅']}
+};
+const STK_COL = t => /BUY|LONG|TP|ENTRY|MOON|PUMP|BISI|EQL|HODL/.test(t) ? '#16a37b' : /SELL|SHORT|SL|DUMP|REKT|SIBI|EQH|TRAP/.test(t) ? '#e0384b' : /BOS|CHoCH|MSS|FVG|IFVG|OB|BB/.test(t) ? '#3f6df5' : /SWEEP|LIQ|WHALE|PD/.test(t) ? '#8e44d6' : '#e08a12';
+const GLYPHS = {};
+for (const [kind, groups] of Object.entries(GLYPH_SETS)){ GLYPHS[kind] = []; for (const arr of Object.values(groups)) for (const g of arr) GLYPHS[kind].push(g); }
+const GLYPHS_OLD = {emoji:['😀','😎','🤔','😱','🥳','😴','🤑','😡','👍','👎','👀','🙏'], sticker:['🚀','🔥','💎','🐂','🐻','🎯','💰','⚠️','✅','❌','🏆','⏰'], icon:['★','♥','▲','▼','●','■','◆','✚','✖','⚡','☂','⌛']};
 for (const [kind, arr] of Object.entries(GLYPHS)) for (const gl of arr) TL['g:' + kind + ':' + gl] = {n:1, name:(kind === 'icon' ? 'Icon ' : kind === 'sticker' ? 'Sticker ' : 'Emoji ') + gl, cat:8, g:gl};
 const ACTIONS = [{k:'cursor', name:'Cursor'}, {k:'range', name:'Measure'}, {k:'eraser', name:'Eraser', g:'⌫'}, {k:'@keep', name:'Keep drawing', g:'🔁'}, {k:'@hide', name:'Hide drawings', g:'👁'},
   {k:'@lock', name:'Lock all drawings', g:'🔒'}, {k:'@magnet', name:'Magnet: strong / weak / off', g:'🧲'}, {k:'@clear', name:'Remove all objects', g:'🗑'}, {k:'@zin', name:'Zoom in', g:'＋'}, {k:'@zout', name:'Zoom out', g:'－'}];
@@ -1417,12 +1496,17 @@ function renderTool(d, Q, PW, PH){
   const seg = (a, b) => { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); };
   const ray = (a, b) => { const [p, q] = extendSeg(a, b, false, true); seg(p, q); };
   const poly = (P, close, fillA) => { if (P.length < 2) return; ctx.beginPath(); P.forEach((q, i) => i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); if (close) ctx.closePath();
-    if (fillA){ ctx.fillStyle = hexA(col, fillA); ctx.fill(); } ctx.stroke(); };
-  const pr = q => pAt(q.y), dsh = (on) => ctx.setLineDash(on ? [4, 4] : []);
+    if (fillA && d.bg !== false){ ctx.fillStyle = hexA(d.bgC || col, d.bgA != null ? d.bgA : fillA); ctx.fill(); } ctx.stroke(); };
+  const pr = q => pAt(q.y), baseDash = DASH[d.ls] || [], dsh = (on) => ctx.setLineDash(on ? [4, 4] : baseDash);
   const lab = (txt, x, y, align = 'center') => { ctx.font = '10px ui-monospace,monospace'; ctx.fillStyle = col; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(txt, x, y); };
   const t = d.type, pts = d.pts;
-  if (t.startsWith('g:')){ const kind = t.split(':')[1], g = TL[t].g, s = kind === 'sticker' ? 40 : kind === 'emoji' ? 28 : 24;
-    ctx.font = `${s}px -apple-system,Segoe UI Emoji,Apple Color Emoji,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = col; ctx.fillText(g, A.x, A.y);
+  if (t.startsWith('g:')){ const kind = t.split(':')[1], g = TL[t].g, s = d.fs || (kind === 'sticker' ? 14 : kind === 'emoji' ? 28 : 24);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (kind === 'sticker'){ ctx.font = `800 ${s}px -apple-system,Segoe UI,sans-serif`; const w = ctx.measureText(g).width + s*1.2, h = s*1.9, bg = d.color && d.color !== drawColor ? d.color : STK_COL(g);
+      ctx.save(); ctx.translate(A.x, A.y); ctx.rotate(-0.06); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.roundRect(-w/2 + 2, -h/2 + 3, w, h, h/2); ctx.fill();
+      ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect(-w/2, -h/2, w, h, h/2); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.fillText(g, 0, 1); ctx.restore(); }
+    else { ctx.font = `${s}px -apple-system,Segoe UI Emoji,Apple Color Emoji,Segoe UI Symbol,sans-serif`; ctx.fillStyle = col; ctx.fillText(g, A.x, A.y); }
     bbMap.set(d, {x:A.x - s/2, y:A.y - s/2, w:s, h:s}); return; }
   switch (t){
     case 'info': { seg(A, B); const p1 = pts[0].p, p2 = (pts[1] || pts[0]).p, dp = p2 - p1, bars = Math.round(tIdx((pts[1] || pts[0]).t) - tIdx(pts[0].t)), ang = Math.atan2(A.y - B.y, B.x - A.x)*180/Math.PI;
@@ -1444,8 +1528,8 @@ function renderTool(d, Q, PW, PH){
       const O = t === 'schiff' ? {x:A.x, y:(A.y + B.y)/2} : t === 'mschiff' ? mid(A, B) : t === 'ipitch' ? mid(A, Cq) : A, M = mid(B, Cq), dv = {x:M.x - O.x, y:M.y - O.y};
       if (t !== 'pitchfork'){ dsh(1); seg(A, O); dsh(0); } seg(B, Cq); ray(O, M); ray(B, {x:B.x + dv.x, y:B.y + dv.y}); ray(Cq, {x:Cq.x + dv.x, y:Cq.y + dv.y});
       ctx.fillStyle = hexA(col, .06); ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(B.x + dv.x*20, B.y + dv.y*20); ctx.lineTo(Cq.x + dv.x*20, Cq.y + dv.y*20); ctx.lineTo(Cq.x, Cq.y); ctx.fill(); break; }
-    case 'fibext': { dsh(1); poly(Q); dsh(0); if (Q.length < 3) break; const p1 = pts[0].p, p2 = pts[1].p, p3 = pts[2].p, x2 = Cq.x + Math.abs(B.x - A.x);
-      for (const L of [0, .236, .382, .5, .618, .786, 1, 1.272, 1.618, 2.618]){ const pp = p3 + (p2 - p1)*L, y = yOf(pp); seg({x:Cq.x, y}, {x:x2, y}); lab(`${L} (${P(pp)})`, Cq.x - 4, y, 'right'); } break; }
+    case 'fibext': { if (d.tl !== false){ ctx.save(); ctx.strokeStyle = d.tlc || col; ctx.lineWidth = 1; ctx.setLineDash([4, 4]); poly(Q); ctx.restore(); } if (Q.length < 3) break;
+      const p1 = pts[0].p, p2 = pts[1].p, p3 = pts[2].p; drawFibLevels(d, Math.min(Cq.x, Cq.x + Math.abs(B.x - A.x)), Cq.x + Math.abs(B.x - A.x), L => p3 + (p2 - p1)*L, col, PW); break; }
     case 'fibch': { seg(A, B); if (Q.length < 3) break; const off = Cq.y - (A.y + (B.y - A.y)*((Cq.x - A.x)/((B.x - A.x) || 1)));
       for (const L of [0, .236, .382, .5, .618, .786, 1, 1.618]){ const o = off*L; seg({x:A.x, y:A.y + o}, {x:B.x, y:B.y + o}); lab(String(L), A.x - 4, A.y + o, 'right'); } break; }
     case 'fibtz': { const dx = B.x - A.x; if (Math.abs(dx) < 2) break; [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89].forEach(F => { const x = A.x + dx*F; seg({x, y:0}, {x, y:PH}); lab(String(F), x + 3, 12, 'left'); }); break; }
@@ -1579,6 +1663,7 @@ function renderFav(){
   $('dtFav').querySelectorAll('[data-t]').forEach(b => b.onclick = () => setTool(tool === b.dataset.t && b.dataset.t !== 'cursor' ? 'cursor' : b.dataset.t));
 }
 let toolCat = 0;
+let glyphKind = 'emoji';
 function renderPicker(){
   $('tpTabs').innerHTML = TCAT.map((c, i) => `<button data-c="${i}"${i === toolCat ? ' class="on"' : ''}>${c}</button>`).join('');
   $('tpTabs').querySelectorAll('button').forEach(b => b.onclick = () => { toolCat = +b.dataset.c; renderPicker(); });
@@ -1586,6 +1671,18 @@ function renderPicker(){
   if (toolCat === 0) items = favTools.map(k => ({k, ...TL[k]}));
   else if (toolCat === 1) items = ACTIONS.map(a => ({...a, act:1, on: a.k === '@keep' ? keepDraw : a.k === '@lock' ? lockDraw : a.k === '@hide' ? hideDraw : a.k === '@magnet' ? magnetMode !== 'off' : false}));
   else items = Object.entries(TL).filter(([, v]) => v.cat === toolCat).map(([k, v]) => ({k, ...v}));
+  $('tpGrid').className = '';
+  if (toolCat === 8){
+    const kinds = [['emoji', 'Emojis'], ['sticker', 'Stickers'], ['icon', 'Icons']];
+    let h = `<div class="gtabs" style="grid-column:1/-1">${kinds.map(([k, n]) => `<button class="mbtn${glyphKind === k ? ' pri' : ''}" data-gk="${k}">${n}</button>`).join('')}</div>`;
+    for (const [grp, arr] of Object.entries(GLYPH_SETS[glyphKind])){ h += `<div class="gh">${grp.toUpperCase()}</div>`;
+      for (const g of arr){ const k = 'g:' + glyphKind + ':' + g;
+        h += `<div class="tpi" data-k="${k}" title="${TL[k].name}"><div class="ic">${glyphKind === 'sticker' ? `<span class="stkp" style="background:${STK_COL(g)}">${g}</span>` : g}</div><div class="nm"></div></div>`; } }
+    $('tpGrid').innerHTML = h; $('tpGrid').className = glyphKind === 'sticker' ? 'stk' : 'glyph';
+    $('tpGrid').querySelectorAll('[data-gk]').forEach(b => b.onclick = () => { glyphKind = b.dataset.gk; renderPicker(); });
+    $('tpGrid').querySelectorAll('.tpi').forEach(el => el.onclick = () => { $('toolModal').classList.remove('open'); setTool(el.dataset.k); toast('Tap the chart to place it'); });
+    return;
+  }
   $('tpGrid').innerHTML = items.map(it => `<div class="tpi${it.on ? ' on' : ''}" data-k="${it.k}">${it.act ? '' : `<b class="star${favTools.includes(it.k) ? ' f' : ''}" data-s="${it.k}">★</b>`}
     <div class="ic">${toolIcon(it.k)}</div><div class="nm">${it.k === '@magnet' ? 'Magnet: ' + magnetMode : it.name}</div></div>`).join('') || '<div style="padding:20px;color:var(--dim)">Tap ★ on any tool to add it here and to the toolbar.</div>';
   $('tpGrid').querySelectorAll('.star').forEach(s => s.onclick = e => { e.stopPropagation(); const k = s.dataset.s; favTools = favTools.includes(k) ? favTools.filter(z => z !== k) : [...favTools, k];
@@ -1599,7 +1696,7 @@ function renderPicker(){
 function doAction(k){
   if (k === '@keep') keepDraw = !keepDraw;
   if (k === '@lock'){ lockDraw = !lockDraw; selId = null; toast(lockDraw ? 'Drawings locked' : 'Drawings unlocked'); }
-  if (k === '@hide'){ hideDraw = !hideDraw; $('dHide').classList.toggle('on', hideDraw); }
+  if (k === '@hide'){ const hid = drawings.filter(z => z.hid); if (hid.length && !hideDraw){ hid.forEach(z => delete z.hid); saveDraw(); toast(`Showing ${hid.length} hidden drawing(s)`); } else { hideDraw = !hideDraw; } $('dHide').classList.toggle('on', hideDraw); }
   if (k === '@magnet'){ magnetMode = magnetMode === 'weak' ? 'strong' : magnetMode === 'strong' ? 'off' : 'weak'; $('dMag').classList.toggle('on', magnetMode !== 'off'); $('dMag').title = 'Magnet: ' + magnetMode; toast('Magnet: ' + magnetMode); }
   if (k === '@clear') $('dClr').click();
   if (k === '@zin') zoomX(1.25, pw() - 80);
@@ -1671,6 +1768,7 @@ function finishDraft(){
   if (nOf(d.type) === 2 && d.pts.length < 2) d.pts.push({t: idxT(tIdx(d.pts[0].t) + 10), p: d.pts[0].p});
   if (d.type === 'alert' && alertCount() >= 5){ toast('Maximum 5 alerts per symbol — delete one first'); setTool('cursor'); return; }
   d.id = Date.now() + '' + Math.random(); d.color = d.type === 'alert' ? COL.gold : drawColor;
+  try{ const def = JSON.parse(localStorage.getItem('fpTplDef_' + d.type) || 'null'); if (def) Object.assign(d, JSON.parse(JSON.stringify(def))); }catch(e){}
   delete d.preview; drawings.push(d); selId = d.id; saveDraw();
   if (keepDraw && d.type !== 'image') { const k = d.type; setTool(k); } else setTool('cursor');
 }
@@ -1688,17 +1786,23 @@ function handlesOf(d, Q){
   return Q;
 }
 function drawDrawings(PW, PH){
+  if (sbFor !== selId || ($('selBar').style.display === 'none') === !!selId) syncSelBar();
   const list = hideDraw ? [] : drawings.slice(); if (draft && draft.pts.length) list.push(draft);
   for (const d of list){
+    if (d.hid || !visOnTf(d)) continue;
     const sel = d.id === selId, col = d.color || drawColor, Q = scr(d);
-    ctx.save(); ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = sel || d === draft ? 2 : 1.5;
+    ctx.save(); ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = (d.w || 1.5) + (sel || d === draft ? .5 : 0); ctx.setLineDash(DASH[d.ls] || []);
     ctx.font = '11px ui-monospace,Menlo,monospace'; ctx.textBaseline = 'middle';
     const seg = (a, b) => { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); };
-    const box = (a, b, fill) => { const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), w = Math.abs(b.x - a.x), h = Math.abs(b.y - a.y); if (fill){ ctx.fillStyle = fill; ctx.fillRect(x, y, w, h); } ctx.strokeRect(x, y, w, h); };
+    const box = (a, b, fill) => { const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), w = Math.abs(b.x - a.x), h = Math.abs(b.y - a.y); if (fill && d.bg !== false){ ctx.fillStyle = d.bgA != null ? hexA(d.bgC || col, d.bgA) : fill; ctx.fillRect(x, y, w, h); } ctx.strokeRect(x, y, w, h); };
     const label = (txt, x, y, bg, fg) => { const w = ctx.measureText(txt).width + 10; ctx.fillStyle = bg; ctx.fillRect(x - w/2, y - 9, w, 18); ctx.fillStyle = fg; ctx.textAlign = 'center'; ctx.fillText(txt, x, y + .5); };
     const A = Q[0], B = Q[1] || Q[0];
     switch (d.type){
-      case 'trend': case 'ray': case 'ext': { const [a, b] = extendSeg(A, B, d.type === 'ext', d.type !== 'trend'); seg(a, b); break; }
+      case 'trend': case 'ray': case 'ext': { const ex = lineExt(d); const [a, b] = extendSeg(A, B, ex.l, ex.r); seg(a, b);
+        if (d.mid){ ctx.fillStyle = col; ctx.beginPath(); ctx.arc((A.x + B.x)/2, (A.y + B.y)/2, 3, 0, 7); ctx.fill(); }
+        if (d.stats && d.pts[1]){ const dp = d.pts[1].p - d.pts[0].p, bars = Math.round(tIdx(d.pts[1].t) - tIdx(d.pts[0].t)); ctx.setLineDash([]);
+          label(`${dp >= 0 ? '+' : ''}${P(dp)} (${(100*dp/d.pts[0].p).toFixed(2)}%) · ${bars} bars`, B.x, B.y - 16, hexA(TH.bg, .85), col); }
+        break; }
       case 'hline': seg({x:0, y:A.y}, {x:PW, y:A.y}); break;
       case 'alert': { ctx.setLineDash([6, 4]); ctx.globalAlpha = d.fired ? .4 : 1; seg({x:0, y:A.y}, {x:PW, y:A.y}); ctx.setLineDash([]);
         ctx.font = 'bold 11px -apple-system,Segoe UI,sans-serif'; const tx = (d.fired ? '✓ alert hit ' : '🔔 alert ') + P(d.pts[0].p), w = ctx.measureText(tx).width + 12;
@@ -1706,12 +1810,9 @@ function drawDrawings(PW, PH){
       case 'hray': seg(A, {x:PW, y:A.y}); break;
       case 'vline': seg({x:A.x, y:0}, {x:A.x, y:PH}); break;
       case 'rect': box(A, B, hexA(col, .13)); break;
-      case 'fib': {
-        const x1 = Math.min(A.x, B.x), x2 = Math.max(A.x, B.x), p1 = d.pts[0].p, p2 = (d.pts[1] || d.pts[0]).p;
-        FIB.forEach((L, k) => { const pr = p2 + (p1 - p2)*L, y = yOf(pr);
-          if (k < FIB.length - 1){ const y2 = yOf(p2 + (p1 - p2)*FIB[k + 1]); ctx.fillStyle = hexA(col, .05 + .03*(k % 2)); ctx.fillRect(x1, Math.min(y, y2), x2 - x1, Math.abs(y2 - y)); }
-          ctx.strokeStyle = col; seg({x:x1, y}, {x:x2, y}); ctx.fillStyle = col; ctx.textAlign = 'right'; ctx.fillText(`${L} (${P(pr)})`, x1 - 4, y); });
-        ctx.setLineDash([3, 3]); seg(A, B); ctx.setLineDash([]); break; }
+      case 'fib': { const p1 = d.pts[0].p, p2 = (d.pts[1] || d.pts[0]).p;
+        drawFibLevels(d, Math.min(A.x, B.x), Math.max(A.x, B.x), L => p2 + (p1 - p2)*L, col, PW);
+        if (d.tl !== false){ ctx.strokeStyle = d.tlc || col; ctx.lineWidth = 1; ctx.setLineDash([4, 4]); seg(A, B); ctx.setLineDash([]); } break; }
       case 'range': {
         box(A, B, hexA(col, .12)); const mx = (A.x + B.x)/2; seg({x:mx, y:A.y}, {x:mx, y:B.y});
         const p1 = d.pts[0].p, p2 = (d.pts[1] || d.pts[0]).p, dp = p2 - p1, bars = Math.round(tIdx((d.pts[1] || d.pts[0]).t) - tIdx(d.pts[0].t));
@@ -1742,7 +1843,7 @@ function drawDrawings(PW, PH){
           posX.push({x:bx + tw + 10, y:by, w:20, h:20, d}); ctx.lineWidth = 1;
         }
         break; }
-      case 'text': { ctx.font = 'bold 13px -apple-system,Segoe UI,sans-serif'; const tx = d.text || 'Text', w = ctx.measureText(tx).width;
+      case 'text': { ctx.font = `${d.bold === false ? '' : 'bold '}${d.italic ? 'italic ' : ''}${d.fs || 13}px -apple-system,Segoe UI,sans-serif`; const tx = d.text || 'Text', w = ctx.measureText(tx).width;
         ctx.fillStyle = hexA(TH.bg, .75); ctx.fillRect(A.x - 4, A.y - 11, w + 8, 22); ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.fillText(tx, A.x, A.y); break; }
       case 'brush': { ctx.beginPath(); Q.forEach((q, k) => k ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); ctx.stroke(); break; }
       default: renderTool(d, Q, PW, PH);
@@ -1763,22 +1864,205 @@ function drawTags(PW){
     }
   }
 }
+// ───────── drawing styles (TradingView-like) ─────────
+const DASH = {solid:[], dash:[7, 5], dot:[2, 4]};
+if (!CanvasRenderingContext2D.prototype.roundRect) CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h){ this.rect(x, y, w, h); };
+const FIB_ALL = [0, .236, .382, .5, .618, .786, 1, 1.618, 2.618, 3.618, 4.236, 1.272, 1.414, 2.272, 2.414, 2, 3, 3.272, 3.414, 4, 4.272, 4.414, 4.618, 4.764];
+const FIB_COL = ['#787b86', '#f23645', '#ff9800', '#4caf50', '#089981', '#00bcd4', '#787b86', '#2962ff', '#f23645', '#9c27b0', '#e91e63', '#ff9800', '#089981', '#ff9800', '#4caf50', '#089981', '#00bcd4', '#787b86', '#2962ff', '#f23645', '#9c27b0', '#e91e63', '#ff9800', '#089981'];
+const FIB_ON = {fib:[0, .236, .382, .5, .618, .786, 1, 1.618], fibext:[0, .382, .5, .618, 1, 1.272, 1.618, 2.618]};
+function fibLv(d){ if (!d.lv){ const on = FIB_ON[d.type] || FIB_ON.fib; d.lv = FIB_ALL.map((v, i) => ({v, on:on.includes(v), c:FIB_COL[i]})); } return d.lv; }
+function lineExt(d){ const e = d.ext; if (e) return {l:e === 'left' || e === 'both', r:e === 'right' || e === 'both'};
+  return {l:d.type === 'ext', r:d.type === 'ray' || d.type === 'ext'}; }
+function drawFibLevels(d, x1, x2, priceOf, col, PW){
+  const lv = fibLv(d).filter(l => l.on).slice().sort((a, b) => a.v - b.v), ex = lineExt(d), xa = ex.l ? 0 : x1, xb = ex.r ? PW : x2, one = d.one ? (d.oneC || col) : null;
+  const fs = d.fs || 11, A = d.bgA != null ? d.bgA : .12;
+  if (d.bg !== false) for (let k = 0; k < lv.length - 1; k++){ const y1 = yOf(priceOf(d.rev ? 1 - lv[k].v : lv[k].v)), y2 = yOf(priceOf(d.rev ? 1 - lv[k + 1].v : lv[k + 1].v));
+    ctx.fillStyle = hexA(one || lv[k + 1].c, A); ctx.fillRect(xa, Math.min(y1, y2), xb - xa, Math.abs(y2 - y1)); }
+  ctx.font = `${fs}px -apple-system,Segoe UI,sans-serif`; ctx.lineWidth = d.w || 1; ctx.setLineDash(DASH[d.ls] || []);
+  for (const l of lv){ const v = d.rev ? 1 - l.v : l.v, pr = priceOf(v), y = Math.round(yOf(pr)) + .5, c = one || l.c;
+    ctx.strokeStyle = c; ctx.beginPath(); ctx.moveTo(xa, y); ctx.lineTo(xb, y); ctx.stroke();
+    if (d.lbl === false) continue;
+    const txt = (d.lvMode === 'percent' ? (l.v*100).toFixed(1) + '%' : String(l.v)) + (d.prices !== false ? ` (${P(pr)})` : '');
+    const right = d.lblH === 'right', vy = d.lblV === 'top' ? -fs*0.7 : d.lblV === 'bottom' ? fs*0.7 : 0;
+    ctx.fillStyle = c; ctx.textBaseline = 'middle'; ctx.textAlign = right ? 'left' : 'right'; ctx.fillText(txt, right ? xb + 4 : xa - 4, y + vy); }
+  ctx.setLineDash([]);
+}
+const TF_CAT = [['m', 'Minutes', 60, 1, 59], ['h', 'Hours', 3600, 1, 24], ['D', 'Days', 86400, 1, 366], ['W', 'Weeks', 604800, 1, 52], ['M', 'Months', 2592000, 1, 12]];
+function visOnTf(d){ if (!d.vis) return true; const tf = S.tfMs/1000;
+  for (let i = TF_CAT.length - 1; i >= 0; i--){ const [k, , sec] = TF_CAT[i]; if (tf >= sec){ const v = d.vis[k]; if (!v) return true; const n = Math.round(tf/sec); return v[0] && n >= v[1] && n <= v[2]; } }
+  return true; }
+const STYLE_KEYS = ['color', 'w', 'ls', 'ext', 'bg', 'bgA', 'bgC', 'lv', 'one', 'oneC', 'rev', 'prices', 'lbl', 'lvMode', 'lblH', 'lblV', 'fs', 'tl', 'tlc', 'mid', 'stats', 'bold', 'italic', 'vis'];
+const styleOf = d => { const o = {}; for (const k of STYLE_KEYS) if (d[k] !== undefined) o[k] = JSON.parse(JSON.stringify(d[k])); return o; };
+const selD = () => drawings.find(z => z.id === selId);
+const PALETTE = ['#ffffff','#d1d4dc','#b2b5be','#9598a1','#787b86','#5d606b','#434651','#2a2e39','#131722','#000000',
+  '#f23645','#ff9800','#ffeb3b','#4caf50','#089981','#00bcd4','#2962ff','#673ab7','#9c27b0','#e91e63',
+  '#fccbcd','#ffe0b2','#fff9c4','#c8e6c9','#ace5dc','#b2ebf2','#bbd9fb','#d1c4e9','#e1bee7','#f8bbd0',
+  '#f7525f','#ffb74d','#fff176','#81c784','#42bda8','#4dd0e1','#5b9cf6','#9575cd','#ba68c8','#f06292',
+  '#b22833','#f57c00','#fbc02d','#388e3c','#056656','#0097a7','#1848cc','#512da8','#7b1fa2','#c2185b'];
+
+// floating bar for the selected drawing
+let sbFor = null;
+function syncSelBar(){
+  const d = selD(), bar = $('selBar'); sbFor = selId;
+  if (!d){ bar.style.display = 'none'; $('sbPop').style.display = 'none'; return; }
+  bar.style.display = 'flex'; $('sbColI').style.background = d.color || drawColor; $('sbWI').style.height = Math.max(1, Math.round(d.w || 1.5)) + 'px';
+  $('sbLock').textContent = d.lock ? '🔒' : '🔓'; $('sbLock').classList.toggle('on', !!d.lock); $('sbLs').textContent = d.ls === 'dash' ? '╌' : d.ls === 'dot' ? '┈' : '━';
+}
+function sbPop(btn, html, wire){ const pop = $('sbPop'), wr = wrap.getBoundingClientRect(), br = btn.getBoundingClientRect();
+  if (pop.style.display === 'block' && pop._for === btn.id){ pop.style.display = 'none'; return; }
+  pop.innerHTML = html; pop.style.display = 'block'; pop._for = btn.id;
+  pop.style.left = clamp(br.left - wr.left, 6, wr.width - pop.offsetWidth - 6) + 'px'; pop.style.top = (br.bottom - wr.top + 6) + 'px'; wire(pop); }
+const sbDone = () => { $('sbPop').style.display = 'none'; saveDraw(); syncSelBar(); dirty = true; };
+function colorPop(btn, cur, set, alpha){
+  sbPop(btn, `<div class="pal">${PALETTE.map(c => `<i data-c="${c}" style="background:${c}"${c === cur ? ' class="on"' : ''}></i>`).join('')}</div>
+    <hr><div style="display:flex;align-items:center;gap:8px">Custom <input type="color" id="pcCus" value="${cur || '#4fb3ff'}">${alpha ? `<span style="margin-left:auto">Opacity</span><input type="range" id="pcA" min="0" max="100" value="${Math.round(alpha.get()*100)}" style="width:110px">` : ''}</div>`,
+    pop => { pop.querySelectorAll('[data-c]').forEach(i => i.onclick = () => { set(i.dataset.c); sbDone(); });
+      pop.querySelector('#pcCus').oninput = e => { set(e.target.value); saveDraw(); syncSelBar(); dirty = true; };
+      if (alpha) pop.querySelector('#pcA').oninput = e => { alpha.set(e.target.value/100); saveDraw(); dirty = true; }; });
+}
+function tplMenu(btn, d, after){
+  const saved = (() => { try{ return JSON.parse(localStorage.getItem('fpTpl_' + d.type) || '{}'); }catch(e){ return {}; } })();
+  sbPop(btn, `<div class="it" data-a="save">Save drawing template as…</div><div class="it" data-a="def">Save as default for new ${TL[d.type] ? TL[d.type].name : d.type}</div><div class="it" data-a="reset">Apply default drawing template</div>
+    ${Object.keys(saved).length ? '<hr>' + Object.keys(saved).map(n => `<div class="it" data-t="${n.replace(/"/g, '&quot;')}">▦ ${n}</div>`).join('') : ''}`, pop => {
+    pop.querySelectorAll('[data-a]').forEach(it => it.onclick = () => { const a = it.dataset.a;
+      if (a === 'save'){ const n = (window.prompt('Template name:') || '').trim(); if (!n) return; saved[n] = styleOf(d); try{ localStorage.setItem('fpTpl_' + d.type, JSON.stringify(saved)); }catch(e){} toast('Template "' + n + '" saved'); }
+      if (a === 'def'){ const st = styleOf(d); delete st.color; try{ localStorage.setItem('fpTplDef_' + d.type, JSON.stringify(st)); }catch(e){} toast('New drawings of this kind will use this style'); }
+      if (a === 'reset'){ for (const k of STYLE_KEYS) if (k !== 'color') delete d[k]; try{ localStorage.removeItem('fpTplDef_' + d.type); }catch(e){} toast('Default style applied'); }
+      sbDone(); if (after) after(); });
+    pop.querySelectorAll('[data-t]').forEach(it => it.onclick = () => { Object.assign(d, JSON.parse(JSON.stringify(saved[it.dataset.t]))); sbDone(); if (after) after(); });
+  });
+}
+function addAlertFrom(d){
+  const lv = (d.type === 'fib' || d.type === 'fibext') ? fibLv(d).filter(l => l.on) : null; let price;
+  if (lv){ const pick = window.prompt('Alert on which level? ' + lv.map(l => l.v).join(', '), '0.618'); if (pick == null) return; const L = +pick;
+    if (d.type === 'fib'){ const p1 = d.pts[0].p, p2 = d.pts[1].p; price = p2 + (p1 - p2)*L; } else { const [a, b, c] = d.pts; price = c.p + (b.p - a.p)*L; } }
+  else price = d.pts[d.pts.length - 1].p;
+  if (alertCount() >= 5) return toast('Maximum 5 alerts per symbol — delete one first');
+  drawings.push({id:Date.now() + '' + Math.random(), type:'alert', color:COL.gold, pts:[{t:d.pts[0].t, p:price}]}); saveDraw(); alertCount(); toast('🔔 Alert set at ' + P(price)); dirty = true;
+}
+function moreMenu(btn, d){
+  sbPop(btn, `<div class="it" data-a="alert">⏰ Add alert on ${TL[d.type] ? TL[d.type].name : 'drawing'}…</div><hr>
+    <div class="it" data-a="front">⇡ Bring to front</div><div class="it" data-a="back">⇣ Send to back</div><div class="it" data-a="fwd">↑ Bring forward</div><div class="it" data-a="bwd">↓ Send backward</div><hr>
+    <div class="it" data-a="clone">⧉ Clone</div><div class="it" data-a="lock">${d.lock ? '🔓 Unlock' : '🔒 Lock'}</div><div class="it" data-a="hide">🙈 Hide</div><div class="it" data-a="del">🗑 Remove</div><hr>
+    <div class="it" data-a="set">⚙ Settings…</div>`, pop => pop.querySelectorAll('[data-a]').forEach(it => it.onclick = () => {
+      const a = it.dataset.a, i = drawings.indexOf(d);
+      if (a === 'alert') addAlertFrom(d);
+      if (a === 'front'){ drawings.splice(i, 1); drawings.push(d); } if (a === 'back'){ drawings.splice(i, 1); drawings.unshift(d); }
+      if (a === 'fwd' && i < drawings.length - 1){ drawings[i] = drawings[i + 1]; drawings[i + 1] = d; } if (a === 'bwd' && i > 0){ drawings[i] = drawings[i - 1]; drawings[i - 1] = d; }
+      if (a === 'clone'){ const c = JSON.parse(JSON.stringify(d)); c.id = Date.now() + '' + Math.random(); const sh = Math.max(2, Math.round(8*12/Math.max(V.cw, 1)));
+        c.pts = c.pts.map(q => ({t:idxT(tIdx(q.t) + sh), p:q.p})); drawings.push(c); selId = c.id; toast('Cloned'); }
+      if (a === 'lock') d.lock = !d.lock;
+      if (a === 'hide'){ d.hid = true; selId = null; toast('Hidden — tap the 👁 button in the toolbar to show it again'); }
+      if (a === 'del'){ deleteSelected(); }
+      if (a === 'set'){ $('sbPop').style.display = 'none'; openDs(d); return; }
+      sbDone(); }));
+}
+$('sbCol').onclick = e => { const d = selD(); if (!d) return; colorPop($('sbCol'), d.color, c => d.color = c, (d.type === 'fib' || d.type === 'fibext' || (TL[d.type] && TL[d.type].area) || ['rect', 'range'].includes(d.type)) ? {get:() => d.bgA != null ? d.bgA : .13, set:v => d.bgA = v} : null); };
+$('sbW').onclick = () => { const d = selD(); if (!d) return; sbPop($('sbW'), [1, 2, 3, 4].map(w => `<div class="it" data-w="${w}"><i style="display:inline-block;width:34px;height:${w}px;background:var(--txt)"></i>${w}px</div>`).join(''),
+  pop => pop.querySelectorAll('[data-w]').forEach(it => it.onclick = () => { d.w = +it.dataset.w; sbDone(); })); };
+$('sbLs').onclick = () => { const d = selD(); if (!d) return; sbPop($('sbLs'), [['solid', '━━━ Solid'], ['dash', '╌╌╌ Dashed'], ['dot', '┈┈┈ Dotted']].map(([k, n]) => `<div class="it" data-l="${k}">${n}</div>`).join(''),
+  pop => pop.querySelectorAll('[data-l]').forEach(it => it.onclick = () => { d.ls = it.dataset.l; sbDone(); })); };
+$('sbLock').onclick = () => { const d = selD(); if (d){ d.lock = !d.lock; toast(d.lock ? 'Locked — it can be selected but not moved' : 'Unlocked'); sbDone(); } };
+$('sbDel').onclick = () => { deleteSelected(); syncSelBar(); };
+$('sbSet').onclick = () => { const d = selD(); if (d) openDs(d); };
+$('sbTpl').onclick = () => { const d = selD(); if (d) tplMenu($('sbTpl'), d); };
+$('sbMore').onclick = () => { const d = selD(); if (d) moreMenu($('sbMore'), d); };
+for (const id of ['selBar', 'sbPop']){ $(id).addEventListener('pointerdown', e => e.stopPropagation()); }
+
+// settings dialog: Style · (Text) · Coordinates · Visibility
+let dsD = null, dsBak = null, dsTab = 'style';
+function openDs(d){ dsD = d; dsBak = JSON.parse(JSON.stringify(d)); dsTab = 'style'; $('dsTitle').textContent = TL[d.type] ? TL[d.type].name : d.type; renderDs(); $('dsModal').classList.add('open'); $('sbPop').style.display = 'none'; }
+function renderDs(){
+  const d = dsD, isFib = d.type === 'fib' || d.type === 'fibext', isLine = ['trend', 'ray', 'ext', 'fib', 'fibext', 'hray', 'info', 'angle'].includes(d.type) || isFib, isTxt = d.type === 'text' || (TL[d.type] && TL[d.type].txt) || d.type.startsWith('g:');
+  const area = ['rect', 'range'].includes(d.type) || (TL[d.type] && TL[d.type].area) || isFib;
+  const tabs = [['style', 'Style'], ...(isTxt ? [['text', 'Text']] : []), ['coords', 'Coordinates'], ['vis', 'Visibility']];
+  $('dsTabs').innerHTML = tabs.map(([k, n]) => `<button data-t="${k}"${k === dsTab ? ' class="on"' : ''}>${n}</button>`).join('');
+  $('dsTabs').querySelectorAll('button').forEach(b => b.onclick = () => { dsTab = b.dataset.t; renderDs(); });
+  const sel = (id, opts, v) => `<select id="${id}">${opts.map(([k, n]) => `<option value="${k}"${String(k) === String(v) ? ' selected' : ''}>${n}</option>`).join('')}</select>`;
+  let h = '';
+  if (dsTab === 'style'){
+    h += `<div class="r"><label>${isFib ? '<input type="checkbox" id="dsTl"' + (d.tl !== false ? ' checked' : '') + '> Trend line' : 'Line'}</label><input type="color" id="dsCol" value="${isFib ? (d.tlc || d.color || drawColor) : (d.color || drawColor)}">
+      ${sel('dsW', [[1, '1px'], [2, '2px'], [3, '3px'], [4, '4px']], String(Math.round(d.w || (isFib ? 1 : 1.5))))} ${sel('dsLs', [['solid', 'Solid'], ['dash', 'Dashed'], ['dot', 'Dotted']], d.ls || 'solid')}</div>`;
+    if (isLine) h += `<div class="r"><label>Extend</label>${sel('dsExt', [['', "Default"], ['none', "Don't extend"], ['left', 'Extend left'], ['right', 'Extend right'], ['both', 'Extend both']], d.ext || '')}</div>`;
+    if (['trend', 'ray', 'ext'].includes(d.type)) h += `<div class="r"><label><input type="checkbox" id="dsMid"${d.mid ? ' checked' : ''}> Middle point</label><label><input type="checkbox" id="dsStats"${d.stats ? ' checked' : ''}> Price / % / bars label</label></div>`;
+    if (isFib){ const lv = fibLv(d);
+      h += `<div class="lvg">${lv.map((l, i) => `<div><input type="checkbox" data-lo="${i}"${l.on ? ' checked' : ''}><input type="number" step="0.001" data-lv="${i}" value="${l.v}"${l.on ? '' : ' disabled'}><input type="color" data-lc="${i}" value="${l.c}"></div>`).join('')}</div>
+      <div class="r"><label><input type="checkbox" id="dsOne"${d.one ? ' checked' : ''}> Use one color</label><input type="color" id="dsOneC" value="${d.oneC || d.color || drawColor}"></div>
+      <div class="r"><label><input type="checkbox" id="dsBg"${d.bg !== false ? ' checked' : ''}> Background</label><input type="range" id="dsBgA" min="0" max="60" value="${Math.round((d.bgA != null ? d.bgA : .12)*100)}" style="width:170px"></div>
+      <div class="r"><label><input type="checkbox" id="dsRev"${d.rev ? ' checked' : ''}> Reverse</label><label><input type="checkbox" id="dsPr"${d.prices !== false ? ' checked' : ''}> Prices</label></div>
+      <div class="r"><label><input type="checkbox" id="dsLbl"${d.lbl !== false ? ' checked' : ''}> Levels</label>${sel('dsLvM', [['values', 'Values'], ['percent', 'Percents']], d.lvMode || 'values')}</div>
+      <div class="r"><label>Labels</label>${sel('dsLH', [['left', 'Left'], ['right', 'Right']], d.lblH || 'left')} ${sel('dsLV', [['top', 'Top'], ['middle', 'Middle'], ['bottom', 'Bottom']], d.lblV || 'middle')}</div>
+      <div class="r"><label>Font size</label>${sel('dsFs', [10, 11, 12, 14, 16, 20, 24].map(v => [v, v]), String(d.fs || 11))}</div>`; }
+    else if (area) h += `<div class="r"><label><input type="checkbox" id="dsBg"${d.bg !== false ? ' checked' : ''}> Background</label><input type="color" id="dsBgC" value="${d.bgC || d.color || drawColor}"><input type="range" id="dsBgA" min="0" max="80" value="${Math.round((d.bgA != null ? d.bgA : .13)*100)}" style="width:150px"></div>`;
+  }
+  if (dsTab === 'text'){
+    h += `<div class="r"><label>Size</label>${sel('dsFs', [10, 11, 12, 13, 14, 16, 20, 24, 28, 32, 40, 48].map(v => [v, v]), String(d.fs || (d.type.startsWith('g:') ? (d.type.includes('sticker') ? 14 : 28) : 13)))}</div>
+      <div class="r"><label>Colour</label><input type="color" id="dsCol" value="${d.color || drawColor}"></div>`;
+    if (!d.type.startsWith('g:')) h += `<div class="r"><label><input type="checkbox" id="dsBold"${d.bold !== false ? ' checked' : ''}> Bold</label><label><input type="checkbox" id="dsIt"${d.italic ? ' checked' : ''}> Italic</label></div>
+      <div class="r" style="align-items:flex-start"><label>Text</label><textarea id="dsTxt" rows="3" style="flex:1;background:var(--inbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:6px;font:inherit">${(d.text || '').replace(/</g, '&lt;')}</textarea></div>`;
+  }
+  if (dsTab === 'coords'){
+    const pts = (d.type === 'long' || d.type === 'short') ? posPts(d) : d.pts;
+    h += pts.slice(0, 12).map((q, i) => `<div class="r"><label>#${i + 1} (price, bar)</label><input type="number" step="any" data-cp="${i}" value="${(+P(q.p))}"><input type="number" step="1" data-cb="${i}" value="${Math.round(tIdx(q.t))}"></div>`).join('')
+      + `<div style="color:var(--dim);font-size:11px">Bar = candle number on this chart (0 = oldest loaded candle).</div>`;
+  }
+  if (dsTab === 'vis'){
+    const v = d.vis || {};
+    h += TF_CAT.map(([k, n, , a, b]) => { const x = v[k] || [true, a, b];
+      return `<div class="r"><label><input type="checkbox" data-vo="${k}"${x[0] ? ' checked' : ''}> ${n}</label><input type="number" data-va="${k}" value="${x[1]}" min="${a}" max="${b}"> — <input type="number" data-vb="${k}" value="${x[2]}" min="${a}" max="${b}"></div>`; }).join('')
+      + `<div style="color:var(--dim);font-size:11px">Untick a row to hide this drawing on those timeframes.</div>`;
+  }
+  $('dsBody').innerHTML = h; wireDs();
+}
+function wireDs(){
+  const d = dsD, B = $('dsBody'), q = id => B.querySelector('#' + id), upd = () => { dirty = true; };
+  const on = (id, ev, f) => { const el = q(id); if (el) el.addEventListener(ev, e => { f(e.target); upd(); }); };
+  const isFib = d.type === 'fib' || d.type === 'fibext';
+  on('dsCol', 'input', t => { if (isFib && dsTab === 'style') d.tlc = t.value; else d.color = t.value; });
+  on('dsTl', 'change', t => d.tl = t.checked); on('dsW', 'change', t => d.w = +t.value); on('dsLs', 'change', t => d.ls = t.value);
+  on('dsExt', 'change', t => { if (t.value) d.ext = t.value; else delete d.ext; }); on('dsMid', 'change', t => d.mid = t.checked); on('dsStats', 'change', t => d.stats = t.checked);
+  on('dsOne', 'change', t => d.one = t.checked); on('dsOneC', 'input', t => { d.oneC = t.value; });
+  on('dsBg', 'change', t => d.bg = t.checked); on('dsBgA', 'input', t => d.bgA = t.value/100); on('dsBgC', 'input', t => d.bgC = t.value);
+  on('dsRev', 'change', t => d.rev = t.checked); on('dsPr', 'change', t => d.prices = t.checked); on('dsLbl', 'change', t => d.lbl = t.checked);
+  on('dsLvM', 'change', t => d.lvMode = t.value); on('dsLH', 'change', t => d.lblH = t.value); on('dsLV', 'change', t => d.lblV = t.value); on('dsFs', 'change', t => d.fs = +t.value);
+  on('dsBold', 'change', t => d.bold = t.checked); on('dsIt', 'change', t => d.italic = t.checked); on('dsTxt', 'input', t => d.text = t.value);
+  B.querySelectorAll('[data-lo]').forEach(el => el.onchange = () => { const i = +el.dataset.lo; fibLv(d)[i].on = el.checked; B.querySelector(`[data-lv="${i}"]`).disabled = !el.checked; upd(); });
+  B.querySelectorAll('[data-lv]').forEach(el => el.oninput = () => { const v = parseFloat(el.value); if (isFinite(v)){ fibLv(d)[+el.dataset.lv].v = v; upd(); } });
+  B.querySelectorAll('[data-lc]').forEach(el => el.oninput = () => { fibLv(d)[+el.dataset.lc].c = el.value; upd(); });
+  const pos = d.type === 'long' || d.type === 'short';
+  if (pos && d.pts.length < 3) d.pts = posPts(d);
+  B.querySelectorAll('[data-cp]').forEach(el => el.oninput = () => { const v = parseFloat(el.value), i = +el.dataset.cp; if (isFinite(v) && d.pts[i]){ d.pts[i].p = v; upd(); } });
+  B.querySelectorAll('[data-cb]').forEach(el => el.oninput = () => { const v = parseInt(el.value), i = +el.dataset.cb; if (isFinite(v) && d.pts[i]){ d.pts[i].t = idxT(v); if (pos && i > 0) d.pts[1].t = d.pts[2].t = idxT(v); upd(); } });
+  B.querySelectorAll('[data-vo],[data-va],[data-vb]').forEach(el => el.onchange = () => {
+    d.vis = d.vis || {}; for (const [k, , , a, b] of TF_CAT){ const o = B.querySelector(`[data-vo="${k}"]`).checked, x = clamp(+B.querySelector(`[data-va="${k}"]`).value || a, a, b), y = clamp(+B.querySelector(`[data-vb="${k}"]`).value || b, a, b); d.vis[k] = [o, Math.min(x, y), Math.max(x, y)]; }
+    if (Object.entries(d.vis).every(([k, v]) => { const c = TF_CAT.find(z => z[0] === k); return v[0] && v[1] === c[3] && v[2] === c[4]; })) delete d.vis; upd(); });
+}
+$('dsOk').onclick = () => { $('dsModal').classList.remove('open'); saveDraw(); syncSelBar(); alertCount(); dirty = true; };
+const dsCancel = () => { if (dsD && dsBak){ for (const k of Object.keys(dsD)) delete dsD[k]; Object.assign(dsD, dsBak); } $('dsModal').classList.remove('open'); syncSelBar(); dirty = true; };
+$('dsCancel').onclick = dsCancel; $('dsX').onclick = dsCancel;
+$('dsModal').addEventListener('click', e => { if (e.target.id === 'dsModal') dsCancel(); });
+$('dsMore').onclick = () => { if (!dsD) return; const keep = selId; selId = dsD.id; tplMenu($('dsMore'), dsD, renderDs); $('sbPop').style.zIndex = 60; selId = keep; };
+cv.addEventListener('dblclick', e => { const r = cv.getBoundingClientRect(), hd = hitDraw(e.clientX - r.left, e.clientY - r.top, false); if (hd){ selId = hd.d.id; openDs(hd.d); } });
+
 function hexA(hex, a){ const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; }
 function distSeg(x, y, a, b){ const dx = b.x - a.x, dy = b.y - a.y, L = dx*dx + dy*dy; let t = L ? ((x - a.x)*dx + (y - a.y)*dy)/L : 0; t = clamp(t, 0, 1); return Math.hypot(x - a.x - t*dx, y - a.y - t*dy); }
 function hitDraw(x, y, touch){
   if (hideDraw || (lockDraw && tool !== 'eraser')) return null;
   const R = touch ? 16 : 8;
   for (let i = drawings.length - 1; i >= 0; i--){
-    const d = drawings[i], Q = scr(d), A = Q[0], B = Q[1] || Q[0];
+    const d = drawings[i]; if (d.hid || !visOnTf(d)) continue; const Q = scr(d), A = Q[0], B = Q[1] || Q[0];
     if (d.id === selId){ const H = handlesOf(d, Q); for (let h = 0; h < H.length; h++) if (Math.hypot(H[h].x - x, H[h].y - y) < R + 3) return {d, h}; }
     const inBox = (a, b) => x >= Math.min(a.x, b.x) - R && x <= Math.max(a.x, b.x) + R && y >= Math.min(a.y, b.y) - R && y <= Math.max(a.y, b.y) + R;
     let hit = false;
     switch (d.type){
-      case 'trend': case 'ray': case 'ext': { const [a, b] = extendSeg(A, B, d.type === 'ext', d.type !== 'trend'); hit = distSeg(x, y, a, b) < R; break; }
+      case 'trend': case 'ray': case 'ext': { const ex = lineExt(d); const [a, b] = extendSeg(A, B, ex.l, ex.r); hit = distSeg(x, y, a, b) < R; break; }
       case 'hline': case 'alert': hit = Math.abs(y - A.y) < R; break;
       case 'hray': hit = Math.abs(y - A.y) < R && x >= A.x - R; break;
       case 'vline': hit = Math.abs(x - A.x) < R; break;
-      case 'rect': case 'range': case 'fib': hit = inBox(A, B); break;
+      case 'rect': case 'range': hit = inBox(A, B); break;
+      case 'fib': { const p1 = d.pts[0].p, p2 = (d.pts[1] || d.pts[0]).p, lv = fibLv(d).filter(l => l.on); if (!lv.length){ hit = inBox(A, B); break; }
+        const ys = lv.map(l => yOf(p2 + (p1 - p2)*l.v)), ex = lineExt(d), xa = ex.l ? 0 : Math.min(A.x, B.x), xb = ex.r ? pw() : Math.max(A.x, B.x);
+        hit = x >= xa - R && x <= xb + R && y >= Math.min(...ys) - R && y <= Math.max(...ys) + R; break; }
       case 'long': case 'short': hit = inBox({x:Math.min(Q[0].x, Q[1].x), y:Math.min(Q[1].y, Q[2].y)}, {x:Math.max(Q[0].x, Q[1].x), y:Math.max(Q[1].y, Q[2].y)}); break;
       case 'text': hit = x >= A.x - 6 && x <= A.x + 9*(d.text || '').length + 10 && Math.abs(y - A.y) < 14; break;
       case 'brush': for (let k = 1; k < Q.length && !hit; k++) hit = distSeg(x, y, Q[k - 1], Q[k]) < R; break;
@@ -2359,6 +2643,140 @@ function makeMovable(el, handle, key){
   handle.addEventListener('pointerup', e => { if (st && st.moved){ el._noClick = true; setTimeout(() => el._noClick = false, 0); try{ localStorage.setItem('pos_' + key, JSON.stringify({l:parseFloat(el.style.left), t:parseFloat(el.style.top)})); }catch(err){} } st = null; });
 }
 
+// ───────── Analysis hub ─────────
+let chartType = 'candles'; try{ chartType = localStorage.getItem('chartType') || 'candles'; }catch(e){}
+const cmp = {on:false, sym:'', data:new Map(), timer:null, col:'#ffb02e'};
+const TF_BN = {60:'1m', 180:'3m', 300:'5m', 900:'15m', 1800:'30m', 3600:'1h', 14400:'4h'}, TF_BY = {60:'1', 180:'3', 300:'5', 900:'15', 1800:'30', 3600:'60', 14400:'240'};
+async function loadCompare(){
+  if (!cmp.on || !S.src) return; const src = S.src, tf = +$('tf').value;
+  if (src.kind === 'fx'){ toast('Compare works on crypto / Bybit gold symbols'); return; }
+  try{
+    let rows;
+    if (src.kind === 'bn'){ const arr = await getJSON(src, `${src.pre}/klines?symbol=${cmp.sym}&interval=${TF_BN[tf]}&limit=1000`); rows = arr.map(k => [+k[0], +k[4]]); }
+    else { const j = await getJSON(src, `/v5/market/kline?category=${src.cat}&symbol=${cmp.sym}&interval=${TF_BY[tf]}&limit=1000`); rows = ((j.result && j.result.list) || []).map(k => [+k[0], +k[4]]); }
+    if (!rows.length) throw new Error('no data');
+    cmp.data = new Map(rows); dirty = true;
+  }catch(e){ toast(`Compare: couldn't load ${cmp.sym} (${e.message || e})`); }
+  clearTimeout(cmp.timer); cmp.timer = setTimeout(loadCompare, 30000);
+}
+function drawCompare(PW, a, b){
+  const C = S.candles; let base = null;
+  for (let i = a; i <= b && base == null; i++){ const v = cmp.data.get(C[i].t); if (v) base = [C[i].c, v]; }
+  if (!base) return;
+  ctx.strokeStyle = cmp.col; ctx.lineWidth = 1.6; ctx.beginPath(); let on = false, last = null;
+  for (let i = a; i <= b; i++){ const v = cmp.data.get(C[i].t); if (v == null){ continue; } const y = yOf(base[0]*v/base[1]); on ? ctx.lineTo(xF(i), y) : ctx.moveTo(xF(i), y); on = true; last = [i, v, y]; }
+  ctx.stroke(); ctx.lineWidth = 1;
+  if (last){ const pc = 100*(last[1]/base[1] - 1); ctx.fillStyle = cmp.col; ctx.font = '600 11px -apple-system,Segoe UI,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.fillText(`${cmp.sym} ${pc >= 0 ? '+' : ''}${pc.toFixed(2)}%`, PW - 6, last[2] - 4); }
+}
+const LAYOUT_KEYS = k => /^(set_|fp(On|Min|Mode)$|bigTh|bigOn|rowMul|botPane|posQty|chartType|klMin|lgMin|ppMin|lensF|theme|upCol|dnCol|gridOn|vpMode|whTh)/.test(k);
+const getLayouts = () => { try{ return JSON.parse(localStorage.getItem('fpLayouts') || '{}'); }catch(e){ return {}; } };
+const setLayouts = o => { try{ localStorage.setItem('fpLayouts', JSON.stringify(o)); }catch(e){} };
+let curLayout = ''; try{ curLayout = localStorage.getItem('fpCurLayout') || ''; }catch(e){}
+function snapLayout(){ const ls = {}; try{ for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (LAYOUT_KEYS(k)) ls[k] = localStorage.getItem(k); } }catch(e){}
+  return {sym:$('sym').value, mkt:$('mkt').value, tf:$('tf').value, ls, cmp:cmp.on ? cmp.sym : '', at:Date.now()}; }
+function openLayout(n){ const L = getLayouts()[n]; if (!L) return;
+  try{ for (const [k, v] of Object.entries(L.ls || {})) localStorage.setItem(k, v); localStorage.setItem('fpLast', JSON.stringify({sym:L.sym, mkt:L.mkt, tf:L.tf, go:1, cmp:L.cmp || ''})); localStorage.setItem('fpCurLayout', n); }catch(e){}
+  location.reload(); }
+const hubTile = (id, ic, nm, cls = '') => `<div class="ht ${cls}" data-h="${id}"><i>${ic}</i>${nm}</div>`;
+function hubHome(){
+  $('hubTitle').textContent = 'Analysis hub';
+  $('hubBody').innerHTML = `<div class="hg">${hubTile('layouts', '▭', 'Layout setup')}${hubTile('manage', '🗂', 'Manage ' + (curLayout ? curLayout.replace(/</g, '') : 'Unnamed'))}${hubTile('settings', '⚙', 'Chart settings')}
+    ${hubTile('new', '＋', 'New')}${hubTile('save', '☁', 'Save' + (curLayout ? '' : ' as…'))}${hubTile('open', '📂', 'Open')}</div>
+    <div class="hg">${hubTile('broker', '🤝', 'Trade with your broker', 'brk')}</div>
+    <div class="hsec">TOOLS</div>
+    <div class="hg two">${hubTile('ind', '📊', 'Indicators')}${hubTile('compare', '⊕', 'Compare' + (cmp.on ? ' · ' + cmp.sym : ''))}${hubTile('alerts', '⏰', 'Alerts')}${hubTile('replay', '⏪', 'Bar replay')}</div>
+    <div class="hg">${hubTile('itpl', '▦', 'Indicator templates')}${hubTile('ctype', '🕯', 'Chart type')}${hubTile('tree', '≋', 'Object tree')}</div>`;
+  $('hubBody').querySelectorAll('[data-h]').forEach(t => t.onclick = () => hubGo(t.dataset.h));
+}
+const hubBack = () => `<button class="hback" id="hubBack">‹ Back</button>`;
+function hubPage(title, html, wire){ $('hubTitle').textContent = title; $('hubBody').innerHTML = hubBack() + html; $('hubBack').onclick = hubHome; if (wire) wire($('hubBody')); }
+function hubGo(k){
+  const close = () => $('hubModal').classList.remove('open');
+  if (k === 'settings'){ close(); setTimeout(() => $('setBtn').click(), 50); return; }
+  if (k === 'ind'){ close(); setTimeout(() => $('indBtn').click(), 50); return; }
+  if (k === 'replay'){ close(); $('bRp').click(); return; }
+  if (k === 'new'){ if (!window.confirm('Start a new blank layout? (Your saved layouts are kept.)')) return;
+    try{ for (const key of Object.keys(snapLayout().ls)) localStorage.removeItem(key); localStorage.removeItem('fpCurLayout'); }catch(e){} location.reload(); return; }
+  if (k === 'save' || k === 'saveas'){ let n = k === 'save' ? curLayout : '';
+    if (!n) n = (window.prompt('Layout name:', S.sym ? `${S.sym} ${$('tf').selectedOptions[0].text}` : 'My layout') || '').trim(); if (!n) return;
+    const L = getLayouts(); L[n] = snapLayout(); setLayouts(L); curLayout = n; try{ localStorage.setItem('fpCurLayout', n); }catch(e){} toast(`Layout "${n}" saved ✓`); hubHome(); return; }
+  if (k === 'open' || k === 'manage' || k === 'layouts'){
+    const L = getLayouts(), names = Object.keys(L).sort((x, y) => L[y].at - L[x].at);
+    hubPage(k === 'open' ? 'Open layout' : 'Manage layouts', (names.length ? names.map(n => `<div class="hrow"><span class="nm">${n === curLayout ? '● ' : ''}<b>${n.replace(/</g, '&lt;')}</b> <span style="color:var(--dim)">· ${L[n].sym} · ${TF_BN[L[n].tf] || L[n].tf}</span></span>
+      <button data-o="${encodeURIComponent(n)}" title="Open">📂</button><button data-r="${encodeURIComponent(n)}" title="Rename">✎</button><button data-d="${encodeURIComponent(n)}" title="Delete">🗑</button></div>`).join('')
+      : '<p style="color:var(--dim)">No saved layouts yet.</p>') + `<div style="display:flex;gap:8px;margin-top:12px"><button class="mbtn pri" id="hSaveAs">Save current as…</button></div>
+      <p style="color:var(--dim);font-size:11px">A layout keeps the symbol, market, timeframe, indicators, chart type and settings. Drawings are saved per symbol automatically.</p>`, B => {
+      B.querySelectorAll('[data-o]').forEach(b => b.onclick = () => openLayout(decodeURIComponent(b.dataset.o)));
+      B.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { const o = decodeURIComponent(b.dataset.r), n = (window.prompt('New name:', o) || '').trim(); if (!n || n === o) return; const L2 = getLayouts(); L2[n] = L2[o]; delete L2[o]; setLayouts(L2); if (curLayout === o){ curLayout = n; try{ localStorage.setItem('fpCurLayout', n); }catch(e){} } hubGo(k); });
+      B.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { const n = decodeURIComponent(b.dataset.d); if (!window.confirm(`Delete layout "${n}"?`)) return; const L2 = getLayouts(); delete L2[n]; setLayouts(L2); if (curLayout === n){ curLayout = ''; try{ localStorage.removeItem('fpCurLayout'); }catch(e){} } hubGo(k); });
+      B.querySelector('#hSaveAs').onclick = () => hubGo('saveas'); }); return; }
+  if (k === 'ctype'){ const T = [['candles', '🕯', 'Candles'], ['hollow', '◻', 'Hollow candles'], ['bars', '⫶', 'Bars (OHLC)'], ['ha', '🕯', 'Heikin Ashi'], ['line', '⟋', 'Line'], ['area', '◭', 'Area']];
+    hubPage('Chart type', `<div class="hg">${T.map(([k2, ic, n]) => hubTile('ct:' + k2, ic, n, chartType === k2 ? 'on' : '')).join('')}</div><p style="color:var(--dim);font-size:11px">Footprint candles (FP) still show their numbers when zoomed in.</p>`, B => {
+      B.querySelectorAll('[data-h]').forEach(t => { if (t.dataset.h.slice(3) === chartType) t.style.borderColor = 'var(--acc)';
+        t.onclick = () => { chartType = t.dataset.h.slice(3); try{ localStorage.setItem('chartType', chartType); }catch(e){} dirty = true; hubGo('ctype'); }; }); }); return; }
+  if (k === 'compare'){
+    hubPage('Compare', `<div class="r" style="display:flex;gap:8px;align-items:center"><input id="cmpS" placeholder="e.g. BTCUSDT, XAGUSDT" value="${cmp.sym}" style="flex:1;background:var(--inbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:8px"><input type="color" id="cmpC" value="${cmp.col}"></div>
+      <div style="display:flex;gap:8px;margin-top:10px"><button class="mbtn pri" id="cmpGo">Add / update</button><button class="mbtn" id="cmpOff">Remove</button></div>
+      <p style="color:var(--dim);font-size:12px">Draws the other symbol as a line on your chart, scaled to start at the same point, with its % change. Uses the same exchange as your chart.</p>
+      <div class="hsec" style="margin-top:12px">QUICK PICKS</div><div class="hg">${['BTCUSDT', 'ETHUSDT', 'XAGUSDT', 'SOLUSDT', 'PAXGUSDT', 'XAUUSDT'].map(x => `<div class="ht" data-q="${x}">${x}</div>`).join('')}</div>`, B => {
+      const go = v => { cmp.sym = v.trim().toUpperCase().replace(/[\/\-\s]/g, ''); if (!cmp.sym) return; cmp.on = true; cmp.data = new Map(); try{ localStorage.setItem('fpCmp', cmp.sym); }catch(e){} loadCompare(); toast('Comparing with ' + cmp.sym); close(); };
+      B.querySelector('#cmpGo').onclick = () => go(B.querySelector('#cmpS').value);
+      B.querySelector('#cmpC').oninput = e => { cmp.col = e.target.value; dirty = true; };
+      B.querySelector('#cmpOff').onclick = () => { cmp.on = false; cmp.data = new Map(); clearTimeout(cmp.timer); try{ localStorage.removeItem('fpCmp'); }catch(e){} dirty = true; hubHome(); };
+      B.querySelectorAll('[data-q]').forEach(t => t.onclick = () => go(t.dataset.q)); }); return; }
+  if (k === 'itpl'){ const T = (() => { try{ return JSON.parse(localStorage.getItem('fpIndTpl') || '{}'); }catch(e){ return {}; } })(), names = Object.keys(T);
+    const preset = {'Order flow':{fp:1, xray:1, whales:1, prints:1, levels:1, senti:1, imb:1}, 'Sessions trader':{sess:1, vwap:1, levels:1, cvd:1, prints:1}, 'Clean chart':{}};
+    hubPage('Indicator templates', `<div class="hsec">BUILT-IN</div>${Object.keys(preset).map(n => `<div class="hrow"><span class="nm">${n}</span><button data-p="${n}">Apply</button></div>`).join('')}
+      <div class="hsec" style="margin-top:12px">YOURS</div>${names.length ? names.map(n => `<div class="hrow"><span class="nm">${n.replace(/</g, '&lt;')} <span style="color:var(--dim)">· ${Object.keys(T[n]).filter(x => T[n][x]).length} indicators</span></span><button data-a="${encodeURIComponent(n)}">Apply</button><button data-d="${encodeURIComponent(n)}">🗑</button></div>`).join('') : '<p style="color:var(--dim)">None yet.</p>'}
+      <button class="mbtn pri" id="itSave" style="margin-top:12px">Save current indicators as template…</button>`, B => {
+      const apply = set => { for (const key of Object.keys(ON)) if (!!ON[key] !== !!set[key]) setInd(key, !!set[key]); toast('Template applied'); close(); };
+      B.querySelectorAll('[data-p]').forEach(b => b.onclick = () => apply(preset[b.dataset.p]));
+      B.querySelectorAll('[data-a]').forEach(b => b.onclick = () => apply(T[decodeURIComponent(b.dataset.a)]));
+      B.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { delete T[decodeURIComponent(b.dataset.d)]; try{ localStorage.setItem('fpIndTpl', JSON.stringify(T)); }catch(e){} hubGo('itpl'); });
+      B.querySelector('#itSave').onclick = () => { const n = (window.prompt('Template name:') || '').trim(); if (!n) return; T[n] = {...ON}; try{ localStorage.setItem('fpIndTpl', JSON.stringify(T)); }catch(e){} hubGo('itpl'); }; }); return; }
+  if (k === 'tree'){ const list = drawings.slice().reverse();
+    hubPage('Object tree', (list.length ? list.map(d => `<div class="hrow" data-id="${d.id}"><span class="sw" style="background:${d.color || drawColor}"></span><span class="nm">${TL[d.type] ? TL[d.type].name : d.type}${d.text ? ' — ' + String(d.text).slice(0, 24).replace(/</g, '&lt;') : ''}</span>
+      <button data-v="${d.id}" title="Show / hide">${d.hid ? '🙈' : '👁'}</button><button data-l="${d.id}" title="Lock">${d.lock ? '🔒' : '🔓'}</button><button data-x="${d.id}" title="Remove">🗑</button></div>`).join('')
+      : `<p style="color:var(--dim)">No drawings on ${S.sym || 'this symbol'} yet.</p>`) + `<p style="color:var(--dim);font-size:11px">Tap a name to select it on the chart. Top of the list = drawn on top.</p>`, B => {
+      const get = id => drawings.find(z => z.id === id);
+      B.querySelectorAll('[data-v]').forEach(b => b.onclick = e => { e.stopPropagation(); const d = get(b.dataset.v); d.hid = !d.hid; if (d.hid && selId === d.id) selId = null; saveDraw(); dirty = true; hubGo('tree'); });
+      B.querySelectorAll('[data-l]').forEach(b => b.onclick = e => { e.stopPropagation(); const d = get(b.dataset.l); d.lock = !d.lock; saveDraw(); hubGo('tree'); });
+      B.querySelectorAll('[data-x]').forEach(b => b.onclick = e => { e.stopPropagation(); drawings = drawings.filter(z => z.id !== b.dataset.x); if (selId === b.dataset.x) selId = null; saveDraw(); alertCount(); dirty = true; hubGo('tree'); });
+      B.querySelectorAll('.hrow').forEach(r => r.onclick = () => { const d = get(r.dataset.id); if (!d) return; d.hid = false; selId = d.id; const i = tIdx(d.pts[0].t); setFollow(false); V.panX = (V.panX || 0) + (pw()/2 - xF(i)); dirty = true; close(); }); }); return; }
+  if (k === 'alerts'){ const al = drawings.filter(d => d.type === 'alert');
+    const fl = [['Big print ≥ $', $('alBig').value !== '0' ? $('alBig').value : ''], ['Candle delta ≥ $', $('alDel').value !== '0' ? $('alDel').value : ''], ['Close across VWAP', $('alVw').checked ? 'on' : ''], ['Imbalance zone touch', $('alImb').checked ? 'on' : '']];
+    hubPage('Alerts', `<div class="hsec">PRICE ALERTS · ${S.sym || ''} (${al.length}/5)</div>${al.length ? al.map(d => `<div class="hrow"><span class="nm">${d.fired ? '✓ hit' : '🔔'} ${P(d.pts[0].p)}</span><button data-x="${d.id}">🗑</button></div>`).join('') : '<p style="color:var(--dim)">None — tap 🔔 in the top bar, then tap a price on the chart.</p>'}
+      <div class="hsec" style="margin-top:12px">ORDER-FLOW ALERTS</div>${fl.map(([n, v]) => `<div class="hrow"><span class="nm">${n}</span><b style="color:${v ? 'var(--buy)' : 'var(--dim)'}">${v || 'off'}</b></div>`).join('')}
+      <button class="mbtn pri" id="alSet" style="margin-top:12px">Change order-flow alerts</button>`, B => {
+      B.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { drawings = drawings.filter(z => z.id !== b.dataset.x); saveDraw(); alertCount(); dirty = true; hubGo('alerts'); });
+      B.querySelector('#alSet').onclick = () => { close(); setTimeout(() => { $('setBtn').click(); const el = $('alBig'); if (el) el.scrollIntoView({block:'center'}); }, 60); }; }); return; }
+  if (k === 'broker'){ hubPage('Trade with your broker', `<p>Broker trading is being set up — tell Claude which broker you use (Exness / MT5, Bybit, Binance…) and it will connect it here.</p>
+      <p style="color:var(--dim);font-size:12px">Until then, plan trades with the Long / Short position tool and the ✦ AI idea, then place them in your broker app.</p>`); return; }
+}
+async function snapshot(){
+  try{ const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height; const g = c.getContext('2d'); g.fillStyle = TH.bg; g.fillRect(0, 0, c.width, c.height); g.drawImage(cv, 0, 0);
+    g.font = `bold ${Math.round(14*c.width/cv.clientWidth)}px -apple-system,Segoe UI,sans-serif`; g.fillStyle = 'rgba(255,255,255,.55)'; g.textAlign = 'right'; g.fillText(`${S.sym} · ${$('tf').selectedOptions[0].text} · ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC`, c.width - 20, c.height - 20);
+    const blob = await new Promise(r => c.toBlob(r, 'image/png')), file = new File([blob], `${S.sym || 'chart'}-${Date.now()}.png`, {type:'image/png'});
+    if (navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:'Chart snapshot'}); return; }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast('Snapshot saved ✓');
+  }catch(e){ if (e.name !== 'AbortError') toast('Snapshot failed: ' + (e.message || e)); }
+}
+$('hubBtn').onclick = e => { e.stopPropagation(); hubHome(); $('hubModal').classList.add('open'); };
+$('hubX').onclick = () => $('hubModal').classList.remove('open');
+$('hubModal').addEventListener('click', e => { if (e.target.id === 'hubModal') $('hubModal').classList.remove('open'); });
+$('hubShare').onclick = () => hubPage('Share', `<div class="hg two">${hubTile('snap', '📸', 'Chart snapshot (image)')}${hubTile('link', '🔗', 'Copy chart link')}</div>`, B => {
+  B.querySelector('[data-h="snap"]').onclick = () => { $('hubModal').classList.remove('open'); setTimeout(snapshot, 120); };
+  B.querySelector('[data-h="link"]').onclick = async () => { const u = `${location.origin}${location.pathname}?sym=${encodeURIComponent($('sym').value)}&mkt=${$('mkt').value}&tf=${$('tf').value}`;
+    try{ await navigator.clipboard.writeText(u); toast('Link copied ✓ — it opens this symbol & timeframe'); }catch(e){ window.prompt('Copy this link:', u); } }; });
+// restore last symbol / opened layout / shared link
+(() => { try{ const q = new URLSearchParams(location.search), last = JSON.parse(localStorage.getItem('fpLast') || 'null');
+  const st = q.get('sym') ? {sym:q.get('sym'), mkt:q.get('mkt') || $('mkt').value, tf:q.get('tf') || $('tf').value, go:1} : last;
+  if (st){ $('sym').value = st.sym; if ([...$('mkt').options].some(o => o.value === st.mkt)) $('mkt').value = st.mkt; if ([...$('tf').options].some(o => o.value === st.tf)) $('tf').value = st.tf; }
+  const c = (st && st.cmp) || localStorage.getItem('fpCmp'); if (c){ cmp.sym = c; cmp.on = true; }
+  if (st && st.go){ if (last) { last.go = 0; localStorage.setItem('fpLast', JSON.stringify(last)); } setTimeout(() => connect(), 300); }
+}catch(e){} })();
+
 // ───────── interaction: main chart ─────────
 const ptrs = new Map(); let act = null, pinch = null, lastAxisTap = 0;
 function zoomX(f, x){ const i0 = iAt(x); V.cw = clamp(V.cw*f, 1.5, 80); if (!V.follow) V.panX = x - pw() + 80 + (S.candles.length - 1 - i0)*V.cw; dirty = true; }
@@ -2392,7 +2810,7 @@ cv.addEventListener('pointerdown', e => {
     return;
   }
   { const hd = hitDraw(p.x, p.y, e.pointerType !== 'mouse');
-    if (hd){ selId = hd.d.id; act = {m:'dr', d:hd.d, h:hd.h, orig:hd.d.pts.map(q => ({...q})), i0:iAt(p.x), p0:pAt(p.y)};
+    if (hd){ selId = hd.d.id; act = hd.d.lock ? null : {m:'dr', d:hd.d, h:hd.h, orig:hd.d.pts.map(q => ({...q})), i0:iAt(p.x), p0:pAt(p.y)};
       if ((hd.d.type === 'long' || hd.d.type === 'short') && hd.d.pts.length < 3) hd.d.pts = posPts(hd.d);
       dirty = true; return; }
     if (selId){ selId = null; dirty = true; } }
@@ -2520,7 +2938,7 @@ $('tpX').onclick = () => $('toolModal').classList.remove('open');
 $('toolModal').onclick = e => { if (e.target.id === 'toolModal') $('toolModal').classList.remove('open'); };
 renderFav();
 $('dCol').oninput = e => { drawColor = e.target.value; const d = drawings.find(z => z.id === selId); if (d){ d.color = drawColor; saveDraw(); } dirty = true; };
-$('dHide').onclick = () => { hideDraw = !hideDraw; $('dHide').classList.toggle('on', hideDraw); dirty = true; };
+$('dHide').onclick = () => { doAction('@hide'); dirty = true; };
 $('dDel').onclick = deleteSelected;
 $('dClr').onclick = () => { if (drawings.length && window.confirm('Remove all drawings on ' + S.sym + '?')){ drawings = []; selId = null; saveDraw(); dirty = true; } };
 try{ if (localStorage.getItem('dtbHide')) $('dtb').classList.add('hide'); }catch(e){}
