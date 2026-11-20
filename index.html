@@ -2683,7 +2683,6 @@ function hubHome(){
   $('hubTitle').textContent = 'Analysis hub';
   $('hubBody').innerHTML = `<div class="hg">${hubTile('layouts', '▭', 'Layout setup')}${hubTile('manage', '🗂', 'Manage ' + (curLayout ? curLayout.replace(/</g, '') : 'Unnamed'))}${hubTile('settings', '⚙', 'Chart settings')}
     ${hubTile('new', '＋', 'New')}${hubTile('save', '☁', 'Save' + (curLayout ? '' : ' as…'))}${hubTile('open', '📂', 'Open')}</div>
-    <div class="hg">${hubTile('broker', '🤝', 'Trade with your broker', 'brk')}</div>
     <div class="hsec">TOOLS</div>
     <div class="hg two">${hubTile('ind', '📊', 'Indicators')}${hubTile('compare', '⊕', 'Compare' + (cmp.on ? ' · ' + cmp.sym : ''))}${hubTile('alerts', '⏰', 'Alerts')}${hubTile('replay', '⏪', 'Bar replay')}</div>
     <div class="hg">${hubTile('itpl', '▦', 'Indicator templates')}${hubTile('ctype', '🕯', 'Chart type')}${hubTile('tree', '≋', 'Object tree')}</div>`;
@@ -2751,8 +2750,6 @@ function hubGo(k){
       <button class="mbtn pri" id="alSet" style="margin-top:12px">Change order-flow alerts</button>`, B => {
       B.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { drawings = drawings.filter(z => z.id !== b.dataset.x); saveDraw(); alertCount(); dirty = true; hubGo('alerts'); });
       B.querySelector('#alSet').onclick = () => { close(); setTimeout(() => { $('setBtn').click(); const el = $('alBig'); if (el) el.scrollIntoView({block:'center'}); }, 60); }; }); return; }
-  if (k === 'broker'){ hubPage('Trade with your broker', `<p>Broker trading is being set up — tell Claude which broker you use (Exness / MT5, Bybit, Binance…) and it will connect it here.</p>
-      <p style="color:var(--dim);font-size:12px">Until then, plan trades with the Long / Short position tool and the ✦ AI idea, then place them in your broker app.</p>`); return; }
 }
 async function snapshot(){
   try{ const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height; const g = c.getContext('2d'); g.fillStyle = TH.bg; g.fillRect(0, 0, c.width, c.height); g.drawImage(cv, 0, 0);
