@@ -129,6 +129,15 @@
   #sbPop .it{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;white-space:nowrap} #sbPop .it:hover{background:var(--mbg)} #sbPop hr{border:0;border-top:1px solid var(--line2);margin:4px 0}
   #sbPop .pal{display:grid;grid-template-columns:repeat(10,22px);gap:5px} #sbPop .pal i{width:22px;height:22px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.12)} #sbPop .pal i.on{outline:2px solid var(--acc);outline-offset:1px}
   #hubBody{padding:12px;overflow:auto;flex:1}
+  .ixtab{position:absolute;z-index:6;display:none;background:var(--ovl);border:1px solid var(--line2);border-radius:8px;font:11px ui-monospace,Menlo,monospace;pointer-events:none}
+  .ixtab table{border-collapse:collapse} .ixtab td,.ixtab th{padding:3px 8px;border:1px solid var(--line2);color:var(--txt);white-space:nowrap} .ixtab th{color:var(--dim);font-weight:600}
+  .ixtab td.warn{background:rgba(242,54,69,.55);color:#fff} .ixtab td.rel{background:rgba(242,54,69,.85);color:#fff}
+  #idxNews{left:50%;transform:translateX(-50%);bottom:30px} #idxMtf{right:80px;top:180px}
+  @media (max-width:600px){#idxNews{left:6px;bottom:60px;font-size:9px} #idxMtf{right:74px;top:120px;font-size:9px}}
+  .ixr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 2px;border-bottom:1px solid var(--line2);font-size:13px}
+  .ixr select,.ixr input[type=number]{background:var(--inbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:5px 8px;font:inherit;width:120px}
+  input.sw{appearance:none;-webkit-appearance:none;width:40px;height:22px;border-radius:11px;background:var(--line2);position:relative;cursor:pointer;flex:none;transition:.15s}
+  input.sw::after{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s} input.sw:checked{background:var(--acc)} input.sw:checked::after{left:21px}
   .hg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px} .hg.two{grid-template-columns:repeat(2,1fr)}
   .ht{background:var(--mbg);border:1px solid var(--line2);border-radius:14px;padding:14px 6px;text-align:center;cursor:pointer;font-size:13px;color:var(--txt)} .ht:hover{border-color:var(--acc)}
   .ht i{display:block;font-style:normal;font-size:22px;margin-bottom:6px} .ht.dis{opacity:.45} .ht.brk{grid-column:1/-1;border:1.5px solid transparent;background:linear-gradient(var(--mbg),var(--mbg)) padding-box,linear-gradient(90deg,#e91e63,#7c4dff,#2962ff) border-box}
@@ -210,6 +219,10 @@
   <div id="status"><div id="dot"></div><span id="stxt">idle</span></div>
 </div>
 
+<div id="idxModal" class="modal"><div class="mbox" style="width:min(480px,96vw)">
+  <div class="mhd" style="align-items:center"><b style="flex:1;font-size:16px;padding-left:4px">Idanelfx settings</b><button id="idxX">✕</button></div>
+  <div id="idxBody" style="padding:4px 14px 14px;overflow:auto;flex:1"></div>
+</div></div>
 <div id="hubModal" class="modal"><div class="mbox" style="width:min(560px,96vw)">
   <div class="mhd" style="align-items:center"><button id="hubShare" title="Share / snapshot">⇪</button><b id="hubTitle" style="flex:1;font-size:17px;text-align:center">Analysis hub</b><button id="hubX">✕</button></div>
   <div id="hubBody"></div>
@@ -243,6 +256,7 @@
   <label><input type="checkbox" data-k="sess"> Sessions (Asia / London / NY) + PDH / PDL</label>
   <label><input type="checkbox" data-k="vwap"> VWAP (daily) ± bands</label>
   <label><input type="checkbox" data-k="cvd"> CVD pane (cumulative delta)</label>
+  <label style="border-top:1px solid var(--line2);padding-top:8px;margin-top:4px"><input type="checkbox" data-k="idx"> <b>Idanelfx</b> — structure, order blocks, FVG, Dbot, sessions, news <a href="#" id="idxOpen" style="margin-left:auto;color:var(--acc)">⚙</a></label>
   <div class="t" style="margin-top:6px">Trend &amp; signals</div>
   <label><input type="checkbox" data-k="umb"> Trend umbrella (trailing curve + Buy/Sell)</label>
   <label><input type="checkbox" data-k="lux"> Hull trend line + momentum pane</label>
@@ -331,6 +345,7 @@
     <div class="hlp"><b>Loupe</b> — a magnifier over the chart. <b>Follow</b>: the lens moves with the cursor, click pins it. <b>Fixed</b> 🔒: the lens size is locked — you can still drag it anywhere, but it can't be resized until you tap Fixed again. Unlocked: drag the box to move it, pull the bottom-right corner (or the wheel over it) to resize, click the chart to move it there, <b>Shift+drag</b> or <b>⬚</b> draws a new area. <b>L</b> toggles, <b>[ ]</b> less / more magnification, <b>Esc</b> turns it off.<br><b>Big prints</b> — boxes every footprint row and trade bigger than the $ amount (type 500k or 1M).<br><b>Classic</b> sell×buy · <b>Delta</b> buy−sell · <b>Volume</b> total.</div>
   </div>
   <div id="ppTip"></div>
+  <div id="idxNews" class="ixtab"></div><div id="idxMtf" class="ixtab"></div>
   <div id="selBar"><span class="sg" title="Drag">⋮⋮</span><button id="sbTpl" title="Template">▦+</button><button id="sbCol" title="Colour"><i id="sbColI"></i></button>
     <button id="sbW" title="Line width"><i id="sbWI"></i></button><button id="sbLs" title="Line style">┄</button><button id="sbLock" title="Lock">🔓</button>
     <button id="sbSet" title="Settings">⚙</button><button id="sbDel" title="Remove">🗑</button><button id="sbMore" title="More">⋯</button></div>
@@ -385,7 +400,7 @@ const RP = {on:false, pick:false, full:null, n:0, timer:null, spd:1};
 const S = {ht:[], rowMul:1, baseRow:0, fpMin:0, whales:[], trades:[], k1:[], dk:[], dt:[], off:0, duka:false, candles:[], tfMs:60000, row:0, dec:2, mode:'delta', bigTh:250000, nPrints:6,
            ws:null, wsBuf:[], back:false, lastId:-1, sess:0, unit:'$'};
 const V = {cw:9, panX:0, follow:true, auto:true, W:0, H:0, dpr:1, lo:0, hi:1};
-const ON = {xray:true, fp:false, whales:false, vp:false, liq:false, heat:false, umb:false, lux:false, aur:false, zones:false, binlex:false, brk:false, prints:true, levels:true, senti:true, imb:false, sess:false, vwap:false, cvd:false};
+const ON = {xray:true, fp:false, whales:false, vp:false, liq:false, heat:false, umb:false, lux:false, aur:false, zones:false, binlex:false, brk:false, prints:true, levels:true, senti:true, imb:false, sess:false, vwap:false, cvd:false, idx:false};
 let lens = null, prints = [], keyLv = [], buyPct = 50, lensFollow = false, lensPin = false, lensFixed = false, bigOn = true;
 let hover = {x:-1, y:-1, in:false}, pinned = null, panelHover = null;
 let dirty = true, derivedDirty = true;
@@ -480,6 +495,7 @@ function derive(){
   derivedDirty = false;
   const C = S.candles; if (!C.length) return;
   if (ON.imb) computeImb();
+  if (ON.idx){ computeIdx(); renderIdxTable(); } else { IDX = null; renderIdxTable(); }
   const cells = [];
   const from = Math.max(0, C.length - 300);
   for (let i = from; i < C.length; i++) for (const [k, L] of C[i].lv) cells.push([L.b + L.s, i, k, L.b - L.s, L.b, L.s]);
@@ -1136,6 +1152,7 @@ function draw(){
 
   if (ON.heat) drawHeat(PW, PH);
   if (ON.sess) drawSessions(PW, PH, a, b);
+  if (ON.idx) drawIdxBack(PW, PH, a, b);
   if (TA && (ON.aur || ON.zones)){ const sv = {umb:ON.umb, lux:ON.lux}; ON.umb = ON.lux = false; const sg = TA.sig; TA.sig = []; drawTA(PW); TA.sig = sg; ON.umb = sv.umb; ON.lux = sv.lux; }
   // key level lines
   if (ON.levels) for (const l of keyLv){ const y = Math.round(yOf(l.p)) + .5;
@@ -1149,7 +1166,7 @@ function draw(){
     for (let i = s0; i <= b; i++){ const c = C[i], hc = (c.o + c.h + c.l + c.c)/4, ho = i === s0 ? (c.o + c.c)/2 : (po + pc)/2;
       if (i >= a) HA.push({o:ho, c:hc, h:Math.max(c.h, ho, hc), l:Math.min(c.l, ho, hc)}); po = ho; pc = hc; } }
   for (let i = a; i <= b; i++){
-    const c = C[i], x = xF(i), up = c.c >= c.o, col = up ? COL.buy : COL.sell;
+    const c = C[i], x = xF(i), up = c.c >= c.o, col = (ON.idx && idxBarCol(i)) || (up ? COL.buy : COL.sell);
     if (dPane){ const dd = c.buy - c.sell, mid = PH - VH/2, hh = dmax ? Math.abs(dd)/dmax*(VH/2 - 5) : 0;
       ctx.fillStyle = hexA(dd >= 0 ? COL.buy : COL.sell, .7); ctx.fillRect(x - bw/2, dd >= 0 ? mid - hh : mid, bw, Math.max(1, hh));
       if (V.cw >= 34 && dd){ ctx.font = '600 9px ui-monospace,Menlo,monospace'; ctx.textAlign = 'center'; ctx.fillStyle = dd >= 0 ? COL.buy : COL.sell;
@@ -1175,6 +1192,7 @@ function draw(){
     ctx.strokeStyle = COL.acc; ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 1; }
   if (cmp.on && cmp.data.size) drawCompare(PW, a, b);
   if (ON.vwap) drawVWAP(PW, a, b);
+  if (ON.idx) drawIdxFront(PW, PH, a, b);
   if (ON.imb) drawImb(PW, a, b);
   if (ON.liq) drawLiq(PW);
   if (ON.vp) drawProfile(PW, PH, a, b);
@@ -2346,6 +2364,318 @@ function drawPanes(PW){
   });
 }
 
+// ═════════════ IDANELFX — price action suite (ported from "DANIEL INDICATOR v3") ═════════════
+// Market structure, order blocks, FVG, EQH/EQL, zones and the strong/weak high-low logic follow
+// "Price Action Concepts" by RUDYINDICATOR (CC BY-NC-SA 4.0). Dbot follows HPotter's open-source ATR
+// trailing stop. Sessions, killzones and the CPI/NFP countdown come from DANIEL INDICATOR v3.
+// Same licence applies: non-commercial, share-alike.
+const IDX_DEF = {
+  ms:true, msInt:'All', msSw:'All', iLen:5, sLen:50, msDyn:false, mtf:true, eql:false, barCol:false,
+  lvD:false, lvW:false, lvM:false, lvY:false,
+  ob:true, obNum:5, obMetrics:true, obSwing:false, obFilter:'None', obMit:'Absolute', obPos:'Precise', obGray:false, obMetric:true, obMid:true, obOverlap:true, obOverMethod:'Previous',
+  acc:false, accMode:'Fast', swLbl:false, mtb:false,
+  fvg:false, fvgType:'FVG', fvgNum:5, fvgExt:10, fvgMit:'Close',
+  news:true, newsWarn:24, newsLines:true, newsAlert:30,
+  db:true, dbKey:3, dbAtr:10, dbTs:true, dbBar:true,
+  ss:true, ssDays:10, ssStyle:'Solid', ssTitle:true, ssMid:false, ssRange:false, ssAs:true, ssLd:true, ssNy:true,
+  kz:true, kzPos:'Bottom', kzLbl:true, kz1:true, kz2:true, kz3:true, kz4:true,
+  daySep:true, dayLbl:true, opD:false, opW:false, opM:false,
+  alMs:true, alOb:true, alFvg:false, alDb:true, alNews:true, alEq:false
+};
+let IC = {...IDX_DEF}; try{ Object.assign(IC, JSON.parse(localStorage.getItem('idxCfg') || '{}')); }catch(e){}
+const saveIC = () => { try{ localStorage.setItem('idxCfg', JSON.stringify(IC)); }catch(e){} };
+const IXC = {up:'#089981', dn:'#f23645', prem:'#f23645', eq:'#9598a1', disc:'#089981', as:'#f23645', ld:'#2962ff', ny:'#e6c800', k1:'#b22833', k2:'#2157a8', k3:'#8a7f1c', k4:'#2157a8', cpi:'#ff9800', nfp:'#00bcd4', day:'#787b86', opD:'#9598a1', opW:'#e6c800', opM:'#2962ff'};
+let IDX = null, idxSeen = {};
+
+// time-zone helpers (Lagos = UTC+1 all year; New York with daylight saving)
+const _tzf = {};
+function tzOff(t, tz){ if (tz === 'GMT+1') return 3600000; const k = tz + Math.floor(t/3600000); if (_tzf[k] != null) return _tzf[k];
+  const f = new Intl.DateTimeFormat('en-US', {timeZone:tz, hour12:false, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  const p = Object.fromEntries(f.formatToParts(new Date(t)).map(x => [x.type, x.value])); const asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
+  return _tzf[k] = asUTC - Math.floor(t/1000)*1000; }
+const local = (t, tz) => new Date(t + tzOff(t, tz));      // a Date whose UTC fields show local wall time
+const minOfDay = (t, tz) => { const d = local(t, tz); return d.getUTCHours()*60 + d.getUTCMinutes(); };
+const dayKey = (t, tz) => Math.floor((t + tzOff(t, tz))/86400000);
+const inSess = (t, tz, a, b) => { const m = minOfDay(t, tz); return a <= b ? m >= a && m < b : m >= a || m < b; };
+const hm = s => { const [x, y] = s.split('-'); return [x, y].map(v => +v.slice(0, 2)*60 + +v.slice(2)); };
+const nyTs = (y, m, d) => { const g = Date.UTC(y, m - 1, d, 8, 30); return g - tzOff(g, 'America/New_York'); };
+
+function rma(arr, n){ const o = new Float64Array(arr.length); let a = arr[0] || 0; for (let i = 0; i < arr.length; i++){ a = i < n ? (a*i + arr[i])/(i + 1) : (a*(n - 1) + arr[i])/n; o[i] = a; } return o; }
+function trA(C){ const t = new Float64Array(C.length); for (let i = 0; i < C.length; i++){ const c = C[i], pc = i ? C[i - 1].c : c.c; t[i] = Math.max(c.h - c.l, Math.abs(c.h - pc), Math.abs(c.l - pc)); } return t; }
+function pivots(C, len, hi){ const out = new Int8Array(C.length);   // out[i]=1 when bar i is a pivot (confirmed at i+len)
+  for (let i = len; i < C.length - len; i++){ const v = hi ? C[i].h : C[i].l; let ok = true;
+    for (let k = i - len; k <= i + len && ok; k++){ if (k === i) continue; const w = hi ? C[k].h : C[k].l; if (hi ? (k < i ? w >= v : w > v) : (k < i ? w <= v : w < v)) ok = false; }
+    if (ok) out[i] = 1; } return out; }
+// BOS / CHoCH / CHoCH+ engine (same rules as the Pine script)
+function structure(C, len){
+  const ph = pivots(C, len, true), pl = pivots(C, len, false), ev = []; let up = {p:[], n:[], l:[]}, dn = {p:[], n:[], l:[]}, tr = 0; const trend = new Int8Array(C.length);
+  for (let n = 0; n < C.length; n++){
+    const k = n - len; if (k >= 0){ if (ph[k]){ up.p.unshift(C[k].h); up.l.unshift(C[k].h); up.n.unshift(k); } if (pl[k]){ dn.p.unshift(C[k].l); dn.l.unshift(C[k].l); dn.n.unshift(k); } }
+    const c = C[n].c, pc = n ? C[n - 1].c : c;
+    if (up.p.length && dn.l.length > 1 && pc <= up.p[0] && c > up.p[0]){
+      const ch = tr < 0, txt = ch ? (dn.l[0] > dn.l[1] ? 'CHoCH+' : 'CHoCH') : 'BOS'; ev.push({n0:up.n[0], n, p:up.p[0], txt, bull:true, piv:up.n[0]}); tr = 1; up.p = []; up.n = []; }
+    if (dn.p.length && up.l.length > 1 && pc >= dn.p[0] && c < dn.p[0]){
+      const ch = tr > 0, txt = ch ? (up.l[0] < up.l[1] ? 'CHoCH+' : 'CHoCH') : 'BOS'; ev.push({n0:dn.n[0], n, p:dn.p[0], txt, bull:false, piv:dn.n[0]}); tr = -1; dn.p = []; dn.n = []; }
+    trend[n] = tr; }
+  return {ev, trend, ph, pl, tr};
+}
+const showMs = (mode, txt) => mode === 'All' || mode === txt;
+function aggregate(C, ms){ const out = []; for (const c of C){ const t = Math.floor(c.t/ms)*ms, l = out[out.length - 1];
+  if (!l || l.t !== t) out.push({t, o:c.o, h:c.h, l:c.l, c:c.c, buy:c.buy, sell:c.sell}); else { l.h = Math.max(l.h, c.h); l.l = Math.min(l.l, c.l); l.c = c.c; l.buy += c.buy; l.sell += c.sell; } } return out; }
+
+function computeIdx(){
+  const Call = S.candles, off = Math.max(0, Call.length - 1500), C = Call.slice(off), N = C.length; if (N < 30){ IDX = null; return; }
+  const R = {off, N}, tr = trA(C), atr200 = rma(tr, 200), atr50 = rma(tr, 50);
+  let iLen = IC.iLen;
+  if (IC.msDyn && N > iLen*2 + 2){ const ch = C.map((c, i) => i >= iLen ? (c.c - C[i - iLen].c)/C[i - iLen].c*100 : 0), w = ch.slice(-iLen), mu = w.reduce((a, b) => a + b, 0)/w.length, sd = Math.sqrt(w.reduce((a, b) => a + (b - mu)**2, 0)/w.length) || 1, z = (ch[N - 1] - mu)/sd;
+    if (Math.abs(z) >= 1.5) iLen = 10; }
+  const I = structure(C, iLen), Sw = structure(C, Math.min(IC.sLen, Math.floor(N/3)));
+  R.iev = I.ev; R.sev = Sw.ev; R.itrend = I.trend; R.strend = Sw.tr; R.iLen = iLen;
+  // order blocks
+  const mkOB = (ev, swing) => { let bull = [], bear = [];
+    for (const e of ev){ if (IC.obFilter !== 'None' && e.txt !== IC.obFilter) continue;
+      const a = e.piv, b2 = e.n; if (b2 - a < 1) continue; let ix = a;
+      for (let i = a; i <= b2; i++) if (e.bull ? C[i].l < C[ix].l : C[i].h > C[ix].h) ix = i;
+      const c = C[ix], pos = IC.obPos === 'Full' ? (e.bull ? c.h : c.l) : IC.obPos === 'Middle' ? (c.o + c.h + c.l + c.c)/4 : (c.h + c.l)/2;
+      let top = e.bull ? pos : c.h, btm = e.bull ? c.l : pos, avg = (top + btm)/2;
+      if (IC.obPos === 'Precise'){ const bodyLo = Math.min(c.o, c.c), bodyHi = Math.max(c.o, c.c), hlcc4 = (c.h + c.l + 2*c.c)/4;
+        if (e.bull && avg < bodyLo && top > hlcc4){ top = avg; avg = (top + btm)/2; } if (!e.bull && avg > bodyHi && btm < hlcc4){ btm = avg; avg = (top + btm)/2; } }
+      const o = {i:ix, top, btm, avg, v:c.buy + c.sell, buy:c.buy, sell:c.sell, bull:e.bull, made:b2, dead:-1, swing};
+      const L = e.bull ? bull : bear;
+      if (IC.obOverlap && L.length){ const pv = L[0]; if (e.bull ? o.btm < pv.top : o.top > pv.btm){ if (IC.obOverMethod === 'Previous') continue; else L.shift(); } }
+      L.unshift(o); }
+    for (const o of [...bull, ...bear]) for (let j = o.made + 1; j < N; j++){ const c = C[j].c, lvl = IC.obMit === 'Middle' ? o.avg : (o.bull ? o.btm : o.top); if (o.bull ? c < lvl : c > lvl){ o.dead = j; break; } }
+    const live = L => L.filter(o => o.dead < 0).slice(0, IC.obNum); return [...live(bull), ...live(bear)]; };
+  R.obs = IC.ob ? mkOB(I.ev, false) : []; R.sobs = IC.obSwing ? mkOB(Sw.ev, true) : [];
+  { const tv = R.obs.reduce((s, o) => s + o.v, 0) || 1; R.obs.forEach(o => o.pct = Math.floor(100*o.v/tv)); }
+  // FVG / VI / OG
+  R.fvg = [];
+  if (IC.fvg){ const g = [];
+    for (let n = 2; n < N; n++){ const a = C[n - 2], p = C[n - 1], c = C[n]; let t = null;
+      if (IC.fvgType === 'FVG'){ if (c.l > a.h) t = {bull:true, top:c.l, btm:a.h, i:n - 2}; else if (c.h < a.l) t = {bull:false, top:a.l, btm:c.h, i:n - 2}; }
+      else if (IC.fvgType === 'OG'){ if (c.l > p.h) t = {bull:true, top:c.l, btm:p.h, i:n - 1}; else if (c.h < p.l) t = {bull:false, top:p.l, btm:c.h, i:n - 1}; }
+      else { if (c.o > p.c && p.h > c.l && c.c > p.c && c.o > p.o && p.h < Math.min(c.c, c.o)) t = {bull:true, top:Math.min(c.o, c.c), btm:Math.max(p.c, p.o), i:n - 1};
+             else if (c.o < p.c && p.l < c.h && c.c < p.c && c.o < p.o && p.l > Math.max(c.c, c.o)) t = {bull:false, top:Math.min(p.c, p.o), btm:Math.max(c.c, c.o), i:n - 1}; }
+      if (t && t.top > t.btm){ t.made = n; t.dead = -1; g.push(t); } }
+    for (const f of g) for (let j = f.made + 1; j < N; j++){ const c = C[j], v = IC.fvgMit === 'Wick' ? (f.bull ? c.l : c.h) : c.c; if (f.bull ? v < f.btm : v > f.top){ f.dead = j; break; } }
+    R.fvg = g.filter(f => f.dead < 0).slice(-IC.fvgNum); }
+  // EQH / EQL
+  R.eq = [];
+  if (IC.eql){ const ph = pivots(C, 1, true), pl = pivots(C, 1, false); let wt = null, wb = null;
+    for (let i = 1; i < N - 1; i++){ if (ph[i]){ if (wt && Math.abs(C[i].h - wt.p) < atr200[i]*.1) R.eq.push({i0:wt.i, p0:wt.p, i1:i, p1:C[i].h, top:true}); wt = {i, p:C[i].h}; }
+      if (pl[i]){ if (wb && Math.abs(C[i].l - wb.p) < atr200[i]*.1) R.eq.push({i0:wb.i, p0:wb.p, i1:i, p1:C[i].l, top:false}); wb = {i, p:C[i].l}; } }
+    R.eq = R.eq.slice(-50); }
+  // accumulation / distribution
+  R.zones = []; R.pattern = null;
+  if (IC.acc){ let z = []; const need = IC.accMode === 'Slow' ? 6 : 4;
+    for (let n = iLen; n < N; n++){ const k = n - iLen; if (I.ph[k]) z.unshift({p:C[k].h, c:1, i:k}); if (I.pl[k]) z.unshift({p:C[k].l, c:-1, i:k});
+      if (z.length > 1 && z[0].c === z[1].c){ z = [z[0]]; }
+      if (z.length >= need){ const s = z.slice(0, need), alt = s.every((q, j) => q.c === (j % 2 ? 1 : -1)), alt2 = s.every((q, j) => q.c === (j % 2 ? -1 : 1));
+        const lows = s.filter(q => q.c === -1).map(q => q.p), highs = s.filter(q => q.c === 1).map(q => q.p);
+        const incr = a => a.every((v, j) => j === 0 || a[j - 1] > v), decr = a => a.every((v, j) => j === 0 || a[j - 1] < v);
+        if (alt && incr(lows) && decr(highs)){ R.zones.push({acc:true, pts:s.slice().reverse(), top:s[need - 1].p, btm:s[need - 2].p, made:n}); z = []; }
+        else if (alt2 && decr(lows.length ? lows : [0]) && incr(highs)){ R.zones.push({acc:false, pts:s.slice().reverse(), top:s[need - 2].p, btm:s[need - 1].p, made:n}); z = []; } } }
+    const lz = R.zones[R.zones.length - 1]; if (lz && N - 1 - lz.made < 50) R.pattern = lz.acc ? 'Accumulation Zone' : 'Distribution Zone'; }
+  // swing labels + strong / weak high-low + premium / discount
+  R.swl = []; R.mtb = null;
+  { const sL = Math.min(IC.sLen, Math.floor(N/3)); let lastH = null, lastL = null;
+    for (let i = 0; i < N; i++){ if (Sw.ph[i]){ R.swl.push({i, p:C[i].h, t:lastH && C[i].h > lastH ? 'HH' : 'LH', top:true}); lastH = C[i].h; } if (Sw.pl[i]){ R.swl.push({i, p:C[i].l, t:lastL && C[i].l > lastL ? 'HL' : 'LL', top:false}); lastL = C[i].l; } }
+    const lh = R.swl.filter(q => q.top).pop(), ll = R.swl.filter(q => !q.top).pop();
+    if (lh && ll){ let tup = lh.p, tupx = lh.i, tdn = ll.p, tdnx = ll.i, uV = C[lh.i].buy + C[lh.i].sell, dV = C[ll.i].buy + C[ll.i].sell;
+      for (let i = lh.i; i < N; i++) if (C[i].h > tup){ tup = C[i].h; tupx = i; uV = C[i].buy + C[i].sell; }
+      for (let i = ll.i; i < N; i++) if (C[i].l < tdn){ tdn = C[i].l; tdnx = i; dV = C[i].buy + C[i].sell; }
+      R.mtb = {tup, tupx, tdn, tdnx, uV, dV, left:Math.max(lh.i, ll.i), trend:Sw.tr}; } }
+  // MTF trend scanner (from the candles we have)
+  R.mtf = [];
+  if (IC.mtf) for (const [nm, ms] of [['15m', 900000], ['1H', 3600000], ['4H', 14400000], ['1D', 86400000]]){
+    if (ms < S.tfMs){ R.mtf.push([nm, null]); continue; } const A = ms === S.tfMs ? Call : aggregate(Call, ms);
+    R.mtf.push([nm, A.length > 12 ? structure(A, Math.min(5, Math.floor(A.length/4))).tr : null]); }
+  // previous day / week / month / year highs-lows
+  R.lv = [];
+  const prevRange = (key) => { let curK = null, cur = null, prev = null; for (const c of Call){ const k = key(c.t); if (k !== curK){ prev = cur; cur = {h:c.h, l:c.l, t:c.t}; curK = k; } else { cur.h = Math.max(cur.h, c.h); cur.l = Math.min(cur.l, c.l); } } return prev; };
+  if (IC.lvD){ const r = prevRange(t => Math.floor(t/86400000)); if (r) R.lv.push(['D', r]); }
+  if (IC.lvW){ const r = prevRange(t => Math.floor((t/86400000 + 3)/7)); if (r) R.lv.push(['W', r]); }
+  if (IC.lvM){ const r = prevRange(t => { const d = new Date(t); return d.getUTCFullYear()*12 + d.getUTCMonth(); }); if (r) R.lv.push(['M', r]); }
+  if (IC.lvY){ const r = prevRange(t => new Date(t).getUTCFullYear()); if (r) R.lv.push(['Y', r]); }
+  // Dbot ATR trailing stop
+  R.db = null;
+  if (IC.db){ const a = rma(tr, IC.dbAtr), ts = new Float64Array(N), pos = new Int8Array(N), sig = [];
+    for (let i = 0; i < N; i++){ const s = C[i].c, ps = i ? C[i - 1].c : s, pv = i ? ts[i - 1] : 0, loss = IC.dbKey*a[i];
+      ts[i] = s > pv && ps > pv ? Math.max(pv, s - loss) : s < pv && ps < pv ? Math.min(pv, s + loss) : s > pv ? s - loss : s + loss;
+      pos[i] = ps < pv && s > pv ? 1 : ps > pv && s < pv ? -1 : (i ? pos[i - 1] : 0);
+      if (i && ps <= ts[i - 1] && s > ts[i]) sig.push({i, buy:true}); if (i && ps >= ts[i - 1] && s < ts[i]) sig.push({i, buy:false}); }
+    R.db = {ts, pos, sig}; }
+  // range used to place killzone strip / day labels
+  { let hi = -Infinity, lo = Infinity; for (let i = Math.max(0, N - 500); i < N; i++){ hi = Math.max(hi, C[i].h); lo = Math.min(lo, C[i].l); } R.rhi = hi; R.rlo = lo; R.ratr = atr50[N - 1]; }
+  IDX = R; idxAlerts(C);
+}
+
+// CPI / NFP release dates (8:30 New York). Official CPI list, then rule-based dates; NFP by the BLS rule.
+const CPI_OFFICIAL = [[2026, 11, 10], [2026, 12, 10], [2027, 1, 13], [2027, 2, 11], [2027, 3, 10], [2027, 4, 13], [2027, 5, 12], [2027, 6, 10], [2027, 7, 14], [2027, 8, 11], [2027, 9, 14], [2027, 10, 14], [2027, 11, 10], [2027, 12, 10]];
+let NEWS = null;
+function newsDates(){
+  if (NEWS && Date.now() - NEWS.at < 3600000) return NEWS;
+  const now = new Date(), cy = now.getUTCFullYear(), cm = now.getUTCMonth() + 1, cpi = CPI_OFFICIAL.map(a => ({t:nyTs(...a), auto:false})), nfp = [], endOff = nyTs(2027, 12, 10);
+  const dowNY = (y, m, d) => new Date(Date.UTC(y, m - 1, d)).getUTCDay();   // 0 = Sunday
+  for (let k = -1; k <= 14; k++){
+    const ri = cy*12 + (cm - 1) + k - 1, ry = Math.floor(ri/12), rm = ri % 12 + 1, dw = dowNY(ry, rm, 12), sat = 12 + (6 - dw);
+    let rel = new Date(Date.UTC(ry, rm - 1, sat + 20)); let y = rel.getUTCFullYear(), m = rel.getUTCMonth() + 1, d = rel.getUTCDate();
+    if (m === 1 && d <= 3) rel = new Date(Date.UTC(y, m - 1, d + 7)); if (m === 7 && (d === 3 || d === 4)) rel = new Date(Date.UTC(y, m - 1, d - 1));
+    nfp.push({t:nyTs(rel.getUTCFullYear(), rel.getUTCMonth() + 1, rel.getUTCDate()), auto:false});
+    const ci = cy*12 + (cm - 1) + k, yy = Math.floor(ci/12), mm = ci % 12 + 1;
+    if (nyTs(yy, mm, 28) > endOff && !cpi.some(x => { const q = new Date(x.t); return q.getUTCFullYear() === yy && q.getUTCMonth() + 1 === mm; })){
+      const w = dowNY(yy, mm, 12), o = w === 0 ? 2 : w === 1 ? 1 : w === 5 ? -1 : w === 6 ? -2 : 0; cpi.push({t:nyTs(yy, mm, 12 + o), auto:true}); } }
+  cpi.sort((a, b) => a.t - b.t); nfp.sort((a, b) => a.t - b.t);
+  return NEWS = {cpi, nfp, at:Date.now()};
+}
+const nextRel = L => L.find(x => x.t > Date.now() - 5*60000);
+function fmtLeft(ms){ const s = Math.max(0, Math.floor(ms/1000)), d = Math.floor(s/86400), h = Math.floor(s%86400/3600), m = Math.floor(s%3600/60), x = s%60, p = v => String(v).padStart(2, '0');
+  return (d ? d + 'd ' : '') + `${p(h)}h ${p(m)}m ${p(x)}s`; }
+function renderNews(){
+  const el = $('idxNews'); if (!el) return;
+  if (!ON.idx || !IC.news){ el.style.display = 'none'; return; }
+  const N2 = newsDates(), warn = IC.newsWarn*3600000, row = (nm, col, L) => { const r = nextRel(L); if (!r) return `<tr><td style="color:${col}">${nm}</td><td>-</td><td>-</td></tr>`;
+    const left = r.t - Date.now(), when = new Date(r.t + 3600000).toISOString().replace('T', ' ').slice(0, 16), ddd = new Date(r.t + 3600000).toUTCString().slice(0, 3);
+    const cd = left <= 0 ? '<td class="rel">RELEASED</td>' : `<td${left <= warn ? ' class="warn"' : ` style="color:${col}"`}>${fmtLeft(left)}</td>`;
+    return `<tr><td style="color:${col};font-weight:700">${nm}</td><td>${ddd} ${when}${r.auto ? ' (auto)' : ''}</td>${cd}</tr>`; };
+  el.style.display = 'block';
+  el.innerHTML = `<table><tr><th>NEWS</th><th>RELEASE (GMT+1)</th><th>COUNTDOWN</th></tr>${row('CPI', IXC.cpi, N2.cpi)}${row('NFP', IXC.nfp, N2.nfp)}</table>`;
+  if (IC.alNews) for (const [nm, L] of [['CPI', N2.cpi], ['NFP', N2.nfp]]){ const r = nextRel(L); if (!r) continue; const left = r.t - Date.now(), key = nm + r.t;
+    if (left > 0 && left <= IC.newsAlert*60000 && !idxSeen[key]){ idxSeen[key] = 1; fire(nm + ' release', `US ${nm} comes out in ${Math.ceil(left/60000)} min — manage your positions`); } }
+}
+setInterval(renderNews, 1000);
+
+function idxAlerts(C){
+  const N = C.length, last = N - 1, k = (s) => { if (idxSeen[s]) return false; idxSeen[s] = 1; return true; }, t = C[last].t, prevT = C[last - 1] ? C[last - 1].t : t;
+  if (!idxSeen.__init){ idxSeen.__init = 1; for (const e of IDX.iev.concat(IDX.sev)) idxSeen['ms' + C[e.n].t + e.p] = 1; if (IDX.db) for (const s of IDX.db.sig) idxSeen['db' + C[s.i].t] = 1; for (const f of IDX.fvg) idxSeen['fv' + C[f.made].t] = 1; return; }
+  if (IC.alMs) for (const e of IDX.iev.concat(IDX.sev)) if (e.n >= last - 1 && k('ms' + C[e.n].t + e.p)) fire('Structure', `${S.sym} ${e.bull ? 'Bullish' : 'Bearish'} ${e.txt} at ${P(e.p)}`);
+  if (IC.alDb && IDX.db) for (const s of IDX.db.sig) if (s.i >= last - 1 && C[s.i].t <= prevT && k('db' + C[s.i].t)) fire('Dbot', `${S.sym} Dbot ${s.buy ? 'BUY' : 'SELL'} at ${P(C[s.i].c)}`);
+  if (IC.alFvg) for (const f of IDX.fvg) if (f.made >= last - 1 && k('fv' + C[f.made].t)) fire('FVG', `${S.sym} new ${f.bull ? 'bullish' : 'bearish'} ${IC.fvgType} ${P(f.btm)}–${P(f.top)}`);
+  if (IC.alOb) for (const o of IDX.obs){ const c = C[last], key = 'ob' + C[o.i].t + Math.floor(t/60000); if ((o.bull ? c.l <= o.top && c.l >= o.btm : c.h >= o.btm && c.h <= o.top) && k(key)) fire('Order block', `${S.sym} price entering a ${o.bull ? 'bullish' : 'bearish'} order block ${P(o.btm)}–${P(o.top)}`); }
+  if (IC.alEq) for (const q of IDX.eq) if (q.i1 >= last - 3 && k('eq' + C[q.i1].t)) fire('EQH/EQL', `${S.sym} ${q.top ? 'EQH' : 'EQL'} at ${P(q.p1)}`);
+}
+
+// ── drawing ──
+function idxText(txt, x, y, col, o = {}){ ctx.font = `${o.b ? '600 ' : ''}${o.fs || 10}px ${o.mono ? 'ui-monospace,Menlo,monospace' : '-apple-system,Segoe UI,sans-serif'}`; ctx.fillStyle = col; ctx.textAlign = o.al || 'center'; ctx.textBaseline = o.bl || 'middle'; ctx.fillText(txt, x, y); }
+function drawIdxBack(PW, PH, a, b){
+  const R = IDX; if (!R) return; const C = S.candles, o0 = R.off, X = i => xF(i + o0), N = C.length, intra = S.tfMs < 86400000;
+  // sessions (GMT+1)
+  if (IC.ss && intra){ const list = [[IC.ssAs, '0100-1000', IXC.as, 'Asian'], [IC.ssLd, '0800-1700', IXC.ld, 'London'], [IC.ssNy, '1300-2200', IXC.ny, 'New York']];
+    const lastDay = dayKey(C[N - 1].t, 'GMT+1'), firstDay = lastDay - IC.ssDays + 1;
+    for (const [on, ses, col, nm] of list){ if (!on) continue; const [sa, sb] = hm(ses); let cur = null; const boxes = [];
+      for (let i = Math.max(0, a - 400); i <= Math.min(N - 1, b); i++){ const c = C[i], ins = inSess(c.t, 'GMT+1', sa, sb) && dayKey(c.t, 'GMT+1') >= firstDay;
+        if (ins){ if (!cur){ cur = {i0:i, i1:i, hi:c.h, lo:c.l}; boxes.push(cur); } else { cur.i1 = i; cur.hi = Math.max(cur.hi, c.h); cur.lo = Math.min(cur.lo, c.l); } } else cur = null; }
+      for (const q of boxes){ const x1 = xF(q.i0) - V.cw/2, x2 = xF(q.i1) + V.cw/2, y1 = yOf(q.hi), y2 = yOf(q.lo); if (x2 < 0 || x1 > PW) continue;
+        ctx.fillStyle = hexA(col, .1); ctx.fillRect(x1, y1, x2 - x1, y2 - y1); ctx.strokeStyle = hexA(col, .45); ctx.setLineDash(IC.ssStyle === 'Dashed' ? [6, 4] : IC.ssStyle === 'Dotted' ? [2, 3] : []); ctx.strokeRect(x1 + .5, y1 + .5, x2 - x1 - 1, y2 - y1 - 1); ctx.setLineDash([]);
+        if (IC.ssMid){ ctx.strokeStyle = hexA(col, .6); ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(x1, yOf((q.hi + q.lo)/2)); ctx.lineTo(x2, yOf((q.hi + q.lo)/2)); ctx.stroke(); ctx.setLineDash([]); }
+        if (IC.ssTitle) idxText(nm + (IC.ssRange ? '  ' + P(q.hi - q.lo) : ''), x1 + 3, y1 - 3, hexA(col, .8), {al:'left', bl:'bottom', b:1}); } } }
+  // killzones (New York time) as a strip below / above the recent range
+  if (IC.kz && intra && R.ratr){ const top = IC.kzPos === 'Top', ky1 = top ? R.rhi + R.ratr*.6 : R.rlo - R.ratr*.6, ky2 = top ? ky1 + R.ratr*.25 : ky1 - R.ratr*.25, yt = yOf(Math.max(ky1, ky2)), yb = yOf(Math.min(ky1, ky2));
+    const lastDay = dayKey(C[N - 1].t, 'America/New_York'), firstDay = lastDay - IC.ssDays + 1;
+    for (const [on, ses, col, nm] of [[IC.kz1, '2000-2200', IXC.k1, 'Asian'], [IC.kz2, '0300-0600', IXC.k2, 'London Open'], [IC.kz3, '0800-1000', IXC.k3, 'New York'], [IC.kz4, '1100-1300', IXC.k4, 'London Close']]){
+      if (!on) continue; const [sa, sb] = hm(ses); let s0 = -1;
+      for (let i = Math.max(0, a - 300); i <= Math.min(N, b + 1); i++){ const ins = i < N && inSess(C[i].t, 'America/New_York', sa, sb) && dayKey(C[i].t, 'America/New_York') >= firstDay;
+        if (ins && s0 < 0) s0 = i; if (!ins && s0 >= 0){ const x1 = xF(s0) - V.cw/2, x2 = xF(i - 1) + V.cw/2; ctx.fillStyle = col; ctx.fillRect(x1, yt, x2 - x1, Math.max(3, yb - yt)); if (IC.kzLbl) idxText(nm, x1 + 2, yt - 2, col, {al:'left', bl:'bottom', fs:9}); s0 = -1; } } } }
+  // premium / equilibrium / discount
+  if (IC.mtb && R.mtb){ const m = R.mtb, xl = X(m.left), xr = Math.min(PW, X(R.N - 1 + 50)), band = (p1, p2, col) => { ctx.fillStyle = hexA(col, .3); ctx.fillRect(xl, yOf(Math.max(p1, p2)), xr - xl, Math.abs(yOf(p1) - yOf(p2))); };
+    band(m.tup, .95*m.tup + .05*m.tdn, IXC.prem); band(.525*m.tup + .475*m.tdn, .525*m.tdn + .475*m.tup, IXC.eq); band(.95*m.tdn + .05*m.tup, m.tdn, IXC.disc);
+    idxText('Premium', (xl + xr)/2, yOf(m.tup) - 7, IXC.prem, {fs:11}); idxText('Discount', (xl + xr)/2, yOf(m.tdn) + 9, IXC.disc, {fs:11}); idxText('Equilibrium', xr + 4, yOf((m.tup + m.tdn)/2), IXC.eq, {al:'left', fs:11}); }
+  // accumulation / distribution zones
+  for (const z of R.zones){ const x1 = X(z.pts[0].i), x2 = X(z.pts[z.pts.length - 1].i); if (x2 < 0 || x1 > PW) continue; const col = z.acc ? IXC.up : IXC.dn;
+    ctx.fillStyle = hexA(col, .3); ctx.fillRect(x1, yOf(z.top), x2 - x1, yOf(z.btm) - yOf(z.top));
+    ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); z.pts.forEach((q, j) => j ? ctx.lineTo(X(q.i), yOf(q.p)) : ctx.moveTo(X(q.i), yOf(q.p))); ctx.stroke(); ctx.lineWidth = 1; }
+  // FVG
+  for (const f of R.fvg){ const x1 = X(f.i), x2 = X(f.made + IC.fvgExt); if (x2 < 0 || x1 > PW) continue; const col = f.bull ? IXC.up : IXC.dn;
+    ctx.fillStyle = hexA(col, .2); ctx.fillRect(x1, yOf(f.top), x2 - x1, yOf(f.btm) - yOf(f.top)); ctx.strokeStyle = hexA(col, .6); ctx.beginPath(); ctx.moveTo(x1, yOf((f.top + f.btm)/2)); ctx.lineTo(x2, yOf((f.top + f.btm)/2)); ctx.stroke();
+    idxText(IC.fvgType, x1 + 3, yOf(f.top) + 7, col, {al:'left', fs:9}); }
+  // order blocks (volumetric): box, buy/sell activity, middle line, volume label
+  for (const o of R.obs.concat(R.sobs)){ const x1 = X(o.i), xc = X(R.N - 1), x2 = PW, y1 = yOf(o.top), y2 = yOf(o.btm), col = IC.obGray ? '#9598a1' : (o.bull ? IXC.up : IXC.dn);
+    if (x2 < x1) continue; ctx.fillStyle = hexA(o.swing ? '#9598a1' : col, o.swing ? .12 : .14); ctx.fillRect(x1, y1, x2 - x1, y2 - y1); if (o.swing){ ctx.strokeStyle = col; ctx.strokeRect(x1 + .5, y1 + .5, x2 - x1 - 1, y2 - y1 - 1); }
+    if (IC.obMetrics && !o.swing && o.v){ const w = Math.max(10, (xc - x1)*.5), ym = yOf(o.avg); ctx.fillStyle = hexA(IXC.up, .5); ctx.fillRect(x1, y1, w*o.buy/o.v, ym - y1); ctx.fillStyle = hexA(IXC.dn, .5); ctx.fillRect(x1, ym, w*o.sell/o.v, y2 - ym); }
+    if (IC.obMid){ ctx.strokeStyle = hexA(col, .8); ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(x1, yOf(o.avg)); ctx.lineTo(xc, yOf(o.avg)); ctx.stroke(); ctx.setLineDash([]); }
+    if (IC.obMetric && !o.swing) idxText(`${S.unit}${fmt(o.v)} (${o.pct}%)`, Math.max(x1, xc) + 6, (y1 + y2)/2, IC.obGray ? '#c0c3cc' : col, {al:'left', fs:10, mono:1}); }
+}
+function drawIdxFront(PW, PH, a, b){
+  const R = IDX; if (!R) return; const C = S.candles, o0 = R.off, X = i => xF(i + o0), N = C.length, intra = S.tfMs < 86400000;
+  // day separators / day names / open levels (GMT+1)
+  if (intra && (IC.daySep || IC.dayLbl || IC.opD || IC.opW || IC.opM)){ const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], lastDay = dayKey(C[N - 1].t, 'GMT+1');
+    let opD = null, opW = null, opM = null;
+    for (let i = 1; i < N; i++){ const d0 = dayKey(C[i - 1].t, 'GMT+1'), d1 = dayKey(C[i].t, 'GMT+1'); if (d0 === d1) continue;
+      const lt = local(C[i].t, 'GMT+1'); opD = i; if (lt.getUTCDay() === 1 || Math.floor((d1 + 3)/7) !== Math.floor((d0 + 3)/7)) opW = i; if (local(C[i - 1].t, 'GMT+1').getUTCMonth() !== lt.getUTCMonth()) opM = i;
+      if (d1 < lastDay - IC.ssDays + 1 || i < a - 2 || i > b + 2) continue; const x = xF(i) - V.cw/2;
+      if (IC.daySep){ ctx.strokeStyle = hexA(IXC.day, .6); ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, PH - VH); ctx.stroke(); ctx.setLineDash([]); }
+      if (IC.dayLbl) idxText(names[lt.getUTCDay()], x + 4, 14, IXC.day, {al:'left', fs:11, b:1}); }
+    for (const [on, i, col, nm] of [[IC.opD, opD, IXC.opD, 'Daily Open'], [IC.opW, opW, IXC.opW, 'Weekly Open'], [IC.opM, opM, IXC.opM, 'Monthly Open']]){ if (!on || i == null) continue;
+      const y = yOf(C[i].o), x = xF(i); ctx.strokeStyle = col; ctx.setLineDash([6, 4]); ctx.beginPath(); ctx.moveTo(Math.max(0, x), y); ctx.lineTo(PW, y); ctx.stroke(); ctx.setLineDash([]); idxText(nm + ' ' + P(C[i].o), Math.max(4, x + 4), y - 7, col, {al:'left', fs:10}); } }
+  // previous D / W / M / Y highs & lows
+  for (const [k, r] of R.lv){ for (const [p, nm] of [[r.h, `P${k}H`], [r.l, `P${k}L`]]){ const y = yOf(p); ctx.strokeStyle = '#2962ff'; ctx.beginPath(); ctx.moveTo(Math.max(0, xF(tIdx(r.t))), y); ctx.lineTo(PW, y); ctx.stroke(); idxText(nm, PW - 6, y - 7, '#5b9cf6', {al:'right', fs:10, b:1}); } }
+  // market structure
+  if (IC.ms){ const draw = (ev, mode, solid) => { for (const e of ev){ if (!showMs(mode, e.txt)) continue; const x1 = X(e.n0), x2 = X(e.n); if (x2 < 0 || x1 > PW) continue;
+      const col = e.txt === 'BOS' ? (e.bull ? IXC.up : IXC.dn) : (e.bull ? '#067363' : '#b62835'), y = yOf(e.p); ctx.strokeStyle = col; ctx.setLineDash(solid ? [] : [5, 4]); ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke(); ctx.setLineDash([]);
+      idxText(e.txt, (x1 + x2)/2, y + (e.bull ? -8 : 9), col, {fs:10, mono:1}); } };
+    draw(R.iev, IC.msInt, false); draw(R.sev, IC.msSw, true); }
+  // EQH / EQL
+  for (const q of R.eq){ const col = q.top ? IXC.dn : IXC.up, x1 = X(q.i0), x2 = X(q.i1); if (x2 < 0 || x1 > PW) continue; ctx.strokeStyle = col; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(x1, yOf(q.p0)); ctx.lineTo(x2, yOf(q.p1)); ctx.stroke(); ctx.setLineDash([]);
+    idxText(q.top ? 'EQH' : 'EQL', (x1 + x2)/2, yOf((q.p0 + q.p1)/2) + (q.top ? -8 : 9), col, {fs:9}); }
+  // swing points
+  if (IC.swLbl) for (const q of R.swl){ const x = X(q.i); if (x < 0 || x > PW) continue; idxText(q.t, x, yOf(q.p) + (q.top ? -9 : 10), q.top ? IXC.prem : IXC.disc, {fs:10, b:1}); }
+  // strong / weak high & low
+  if (IC.mtb && R.mtb){ const m = R.mtb, xr = Math.min(PW, X(R.N - 1 + 50)), tv = (m.uV + m.dV) || 1;
+    ctx.strokeStyle = IXC.prem; ctx.beginPath(); ctx.moveTo(X(m.tupx), yOf(m.tup)); ctx.lineTo(xr, yOf(m.tup)); ctx.stroke(); ctx.strokeStyle = IXC.disc; ctx.beginPath(); ctx.moveTo(X(m.tdnx), yOf(m.tdn)); ctx.lineTo(xr, yOf(m.tdn)); ctx.stroke();
+    idxText(`${m.trend < 0 ? 'Strong' : 'Weak'} High | ${fmt(m.uV)} (${Math.round(100*m.uV/tv)}%)`, xr - 4, yOf(m.tup) - 8, IXC.prem, {al:'right', fs:10});
+    idxText(`${m.trend > 0 ? 'Strong' : 'Weak'} Low | ${fmt(m.dV)} (${Math.round(100*m.dV/tv)}%)`, xr - 4, yOf(m.tdn) + 9, IXC.disc, {al:'right', fs:10}); }
+  // Dbot trailing stop + signals
+  if (R.db){ const d = R.db;
+    if (IC.dbTs){ ctx.lineWidth = 1.6; for (let j = Math.max(1, a - o0); j <= Math.min(R.N - 1, b - o0); j++){ ctx.strokeStyle = d.pos[j] === -1 ? '#f23645' : d.pos[j] === 1 ? '#22c55e' : '#2962ff'; ctx.beginPath(); ctx.moveTo(X(j - 1), yOf(d.ts[j - 1])); ctx.lineTo(X(j), yOf(d.ts[j])); ctx.stroke(); } ctx.lineWidth = 1; }
+    for (const s of d.sig){ const i = s.i + o0; if (i < a - 1 || i > b + 1) continue; const c = C[i], x = xF(i), y = s.buy ? yOf(c.l) + 16 : yOf(c.h) - 16, col = s.buy ? '#22c55e' : '#f23645';
+      ctx.font = '700 10px -apple-system,Segoe UI,sans-serif'; const w = ctx.measureText(s.buy ? 'Buy' : 'Sell').width + 10; ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(x - w/2, y - 8, w, 16, 3); ctx.fill();
+      ctx.beginPath(); if (s.buy){ ctx.moveTo(x - 4, y - 8); ctx.lineTo(x, y - 13); ctx.lineTo(x + 4, y - 8); } else { ctx.moveTo(x - 4, y + 8); ctx.lineTo(x, y + 13); ctx.lineTo(x + 4, y + 8); } ctx.fill(); idxText(s.buy ? 'Buy' : 'Sell', x, y + .5, '#fff', {fs:10, b:1}); } }
+  // CPI / NFP release lines (future)
+  if (IC.news && IC.newsLines){ const N2 = newsDates(); for (const [nm, L, col] of [['CPI', N2.cpi, IXC.cpi], ['NFP', N2.nfp, IXC.nfp]]){ const r = nextRel(L); if (!r) continue; const x = xF(tIdx(r.t)); if (x < 0 || x > PW) continue;
+    ctx.strokeStyle = col; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, PH - VH); ctx.stroke(); ctx.setLineDash([]); idxText(nm, x, 26, col, {fs:11, b:1}); } }
+}
+// candle colour override (Dbot / structure)
+function idxBarCol(i){ const R = IDX; if (!R || !ON.idx) return null; const j = i - R.off; if (j < 0 || j >= R.N) return null;
+  if (IC.barCol){ const t = R.itrend[j]; return t > 0 ? IXC.up : t < 0 ? IXC.dn : null; }
+  if (IC.db && IC.dbBar && R.db) return S.candles[i].c > R.db.ts[j] ? '#22c55e' : '#f23645'; return null; }
+// MTF scanner table
+function renderIdxTable(){ const el = $('idxMtf'); if (!el) return; if (!ON.idx || !IC.mtf || !IDX){ el.style.display = 'none'; return; }
+  el.style.display = 'block'; el.innerHTML = `<table>${IDX.mtf.map(([nm, t]) => `<tr><td>${nm}</td><td style="color:${t === 1 ? '#22c55e' : t === -1 ? '#ff5c6c' : 'var(--dim)'}">${t === 1 ? 'BULLISH' : t === -1 ? 'BEARISH' : '—'}</td></tr>`).join('')}
+    <tr><td colspan="2" style="color:var(--dim)">Detected Pattern</td></tr><tr><td colspan="2" style="color:${IDX.pattern ? (IDX.pattern[0] === 'A' ? '#22c55e' : '#ff5c6c') : 'var(--txt)'}">${IDX.pattern || 'None'}</td></tr></table>`; }
+
+// settings window
+const IDX_UI = [
+  ['MARKET STRUCTURE', [['ms', 'b', 'Show market structure'], ['msInt', ['All', 'CHoCH', 'CHoCH+', 'BOS', 'None'], 'Internal'], ['iLen', 'n', 'Internal length', 2, 20], ['msSw', ['All', 'CHoCH', 'CHoCH+', 'BOS', 'None'], 'Swing'], ['sLen', 'n', 'Swing length', 10, 100], ['msDyn', 'b', 'Dynamic internal length'], ['mtf', 'b', 'MTF scanner (15m / 1H / 4H / 1D)'], ['eql', 'b', 'Show EQH / EQL'], ['barCol', 'b', 'Colour candles by structure']]],
+  ['HIGHS & LOWS MTF', [['lvD', 'b', 'Previous day'], ['lvW', 'b', 'Previous week'], ['lvM', 'b', 'Previous month'], ['lvY', 'b', 'Previous year']]],
+  ['VOLUMETRIC ORDER BLOCKS', [['ob', 'b', 'Show order blocks'], ['obNum', 'n', 'How many', 1, 10], ['obMetrics', 'b', 'Internal buy / sell activity'], ['obSwing', 'b', 'Swing order blocks'], ['obFilter', ['None', 'BOS', 'CHoCH', 'CHoCH+'], 'Filter'], ['obMit', ['Absolute', 'Middle'], 'Mitigation'], ['obPos', ['Full', 'Middle', 'Accurate', 'Precise'], 'Positioning'], ['obGray', 'b', 'Grayscale'], ['obMetric', 'b', 'Show volume metrics'], ['obMid', 'b', 'Middle line'], ['obOverlap', 'b', 'Hide overlap'], ['obOverMethod', ['Previous', 'Recent'], 'Overlap method']]],
+  ['ACCUMULATION / DISTRIBUTION', [['acc', 'b', 'Show zones'], ['accMode', ['Fast', 'Slow'], 'Mode']]],
+  ['HIGH AND LOW', [['swLbl', 'b', 'Swing points (HH / HL / LH / LL)'], ['mtb', 'b', 'Strong / weak high-low + premium / discount']]],
+  ['FAIR VALUE GAP', [['fvg', 'b', 'Show gaps'], ['fvgType', ['FVG', 'VI', 'OG'], 'Type'], ['fvgNum', 'n', 'Show last', 1, 20], ['fvgExt', 'n', 'Extend (bars)', 1, 100], ['fvgMit', ['Close', 'Wick'], 'Mitigation']]],
+  ['NEWS COUNTDOWN (CPI / NFP)', [['news', 'b', 'Show countdown'], ['newsWarn', 'n', 'Highlight under (hours)', 1, 168], ['newsLines', 'b', 'Release lines on chart'], ['newsAlert', 'n', 'Alert minutes before', 1, 240]]],
+  ['DBOT SIGNALS', [['db', 'b', 'Show Dbot buy / sell'], ['dbKey', 'f', 'Key value (sensitivity)', .5, 10], ['dbAtr', 'n', 'ATR period', 1, 50], ['dbTs', 'b', 'Trailing stop line'], ['dbBar', 'b', 'Dbot candle colour']]],
+  ['SESSIONS (GMT+1)', [['ss', 'b', 'Show sessions'], ['ssAs', 'b', 'Asian 01:00–10:00'], ['ssLd', 'b', 'London 08:00–17:00'], ['ssNy', 'b', 'New York 13:00–22:00'], ['ssDays', 'n', 'Days to show', 1, 40], ['ssStyle', ['Solid', 'Dashed', 'Dotted'], 'Border'], ['ssTitle', 'b', 'Titles'], ['ssMid', 'b', 'Mid line'], ['ssRange', 'b', 'Range in title']]],
+  ['KILLZONES (New York time)', [['kz', 'b', 'Show killzones'], ['kz1', 'b', 'Asian 20:00–22:00'], ['kz2', 'b', 'London Open 03:00–06:00'], ['kz3', 'b', 'New York 08:00–10:00'], ['kz4', 'b', 'London Close 11:00–13:00'], ['kzPos', ['Bottom', 'Top'], 'Position'], ['kzLbl', 'b', 'Labels']]],
+  ['DAYS & OPEN LEVELS', [['daySep', 'b', 'Day separators'], ['dayLbl', 'b', 'Day labels'], ['opD', 'b', 'Daily open'], ['opW', 'b', 'Weekly open'], ['opM', 'b', 'Monthly open']]],
+  ['ALERTS', [['alMs', 'b', 'BOS / CHoCH'], ['alOb', 'b', 'Price entering an order block'], ['alFvg', 'b', 'New FVG'], ['alDb', 'b', 'Dbot buy / sell'], ['alEq', 'b', 'EQH / EQL'], ['alNews', 'b', 'CPI / NFP coming up']]]
+];
+function openIdx(){
+  let h = '';
+  for (const [g, items] of IDX_UI){ h += `<div class="hsec" style="margin:14px 0 6px">${g}</div>`;
+    for (const [k, ty, nm, mn, mx] of items){
+      if (ty === 'b') h += `<label class="ixr"><span>${nm}</span><input type="checkbox" class="sw" data-ix="${k}"${IC[k] ? ' checked' : ''}></label>`;
+      else if (Array.isArray(ty)) h += `<label class="ixr"><span>${nm}</span><select data-ix="${k}">${ty.map(o => `<option${IC[k] === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label>`;
+      else h += `<label class="ixr"><span>${nm}</span><input type="number" data-ix="${k}" data-ty="${ty}" min="${mn}" max="${mx}" step="${ty === 'f' ? .5 : 1}" value="${IC[k]}"></label>`; } }
+  $('idxBody').innerHTML = h + `<div style="display:flex;gap:8px;margin-top:14px"><button class="mbtn" id="ixReset">Reset to defaults</button></div>
+    <p style="color:var(--dim);font-size:11px">Based on DANIEL INDICATOR v3 — “Price Action Concepts” by RUDYINDICATOR and HPotter's ATR trailing stop (CC BY-NC-SA 4.0: personal / non-commercial use).</p>`;
+  $('idxBody').querySelectorAll('[data-ix]').forEach(el => el.onchange = () => { const k = el.dataset.ix; IC[k] = el.type === 'checkbox' ? el.checked : el.tagName === 'SELECT' ? el.value : (el.dataset.ty === 'f' ? parseFloat(el.value) : parseInt(el.value)) || IDX_DEF[k];
+    saveIC(); idxSeen = {}; derivedDirty = dirty = true; renderNews(); });
+  $('ixReset').onclick = () => { IC = {...IDX_DEF}; saveIC(); idxSeen = {}; openIdx(); derivedDirty = dirty = true; };
+  $('idxModal').classList.add('open');
+}
+$('idxX').onclick = () => $('idxModal').classList.remove('open');
+$('idxModal').addEventListener('click', e => { if (e.target.id === 'idxModal') $('idxModal').classList.remove('open'); });
+
+$('idxOpen').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); openIdx(); });
 // ═════════════ order-flow extras ═════════════
 const DAY = 86400000;
 function drawCVD(PW, top, h){
@@ -3049,7 +3379,7 @@ function setInd(k, v){
   $('indCount').textContent = Object.values(ON).filter(Boolean).length;
   if (k === 'xray'){ if (v) initLens(); else { panelHover = null; hideTip(); } }
   if (k === 'fp'){ $('bFp').classList.toggle('on', v); if (v && V.cw < 70) zoomX(70/V.cw, pw() - 80); }
-  renderKL(); dirty = derivedDirty = true; if (window.__ui){ syncPP(); renderLegend(true); }
+  renderKL(); dirty = derivedDirty = true; if (k === 'idx'){ renderNews(); renderIdxTable(); } if (window.__ui){ syncPP(); renderLegend(true); }
 }
 document.querySelectorAll('#indMenu input[data-k]').forEach(cb => cb.onchange = () => setInd(cb.dataset.k, cb.checked));
 $('bFollow').onclick = () => setFollow(true);
@@ -3142,7 +3472,7 @@ $('bAuto').onclick = () => { V.auto = true; dirty = true; };
 $('bFp').onclick = () => setInd('fp', !ON.fp);
 try{ S.fpMin = +(localStorage.getItem('fpMin') || 0); $('fpMin').value = S.fpMin || 0; }catch(e){}
 // ── top-left legend: symbol, active indicators, quick sliders ──
-const IND_NAME = {imb:'Imbalances', sess:'Sessions', vwap:'VWAP', cvd:'CVD', xray:'Loupe', fp:'Print Pro', whales:'Whales Map', vp:'Volume Profile', liq:'Inside Levels', heat:'Pulse', umb:'Umbrella', lux:'Binary Lux', aur:'Aurora', zones:'Saga', binlex:'Binlex', brk:'Breakout', prints:'Big Prints', levels:'Key Levels', senti:'Pressure'};
+const IND_NAME = {idx:'Idanelfx', imb:'Imbalances', sess:'Sessions', vwap:'VWAP', cvd:'CVD', xray:'Loupe', fp:'Print Pro', whales:'Whales Map', vp:'Volume Profile', liq:'Inside Levels', heat:'Pulse', umb:'Umbrella', lux:'Binary Lux', aur:'Aurora', zones:'Saga', binlex:'Binlex', brk:'Breakout', prints:'Big Prints', levels:'Key Levels', senti:'Pressure'};
 const legend = $('legend');
 const wSl = v => Math.round(100*(Math.log10(Math.max(1e4, v)) - 4)/3.3);   // slider 0..100 → $10k..$20M
 const slW = s => Math.pow(10, 4 + 3.3*s/100);
@@ -3183,7 +3513,7 @@ function renderLegend(force){
 legend.addEventListener('click', e => {
   if (e.target.closest('#lgHd')){ legend.classList.toggle('min'); try{ localStorage.setItem('lgMin', legend.classList.contains('min') ? '1' : '0'); }catch(err){} renderLegend(true); return; }
   const x = e.target.closest('[data-x]'); if (x){ setInd(x.dataset.x, false); renderLegend(true); return; }
-  const g = e.target.closest('[data-g]'); if (g){ e.stopPropagation(); $('setBtn').click(); }
+  const g = e.target.closest('[data-g]'); if (g){ e.stopPropagation(); if (g.dataset.g === 'idx') openIdx(); else $('setBtn').click(); }
 });
 legend.addEventListener('pointerdown', e => e.stopPropagation());
 try{ const m = localStorage.getItem('lgMin'); if (m === '1' || (m == null && window.innerWidth < 600)) legend.classList.add('min'); }catch(e){}
