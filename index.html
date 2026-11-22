@@ -137,7 +137,11 @@
   #idxNews[data-pos="Top Center"]{top:60px;bottom:auto} #idxNews[data-pos="Middle Left"]{left:56px;top:45%;bottom:auto;transform:none}
   #idxNews[data-pos="Middle Right"]{left:auto;right:80px;top:45%;bottom:auto;transform:none} #idxMtf{right:80px;top:180px}
   @media (max-width:600px){#idxNews,#idxNews[data-pos]{left:6px;right:auto;transform:none;font-size:9px;max-width:calc(100% - 80px);overflow:hidden} #idxNews:not([data-pos^="Top"]):not([data-pos^="Middle"]){bottom:60px} #idxMtf{right:74px;top:120px;font-size:9px}}
-  #idxMtf{overflow:hidden} #idxMtf .hd{display:flex;align-items:center;gap:6px;padding:.35em .7em;cursor:move;touch-action:none;pointer-events:auto;user-select:none;-webkit-user-select:none;color:var(--txt);font-family:-apple-system,Segoe UI,sans-serif;border-bottom:1px solid var(--line2)}
+  #idxNews,#idxMtf{overflow:hidden} #idxNews table{width:100%} #idxNews .rz,#idxNews .hd{pointer-events:auto}
+  .ixtab .bx{cursor:pointer;opacity:.6;padding:0 .2em;pointer-events:auto} .ixtab .bx:hover{opacity:1;color:#ff5c6c}
+  #idxNews .hd{display:flex;align-items:center;gap:6px;padding:.35em .7em;cursor:move;touch-action:none;user-select:none;-webkit-user-select:none;color:var(--txt);font-family:-apple-system,Segoe UI,sans-serif;border-bottom:1px solid var(--line2)}
+  #idxNews .rz{position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;touch-action:none;background:linear-gradient(135deg,transparent 55%,var(--acc) 55%);opacity:.8}
+  #idxMtf .hd{display:flex;align-items:center;gap:6px;padding:.35em .7em;cursor:move;touch-action:none;pointer-events:auto;user-select:none;-webkit-user-select:none;color:var(--txt);font-family:-apple-system,Segoe UI,sans-serif;border-bottom:1px solid var(--line2)}
   #idxMtf table{width:100%} #idxMtf td,#idxMtf th{padding:.3em .7em;font-size:1em} #idxMtf th{font-size:.85em}
   #idxMtf .rz{position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;touch-action:none;pointer-events:auto;background:linear-gradient(135deg,transparent 55%,var(--acc) 55%);opacity:.8}
   #idxMtf .sb{display:inline-block;width:3.6em;height:.5em;border-radius:.25em;background:var(--line2);vertical-align:middle;margin-right:.4em;overflow:hidden} #idxMtf .sb i{display:block;height:100%;border-radius:.25em}
@@ -282,6 +286,8 @@
   <label><input type="checkbox" data-k="vwap"> VWAP (daily) ± bands</label>
   <label><input type="checkbox" data-k="cvd"> CVD pane (cumulative delta)</label>
   <label style="border-top:1px solid var(--line2);padding-top:8px;margin-top:4px"><input type="checkbox" data-k="idx"> <b>Idanelfx</b> — structure, order blocks, FVG, Dbot, sessions, news <a href="#" id="idxOpen" style="margin-left:auto;color:var(--acc)">⚙</a></label>
+  <label><input type="checkbox" data-k="news"> 📅 CPI / NFP countdown board</label>
+  <label><input type="checkbox" data-k="mtfb"> 🧭 Trend board (15m · 1H · 4H · 1D)</label>
   <div class="t" style="margin-top:6px">Trend &amp; signals</div>
   <label><input type="checkbox" data-k="umb"> Trend umbrella (trailing curve + Buy/Sell)</label>
   <label><input type="checkbox" data-k="lux"> Hull trend line + momentum pane</label>
@@ -370,7 +376,7 @@
     <div class="hlp"><b>Loupe</b> — a magnifier over the chart. <b>Follow</b>: the lens moves with the cursor, click pins it. <b>Fixed</b> 🔒: the lens size is locked — you can still drag it anywhere, but it can't be resized until you tap Fixed again. Unlocked: drag the box to move it, pull the bottom-right corner (or the wheel over it) to resize, click the chart to move it there, <b>Shift+drag</b> or <b>⬚</b> draws a new area. <b>L</b> toggles, <b>[ ]</b> less / more magnification, <b>Esc</b> turns it off.<br><b>Big prints</b> — boxes every footprint row and trade bigger than the $ amount (type 500k or 1M).<br><b>Classic</b> sell×buy · <b>Delta</b> buy−sell · <b>Volume</b> total.</div>
   </div>
   <div id="ppTip"></div>
-  <div id="idxNews" class="ixtab"></div><div id="idxMtf" class="ixtab"><div class="hd" id="idxMtfH"><span style="opacity:.6">⠿</span><b style="flex:1">Trend board</b><span id="idxMtfS" title="Data source" style="opacity:.6;font-weight:400"></span></div><div id="idxMtfB"></div><div class="rz" id="idxMtfR" title="Drag to resize"></div></div>
+  <div id="idxNews" class="ixtab"><div class="hd" id="idxNewsH"><span style="opacity:.6">⠿</span><b style="flex:1">CPI / NFP</b><span class="bx" id="idxNewsX" title="Hide (turn back on in Indicators)">✕</span></div><div id="idxNewsB"></div><div class="rz" id="idxNewsR" title="Drag to resize"></div></div><div id="idxMtf" class="ixtab"><div class="hd" id="idxMtfH"><span style="opacity:.6">⠿</span><b style="flex:1">Trend board</b><span id="idxMtfS" title="Data source" style="opacity:.6;font-weight:400"></span><span class="bx" id="idxMtfX" title="Hide (turn back on in Indicators)">✕</span></div><div id="idxMtfB"></div><div class="rz" id="idxMtfR" title="Drag to resize"></div></div>
   <div id="selBar"><span class="sg" title="Drag">⋮⋮</span><button id="sbTpl" title="Template">▦+</button><button id="sbCol" title="Colour"><i id="sbColI"></i></button>
     <button id="sbW" title="Line width"><i id="sbWI"></i></button><button id="sbLs" title="Line style">┄</button><button id="sbLock" title="Lock">🔓</button>
     <button id="sbSet" title="Settings">⚙</button><button id="sbDel" title="Remove">🗑</button><button id="sbMore" title="More">⋯</button></div>
@@ -425,7 +431,7 @@ const RP = {on:false, pick:false, full:null, n:0, timer:null, spd:1, mode:null, 
 const S = {ht:[], rowMul:1, baseRow:0, fpMin:0, whales:[], trades:[], k1:[], dk:[], dt:[], off:0, duka:false, candles:[], tfMs:60000, row:0, dec:2, mode:'delta', bigTh:250000, nPrints:6,
            ws:null, wsBuf:[], back:false, lastId:-1, sess:0, unit:'$'};
 const V = {cw:9, panX:0, follow:true, auto:true, W:0, H:0, dpr:1, lo:0, hi:1};
-const ON = {xray:true, fp:false, whales:false, vp:false, liq:false, heat:false, umb:false, lux:false, aur:false, zones:false, binlex:false, brk:false, prints:true, levels:true, senti:true, imb:false, sess:false, vwap:false, cvd:false, idx:false};
+const ON = {xray:true, fp:false, whales:false, vp:false, liq:false, heat:false, umb:false, lux:false, aur:false, zones:false, binlex:false, brk:false, prints:true, levels:true, senti:true, imb:false, sess:false, vwap:false, cvd:false, idx:false, news:true, mtfb:true};
 let lens = null, prints = [], keyLv = [], buyPct = 50, lensFollow = false, lensPin = false, lensFixed = false, bigOn = true;
 let hover = {x:-1, y:-1, in:false}, pinned = null, panelHover = null;
 let dirty = true, derivedDirty = true;
@@ -521,7 +527,7 @@ function derive(){
   derivedDirty = false;
   const C = S.candles; if (!C.length) return;
   if (ON.imb) computeImb();
-  if (ON.idx){ computeIdx(); renderIdxTable(); } else { IDX = null; renderIdxTable(); }
+  if (ON.idx || ON.mtfb){ computeIdx(); renderIdxTable(); } else { IDX = null; renderIdxTable(); }
   const cells = [];
   const from = Math.max(0, C.length - 300);
   for (let i = from; i < C.length; i++) for (const [k, L] of C[i].lv) cells.push([L.b + L.s, i, k, L.b - L.s, L.b, L.s]);
@@ -2538,7 +2544,7 @@ function computeIdx(){
   // MTF trend board: trend (market structure), strength (ADX 14) and momentum (RSI 14) on each timeframe.
   // Live: real exchange candles for every timeframe. Replay / forex without them: built from the chart's candles.
   R.mtf = [];
-  if (IC.mtf) for (const [nm, ms] of MTF_TF){
+  if (ON.mtfb) for (const [nm, ms] of MTF_TF){
     let A = null; const K = !RP.on && MTFK.sym === S.sym && MTFK[ms];
     if (K && K.length > 30) A = mtfPatch(K, Call, ms); else if (ms >= S.tfMs) A = ms === S.tfMs ? Call : aggregate(Call, ms);
     if (!A || A.length < 16){ R.mtf.push({nm, t:null}); continue; }
@@ -2586,20 +2592,20 @@ function fmtLeft(ms){ const s = Math.max(0, Math.floor(ms/1000)), d = Math.floor
   return (d ? d + 'd ' : '') + `${p(h)}h ${p(m)}m ${p(x)}s`; }
 function renderNews(){
   const el = $('idxNews'); if (!el) return;
-  if (!ON.idx || !IC.news){ el.style.display = 'none'; return; }
+  if (!ON.news){ el.style.display = 'none'; return; }
   const N2 = newsDates(), warn = IC.newsWarn*3600000, row = (nm, col, L) => { const r = nextRel(L); if (!r) return `<tr><td style="color:${col}">${nm}</td><td>-</td><td>-</td></tr>`;
     const left = r.t - Date.now(), lt = local(r.t, IC.newsTz), when = lt.toISOString().replace('T', ' ').slice(0, 16), ddd = lt.toUTCString().slice(0, 3);
     const cd = left <= 0 ? '<td class="rel">RELEASED</td>' : `<td${left <= warn ? ' class="warn"' : ` style="color:${col}"`}>${fmtLeft(left)}</td>`;
     return `<tr><td style="color:${col};font-weight:700">${nm}</td><td>${ddd} ${when}${r.auto ? ' (auto)' : ''}</td>${cd}</tr>`; };
-  el.style.display = 'block'; el.dataset.pos = IC.newsPos; el.style.fontSize = {Small:'9px', Normal:'11px', Large:'13px'}[IC.newsSize];
-  el.innerHTML = `<table><tr><th>NEWS</th><th>RELEASE (${IC.newsTz})</th><th>COUNTDOWN</th></tr>${row('CPI', IXC.cpi, N2.cpi)}${row('NFP', IXC.nfp, N2.nfp)}</table>`;
+  el.style.display = 'block'; el.dataset.pos = IC.newsPos; if (!el.dataset.sized) el.style.fontSize = {Small:'9px', Normal:'11px', Large:'13px'}[IC.newsSize];
+  $('idxNewsB').innerHTML = `<table><tr><th>NEWS</th><th>RELEASE (${IC.newsTz})</th><th>COUNTDOWN</th></tr>${row('CPI', IXC.cpi, N2.cpi)}${row('NFP', IXC.nfp, N2.nfp)}</table>`;
   if (IC.alNews) for (const [nm, L] of [['CPI', N2.cpi], ['NFP', N2.nfp]]){ const r = nextRel(L); if (!r) continue; const left = r.t - Date.now(), key = nm + r.t;
     if (left > 0 && left <= IC.newsAlert*60000 && !idxSeen[key]){ idxSeen[key] = 1; fire(nm + ' release', `US ${nm} comes out in ${Math.ceil(left/60000)} min — manage your positions`); } }
 }
 setInterval(renderNews, 1000);
 
 function idxAlerts(C){
-  if (RP.on) return;   // no pop-ups while practising on replay
+  if (RP.on || !ON.idx) return;   // no pop-ups while practising on replay (or with Idanelfx off)
   const N = C.length, last = N - 1, k = (s) => { if (idxSeen[s]) return false; idxSeen[s] = 1; return true; }, t = C[last].t, prevT = C[last - 1] ? C[last - 1].t : t;
   if (!idxSeen.__init){ idxSeen.__init = 1; for (const e of IDX.iev.concat(IDX.sev)) idxSeen['ms' + C[e.n].t + e.p] = 1; for (const o of IDX.sobs) idxSeen['so' + C[o.i].t] = 1; for (const z of IDX.zones) idxSeen['zn' + C[z.made].t] = 1; if (IDX.db) for (const s of IDX.db.sig) idxSeen['db' + C[s.i].t] = 1; for (const f of IDX.fvg) idxSeen['fv' + C[f.made].t] = 1; return; }
   if (IC.alMs) for (const e of IDX.iev.concat(IDX.sev)) if (e.n >= last - 1 && k('ms' + C[e.n].t + e.p)) fire('Structure', `${S.sym} ${e.bull ? 'Bullish' : 'Bearish'} ${e.txt} at ${P(e.p)}`);
@@ -2698,7 +2704,7 @@ function drawIdxFront(PW, PH, a, b){
       ctx.font = '700 10px -apple-system,Segoe UI,sans-serif'; const w = ctx.measureText(s.buy ? 'Buy' : 'Sell').width + 10; ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(x - w/2, y - 8, w, 16, 3); ctx.fill();
       ctx.beginPath(); if (s.buy){ ctx.moveTo(x - 4, y - 8); ctx.lineTo(x, y - 13); ctx.lineTo(x + 4, y - 8); } else { ctx.moveTo(x - 4, y + 8); ctx.lineTo(x, y + 13); ctx.lineTo(x + 4, y + 8); } ctx.fill(); idxText(s.buy ? 'Buy' : 'Sell', x, y + .5, '#fff', {fs:10, b:1}); } }
   // CPI / NFP release lines (future)
-  if (IC.news && IC.newsLines){ const N2 = newsDates(); for (const [nm, L, col] of [['CPI', N2.cpi, IXC.cpi], ['NFP', N2.nfp, IXC.nfp]]){ const r = nextRel(L); if (!r) continue; const x = xF(tIdx(r.t)); if (x < 0 || x > PW) continue;
+  if (ON.news && IC.newsLines){ const N2 = newsDates(); for (const [nm, L, col] of [['CPI', N2.cpi, IXC.cpi], ['NFP', N2.nfp, IXC.nfp]]){ const r = nextRel(L); if (!r) continue; const x = xF(tIdx(r.t)); if (x < 0 || x > PW) continue;
     ctx.strokeStyle = col; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, PH - VH); ctx.stroke(); ctx.setLineDash([]); idxText(nm, x, 26, col, {fs:11, b:1}); } }
 }
 // candle colour override (Dbot / structure)
@@ -2721,7 +2727,7 @@ function rsiLast(A, n){ if (A.length < n + 1) return null; let g = 0, l = 0;
 function mtfPatch(K, Call, ms){ const A = K.slice(), last = Call[Call.length - 1]; if (!last) return A; const t0 = Math.floor(last.t/ms)*ms, L = A[A.length - 1];
   if (L.t === t0){ A[A.length - 1] = {...L, c:last.c, h:Math.max(L.h, last.c), l:Math.min(L.l, last.c)}; } else if (t0 > L.t) A.push({t:t0, o:last.c, h:last.c, l:last.c, c:last.c, buy:0, sell:0}); return A; }
 async function mtfFetch(){
-  if (!ON.idx || !IC.mtf || RP.on || !S.src || document.hidden) return; const src = S.src, sym = S.sym, my = S.sess; if (MTFK.sym !== sym){ for (const [, ms] of MTF_TF) delete MTFK[ms]; MTFK.sym = sym; }
+  if (!ON.mtfb || RP.on || !S.src || document.hidden) return; const src = S.src, sym = S.sym, my = S.sess; if (MTFK.sym !== sym){ for (const [, ms] of MTF_TF) delete MTFK[ms]; MTFK.sym = sym; }
   const IV = {900000:['15m', '15'], 3600000:['1h', '60'], 14400000:['4h', '240'], 86400000:['1d', 'D']};
   try{
     if (src.kind === 'bn' || src.kind === 'by') for (const [, ms] of MTF_TF){ let rows;
@@ -2738,7 +2744,7 @@ async function mtfFetch(){
 }
 setInterval(mtfFetch, 30000);
 const strengthTxt = a => a == null ? '' : a < 20 ? 'Weak' : a < 25 ? 'Building' : a < 40 ? 'Strong' : 'Very strong';
-function renderIdxTable(){ const el = $('idxMtf'); if (!el) return; if (!ON.idx || !IC.mtf || !IDX){ el.style.display = 'none'; return; }
+function renderIdxTable(){ const el = $('idxMtf'); if (!el) return; if (!ON.mtfb || !IDX){ el.style.display = 'none'; return; }
   if (el.style.display !== 'block'){ el.style.display = 'block'; mtfFetch(); }
   const up = '#22c55e', dn = '#ff5c6c', rows = IDX.mtf;
   const row = m => { if (m.t == null) return `<tr><td>${m.nm}</td><td style="color:var(--dim)">—</td><td></td><td></td></tr>`;
@@ -2754,20 +2760,25 @@ function renderIdxTable(){ const el = $('idxMtf'); if (!el) return; if (!ON.idx 
   $('idxMtfB').innerHTML = `<table><tr><th>TF</th><th>TREND</th><th>STRENGTH</th><th>RSI</th></tr>${rows.map(row).join('')}
     <tr><td style="color:var(--dim)">Bias</td><td style="color:${bc};font-weight:700">${bias}</td><td colspan="2" style="color:var(--dim)">${k.length ? `${Math.max(b, s)}/${k.length} agree (${agree}%)` : ''}${aAvg != null ? ` · ${strengthTxt(aAvg).toLowerCase()}` : ''}</td></tr>
     <tr><td colspan="4" style="color:var(--dim)">Detected Pattern: <span style="color:${IDX.pattern ? (IDX.pattern[0] === 'A' ? up : dn) : 'var(--txt)'}">${IDX.pattern || 'None'}</span></td></tr></table>`; }
-// drag the header to move, drag the corner to resize (works with finger or mouse; position + size are remembered)
-(() => { const el = $('idxMtf'), H = $('idxMtfH'), Z = $('idxMtfR'); let st = null;
-  const save = () => { try{ localStorage.setItem('idxMtfBox', JSON.stringify({l:parseFloat(el.style.left), t:parseFloat(el.style.top), fs:parseFloat(el.style.fontSize) || 11})); }catch(e){} };
-  const place = (l, t) => { const w = wrap.getBoundingClientRect(), r = el.getBoundingClientRect(); el.style.left = clamp(l, 0, Math.max(0, w.width - Math.min(r.width, w.width) )) + 'px'; el.style.top = clamp(t, 0, Math.max(0, w.height - 40)) + 'px'; el.style.right = 'auto'; el.style.bottom = 'auto'; };
-  try{ const q = JSON.parse(localStorage.getItem('idxMtfBox') || 'null'); if (q){ if (q.fs) el.style.fontSize = q.fs + 'px'; if (q.l != null && !isNaN(q.l)) requestAnimationFrame(() => place(q.l, q.t)); } }catch(e){}
-  const down = (mode) => e => { e.preventDefault(); e.stopPropagation(); const r = el.getBoundingClientRect(), w = wrap.getBoundingClientRect();
+// drag the header to move, drag the corner to resize (works with finger or mouse; position + size are remembered). Double-tap the header to reset.
+function makeBoard(el, H, Z, key, name, onSize){ let st = null;
+  const save = () => { try{ localStorage.setItem(key, JSON.stringify({l:parseFloat(el.style.left), t:parseFloat(el.style.top), fs:parseFloat(el.style.fontSize) || null})); }catch(e){} };
+  const place = (l, t) => { const w = wrap.getBoundingClientRect(), r = el.getBoundingClientRect(); el.style.transform = 'none'; el.style.right = 'auto'; el.style.bottom = 'auto';
+    el.style.left = clamp(l, 0, Math.max(0, w.width - Math.min(r.width, w.width))) + 'px'; el.style.top = clamp(t, 0, Math.max(0, w.height - 40)) + 'px'; };
+  try{ const q = JSON.parse(localStorage.getItem(key) || 'null'); if (q){ if (q.fs){ el.style.fontSize = q.fs + 'px'; el.dataset.sized = 1; } if (q.l != null && !isNaN(q.l)) requestAnimationFrame(() => { el.style.transform = 'none'; place(q.l, q.t); }); } }catch(e){}
+  const down = mode => e => { if (e.target.classList.contains('bx')) return; e.preventDefault(); e.stopPropagation(); const r = el.getBoundingClientRect(), w = wrap.getBoundingClientRect();
     st = {mode, x:e.clientX, y:e.clientY, l:r.left - w.left, t:r.top - w.top, w0:r.width, fs:parseFloat(getComputedStyle(el).fontSize) || 11}; e.target.setPointerCapture(e.pointerId); };
   const move = e => { if (!st) return; e.preventDefault(); const dx = e.clientX - st.x, dy = e.clientY - st.y;
-    if (st.mode === 'm') place(st.l + dx, st.t + dy); else el.style.fontSize = clamp(st.fs*(st.w0 + (dx + dy)/2)/st.w0, 7, 22).toFixed(1) + 'px'; };
+    if (st.mode === 'm') place(st.l + dx, st.t + dy); else { if (!el.style.left){ place(st.l, st.t); } el.style.fontSize = clamp(st.fs*(st.w0 + (dx + dy)/2)/st.w0, 7, 24).toFixed(1) + 'px'; el.dataset.sized = 1; } };
   const up = () => { if (st){ st = null; save(); } };
   for (const [h, m] of [[H, 'm'], [Z, 'r']]){ h.addEventListener('pointerdown', down(m)); h.addEventListener('pointermove', move); h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up); }
   window.addEventListener('resize', () => { if (el.style.left) place(parseFloat(el.style.left), parseFloat(el.style.top)); });
-  H.addEventListener('dblclick', () => { el.style.left = el.style.top = el.style.fontSize = ''; el.style.right = el.style.bottom = ''; try{ localStorage.removeItem('idxMtfBox'); }catch(e){} toast('Trend board back to its corner'); });
-})();
+  H.addEventListener('dblclick', () => { for (const k of ['left', 'top', 'right', 'bottom', 'transform', 'fontSize']) el.style[k] = ''; delete el.dataset.sized; try{ localStorage.removeItem(key); }catch(e){} if (onSize) onSize(); toast(name + ' back to its place'); });
+}
+makeBoard($('idxMtf'), $('idxMtfH'), $('idxMtfR'), 'idxMtfBox', 'Trend board');
+makeBoard($('idxNews'), $('idxNewsH'), $('idxNewsR'), 'idxNewsBox', 'CPI / NFP board', () => renderNews());
+$('idxNewsX').onclick = e => { e.stopPropagation(); setInd('news', false); toast('CPI / NFP board hidden — turn it back on in Indicators'); };
+$('idxMtfX').onclick = e => { e.stopPropagation(); setInd('mtfb', false); toast('Trend board hidden — turn it back on in Indicators'); };
 
 // settings window
 const IDX_UI = [
@@ -2806,7 +2817,7 @@ function openIdx(){
     <p style="color:var(--dim);font-size:11px">Based on DANIEL INDICATOR v3 — “Price Action Concepts” by RUDYINDICATOR and HPotter's ATR trailing stop (CC BY-NC-SA 4.0: personal / non-commercial use).</p>`;
   $('idxBody').querySelectorAll('[data-ix]').forEach(el => el.onchange = () => { const k = el.dataset.ix; if (el.dataset.ty === 't' && !/^\d{4}-\d{4}$/.test(el.value)){ el.style.borderColor = '#f23645'; toast('Write the time like 0800-1700'); return; } el.style.borderColor = '';
     IC[k] = el.type === 'checkbox' ? el.checked : el.tagName === 'SELECT' || el.type === 'color' || el.dataset.ty === 't' ? el.value : (el.dataset.ty === 'f' ? parseFloat(el.value) : parseInt(el.value)) || IDX_DEF[k];
-    saveIC(); idxSeen = {}; derivedDirty = dirty = true; renderNews(); });
+    saveIC(); idxSeen = {}; derivedDirty = dirty = true; if (k === 'news' && ON.news !== IC.news) setInd('news', IC.news); if (k === 'newsPos' || k === 'newsSize'){ const nb = $('idxNews'); for (const q of ['left', 'top', 'right', 'bottom', 'transform', 'fontSize']) nb.style[q] = ''; delete nb.dataset.sized; try{ localStorage.removeItem('idxNewsBox'); }catch(e){} } if (k === 'mtf' && ON.mtfb !== IC.mtf) setInd('mtfb', IC.mtf); renderNews(); });
   $('ixReset').onclick = () => { IC = {...IDX_DEF}; saveIC(); idxSeen = {}; openIdx(); derivedDirty = dirty = true; };
   $('idxModal').classList.add('open');
 }
@@ -3607,7 +3618,7 @@ $('setBtn').onclick = e => { e.stopPropagation(); toggleMenu('setMenu', $('setBt
 document.querySelectorAll('.menu').forEach(m => m.addEventListener('click', e => e.stopPropagation()));
 document.addEventListener('click', closeMenus);
 function setInd(k, v){
-  ON[k] = v; document.querySelector(`#indMenu input[data-k="${k}"]`).checked = v;
+  ON[k] = v; if (k === 'news'){ IC.news = v; saveIC(); setTimeout(renderNews, 0); } if (k === 'mtfb'){ IC.mtf = v; saveIC(); setTimeout(renderIdxTable, 0); } document.querySelector(`#indMenu input[data-k="${k}"]`).checked = v;
   try{ localStorage.setItem('fpOn', JSON.stringify(ON)); }catch(e){}
   derivedDirty = true;
   $('indCount').textContent = Object.values(ON).filter(Boolean).length;
@@ -3625,6 +3636,7 @@ $('whTh').onchange = () => { derivedDirty = true; };
 $('hmWin').onchange = () => { derivedDirty = true; };
 $('vpMode').onchange = () => { dirty = true; };
 try{ const on = JSON.parse(localStorage.getItem('fpOn') || 'null'); if (on) for (const k of Object.keys(ON)) if (k in on){ ON[k] = !!on[k]; const cb = document.querySelector(`#indMenu input[data-k="${k}"]`); if (cb) cb.checked = ON[k]; } }catch(e){}
+document.querySelectorAll('#indMenu input[data-k]').forEach(cb => { if (cb.dataset.k in ON) cb.checked = !!ON[cb.dataset.k]; });   // new switches start ticked when they are on by default
 $('indCount').textContent = Object.values(ON).filter(Boolean).length;
 document.querySelectorAll('#dtb [data-t]').forEach(b => b.onclick = () => setTool(tool === b.dataset.t && b.dataset.t !== 'cursor' ? 'cursor' : b.dataset.t));
 $('dtT').onclick = () => { $('dtb').classList.toggle('hide'); try{ localStorage.setItem('dtbHide', $('dtb').classList.contains('hide') ? '1' : ''); }catch(e){} };
@@ -3706,7 +3718,7 @@ $('bAuto').onclick = () => { V.auto = true; dirty = true; };
 $('bFp').onclick = () => setInd('fp', !ON.fp);
 try{ S.fpMin = +(localStorage.getItem('fpMin') || 0); $('fpMin').value = S.fpMin || 0; }catch(e){}
 // ── top-left legend: symbol, active indicators, quick sliders ──
-const IND_NAME = {idx:'Idanelfx', imb:'Imbalances', sess:'Sessions', vwap:'VWAP', cvd:'CVD', xray:'Loupe', fp:'Print Pro', whales:'Whales Map', vp:'Volume Profile', liq:'Inside Levels', heat:'Pulse', umb:'Umbrella', lux:'Binary Lux', aur:'Aurora', zones:'Saga', binlex:'Binlex', brk:'Breakout', prints:'Big Prints', levels:'Key Levels', senti:'Pressure'};
+const IND_NAME = {news:'CPI / NFP', mtfb:'Trend board', idx:'Idanelfx', imb:'Imbalances', sess:'Sessions', vwap:'VWAP', cvd:'CVD', xray:'Loupe', fp:'Print Pro', whales:'Whales Map', vp:'Volume Profile', liq:'Inside Levels', heat:'Pulse', umb:'Umbrella', lux:'Binary Lux', aur:'Aurora', zones:'Saga', binlex:'Binlex', brk:'Breakout', prints:'Big Prints', levels:'Key Levels', senti:'Pressure'};
 const legend = $('legend');
 const wSl = v => Math.round(100*(Math.log10(Math.max(1e4, v)) - 4)/3.3);   // slider 0..100 → $10k..$20M
 const slW = s => Math.pow(10, 4 + 3.3*s/100);
@@ -3747,7 +3759,7 @@ function renderLegend(force){
 legend.addEventListener('click', e => {
   if (e.target.closest('#lgHd')){ legend.classList.toggle('min'); try{ localStorage.setItem('lgMin', legend.classList.contains('min') ? '1' : '0'); }catch(err){} renderLegend(true); return; }
   const x = e.target.closest('[data-x]'); if (x){ setInd(x.dataset.x, false); renderLegend(true); return; }
-  const g = e.target.closest('[data-g]'); if (g){ e.stopPropagation(); if (g.dataset.g === 'idx') openIdx(); else $('setBtn').click(); }
+  const g = e.target.closest('[data-g]'); if (g){ e.stopPropagation(); if (['idx', 'news', 'mtfb'].includes(g.dataset.g)) openIdx(); else $('setBtn').click(); }
 });
 legend.addEventListener('pointerdown', e => e.stopPropagation());
 try{ const m = localStorage.getItem('lgMin'); if (m === '1' || (m == null && window.innerWidth < 600)) legend.classList.add('min'); }catch(e){}
