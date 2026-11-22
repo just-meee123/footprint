@@ -324,10 +324,10 @@
   <div id="legend"></div>
   <div id="pp">
     <div class="ph" id="ppH"><i>☷</i>Print Pro<span class="cv" id="ppCv">▾</span></div>
-    <div class="rw"><button id="ppLoupe" data-h="Loupe — a magnifier over the chart. Follow: the lens moves with the cursor, click pins it. Fixed: drag the rectangle on the chart (a corner or the wheel over it resizes it), the lens stays put. L toggles, [ ] less / more magnification">Loupe</button><button id="ppFollow" data-h="Follow — the lens moves with the cursor; click pins it, click again lets it follow">Follow</button><button id="ppFixed" data-h="Fixed — locks the lens: it can't be moved or resized until you tap Fixed again. Unlocked: drag the box to move it, pull its bottom-right corner (or the wheel over it) to resize">Fixed</button><button id="ppSel" data-h="Draw a new lens area: tap this, then drag a box on the chart" title="Draw lens area">⬚</button></div>
+    <div class="rw"><button id="ppLoupe" data-h="Loupe — a magnifier over the chart. Follow: the lens moves with the cursor, click pins it. Fixed: drag the rectangle on the chart (a corner or the wheel over it resizes it), the lens stays put. L toggles, [ ] less / more magnification">Loupe</button><button id="ppFollow" data-h="Follow — the lens moves with the cursor; click pins it, click again lets it follow">Follow</button><button id="ppFixed" data-h="Fixed — locks the lens SIZE: you can still drag it anywhere, but the corner, wheel and [ ] keys won't resize it until you tap Fixed again">Fixed</button><button id="ppSel" data-h="Draw a new lens area: tap this, then drag a box on the chart" title="Draw lens area">⬚</button></div>
     <div class="rw"><button id="ppBig" data-h="Big prints — boxes every footprint row and trade bigger than the $ amount (type 500k or 1M)">Big prints</button><span>$</span><input id="ppBigV" value="250k" title="e.g. 500k, 1M"></div>
     <div class="rw"><button data-m="ba">Classic</button><button data-m="delta">Delta</button><button data-m="vol">Volume</button><button id="ppHelp" style="margin-left:auto">?</button></div>
-    <div class="hlp"><b>Loupe</b> — a magnifier over the chart. <b>Follow</b>: the lens moves with the cursor, click pins it. <b>Fixed</b> 🔒: the lens is locked — no moving or resizing until you tap Fixed again. Unlocked: drag the box to move it, pull the bottom-right corner (or the wheel over it) to resize, click the chart to move it there, <b>Shift+drag</b> or <b>⬚</b> draws a new area. <b>L</b> toggles, <b>[ ]</b> less / more magnification, <b>Esc</b> turns it off.<br><b>Big prints</b> — boxes every footprint row and trade bigger than the $ amount (type 500k or 1M).<br><b>Classic</b> sell×buy · <b>Delta</b> buy−sell · <b>Volume</b> total.</div>
+    <div class="hlp"><b>Loupe</b> — a magnifier over the chart. <b>Follow</b>: the lens moves with the cursor, click pins it. <b>Fixed</b> 🔒: the lens size is locked — you can still drag it anywhere, but it can't be resized until you tap Fixed again. Unlocked: drag the box to move it, pull the bottom-right corner (or the wheel over it) to resize, click the chart to move it there, <b>Shift+drag</b> or <b>⬚</b> draws a new area. <b>L</b> toggles, <b>[ ]</b> less / more magnification, <b>Esc</b> turns it off.<br><b>Big prints</b> — boxes every footprint row and trade bigger than the $ amount (type 500k or 1M).<br><b>Classic</b> sell×buy · <b>Delta</b> buy−sell · <b>Volume</b> total.</div>
   </div>
   <div id="ppTip"></div>
   <div id="selBar"><span class="sg" title="Drag">⋮⋮</span><button id="sbTpl" title="Template">▦+</button><button id="sbCol" title="Colour"><i id="sbColI"></i></button>
@@ -1062,9 +1062,8 @@ function lensHandles(L){
   return [{k:'br', x:L.x2, y:L.y2}];   // one corner (bottom-right) resizes, like before
 }
 function lensHit(L, x, y, touch){
-  if (lensFixed) return null;   // fixed: the box can't be moved or resized
   const r = touch ? 18 : 12;
-  if (Math.abs(x - L.x2) < r && Math.abs(y - L.y2) < r) return 'br';
+  if (!lensFixed && Math.abs(x - L.x2) < r && Math.abs(y - L.y2) < r) return 'br';   // fixed: size locked, moving still allowed
   if (x >= L.x1 && x <= L.x2 && y >= L.y1 && y <= L.y2) return 'in';
   return null;
 }
@@ -2855,7 +2854,7 @@ const endPtr = e => {
   if (act && act.m === 'sel'){ const w = Math.abs(act.x - act.x0), h = Math.abs(act.y - act.y0);
     if (w > 8 && h > 8){ if (!lens) initLens(); lens.ci = iAt((act.x + act.x0)/2); lens.wc = Math.max(0.6, w/V.cw); lens.cp = pAt((act.y + act.y0)/2); lens.hp = Math.max(S.row, h*ppp()); }
     lensSelArm = false; $('ppSel').classList.remove('arm'); }
-  else if (act && act.m === 'pan' && !act.moved && ON.xray && !lensFollow && !lensFixed && lens && e.pointerType === 'mouse'){ const p = pos(e); lens.ci = iAt(p.x); lens.cp = pAt(p.y); }   // Fixed: click moves the lens there
+  else if (act && act.m === 'pan' && !act.moved && ON.xray && !lensFollow && lens && e.pointerType === 'mouse'){ const p = pos(e); lens.ci = iAt(p.x); lens.cp = pAt(p.y); }   // Fixed: click moves the lens there
   if (act && act.m === 'pan' && !act.moved && ON.xray && lensFollow && lens){ lensPin = !lensPin; if (!lensPin){ const p = pos(e); lens.ci = iAt(p.x); lens.cp = pAt(p.y); } toast(lensPin ? 'Loupe pinned — click again to let it follow' : 'Loupe follows the cursor'); }
   act = null; dirty = true;
 };
@@ -3072,7 +3071,7 @@ $('ppLoupe').onclick = () => { setInd('xray', !ON.xray); syncPP(); };
 $('ppFollow').onclick = () => { lensFollow = !lensFollow; lensPin = false; if (lensFollow) lensFixed = false; try{ localStorage.setItem('lensX', lensFixed ? '1' : '0'); }catch(e){} if (!ON.xray) setInd('xray', true); try{ localStorage.setItem('lensF', '1'); }catch(e){} syncPP(); dirty = true; };
 $('ppFixed').onclick = () => { lensFixed = !lensFixed; lensFollow = false; lensPin = false; if (!ON.xray) setInd('xray', true);
   try{ localStorage.setItem('lensF', '0'); localStorage.setItem('lensX', lensFixed ? '1' : '0'); }catch(e){}
-  toast(lensFixed ? 'Loupe fixed 🔒 — size and position locked. Tap Fixed again to unlock' : 'Loupe unlocked — drag it to move, pull the corner to resize'); syncPP(); dirty = true; };
+  toast(lensFixed ? 'Loupe size locked 🔒 — you can still drag it around. Tap Fixed again to unlock the size' : 'Size unlocked — pull the corner to resize'); syncPP(); dirty = true; };
 $('ppBig').onclick = () => { bigOn = !bigOn; try{ localStorage.setItem('bigOn', bigOn ? '1' : '0'); }catch(e){} syncPP(); dirty = true; };
 $('ppBigV').onchange = e => { const v = parseMoney(e.target.value); if (v > 0){ S.bigTh = v; $('big').value = v; try{ localStorage.setItem('bigTh', v); }catch(err){} derivedDirty = true; } syncPP(); dirty = true; };
 pp.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { S.mode = b.dataset.m; $('mode').value = S.mode; try{ localStorage.setItem('fpMode', S.mode); }catch(e){} syncPP(); dirty = true; });
