@@ -139,6 +139,7 @@
   #dsBody{padding:12px 14px;overflow:auto;flex:1;font-size:13px}
   #dsBody .r{display:flex;align-items:center;gap:10px;margin:7px 0;flex-wrap:wrap} #dsBody .r > label:first-child{min-width:110px}
   #dsBody input[type=number],#dsBody input[type=text],#dsBody select{background:var(--inbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:6px 8px;font:inherit;width:96px}
+  #dsBody select{width:auto;min-width:96px}
   #dsBody input[type=color]{width:34px;height:30px;border:1px solid var(--line2);border-radius:6px;background:none;padding:1px}
   #dsBody .lvg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 18px;margin:6px 0 10px} #dsBody .lvg div{display:flex;align-items:center;gap:6px} #dsBody .lvg input[type=number]{width:74px}
   #dsBody .lvg input:disabled{opacity:.45}
@@ -1442,8 +1443,9 @@ const GLYPHS_OLD = {emoji:['😀','😎','🤔','😱','🥳','😴','🤑','�
 for (const [kind, arr] of Object.entries(GLYPHS)) for (const gl of arr) TL['g:' + kind + ':' + gl] = {n:1, name:(kind === 'icon' ? 'Icon ' : kind === 'sticker' ? 'Sticker ' : 'Emoji ') + gl, cat:8, g:gl};
 const ACTIONS = [{k:'cursor', name:'Cursor'}, {k:'range', name:'Measure'}, {k:'eraser', name:'Eraser', g:'⌫'}, {k:'@keep', name:'Keep drawing', g:'🔁'}, {k:'@hide', name:'Hide drawings', g:'👁'},
   {k:'@lock', name:'Lock all drawings', g:'🔒'}, {k:'@magnet', name:'Magnet: strong / weak / off', g:'🧲'}, {k:'@clear', name:'Remove all objects', g:'🗑'}, {k:'@zin', name:'Zoom in', g:'＋'}, {k:'@zout', name:'Zoom out', g:'－'}];
-let favTools = ['trend', 'hline', 'hray', 'vline', 'rect', 'fib', 'range', 'long', 'short', 'text', 'brush'];
-try{ const f = JSON.parse(localStorage.getItem('fpFav') || 'null'); if (Array.isArray(f)) favTools = f.filter(k => TL[k]); }catch(e){}
+let favTools = ['trend', 'hline', 'hray', 'vline', 'rect', 'fib', 'range', 'long', 'short', 'frvp', 'text', 'brush'];
+try{ const f = JSON.parse(localStorage.getItem('fpFav') || 'null'); if (Array.isArray(f)) favTools = f.filter(k => TL[k]);
+  if (!localStorage.getItem('fpFavV2')){ if (!favTools.includes('frvp')) favTools.splice(Math.max(0, favTools.indexOf('short') + 1), 0, 'frvp'); localStorage.setItem('fpFavV2', '1'); localStorage.setItem('fpFav', JSON.stringify(favTools)); } }catch(e){}
 let keepDraw = false, lockDraw = false, magnetMode = 'weak';
 const bbMap = new WeakMap();   // last drawn box of label-type drawings, for tapping them
 const nOf = t => (TL[t] || {n:2}).n;
@@ -1457,6 +1459,7 @@ function circum(a, b, c){ const d = 2*(a.x*(b.y - c.y) + b.x*(c.y - a.y) + c.x*(
   const ux = ((a.x**2 + a.y**2)*(b.y - c.y) + (b.x**2 + b.y**2)*(c.y - a.y) + (c.x**2 + c.y**2)*(a.y - b.y))/d, uy = ((a.x**2 + a.y**2)*(c.x - b.x) + (b.x**2 + b.y**2)*(a.x - c.x) + (c.x**2 + c.y**2)*(b.x - a.x))/d;
   return {x:ux, y:uy, r:Math.hypot(a.x - ux, a.y - uy)}; }
 function bubble(d, x, y, lines, opt = {}){
+  if (d.tbg) opt = {...opt, bg:hexA(d.tbg, .94)}; if (d.tfg) opt = {...opt, fg:d.tfg}; if (d.fs && !opt.font) opt = {...opt, font:`${d.bold ? 'bold ' : ''}${d.italic ? 'italic ' : ''}${d.fs}px -apple-system,Segoe UI,sans-serif`};
   ctx.font = (opt.font || '12px -apple-system,Segoe UI,sans-serif'); const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + 14, h = lines.length*16 + 8;
   const bx = opt.cx ? x - w/2 : x, by = opt.above ? y - h - (opt.gap ?? 10) : y;
   ctx.fillStyle = opt.bg || hexA(d.color || drawColor, .92); ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(bx, by, w, h, opt.r ?? 6); else ctx.rect(bx, by, w, h); ctx.fill();
@@ -1464,25 +1467,55 @@ function bubble(d, x, y, lines, opt = {}){
   ctx.fillStyle = opt.fg || '#fff'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; lines.forEach((l, i) => ctx.fillText(l, bx + 7, by + 12 + i*16));
   bbMap.set(d, {x:bx, y:by, w, h});
 }
+// per-tool level lists (Gann & Fibonacci family) — editable in Settings
+const LV_DEF = {fibch:[0, .236, .382, .5, .618, .786, 1, 1.618, 2.618, 3.618, 4.236], fibtz:[0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144], fibfan:[.25, .382, .5, .618, .75, 1],
+  fibtime:[0, .382, .5, .618, 1, 1.382, 1.618, 2, 2.618, 3, 3.618, 4.236], fibcirc:[.236, .382, .5, .618, .786, 1, 1.618, 2.618, 3.618, 4.236], fibarcs:[.236, .382, .5, .618, .786, 1],
+  fibwedge:[.236, .382, .5, .618, .786, 1], pitchfan:[0, .25, .382, .5, .618, .75, 1], gannbox:[0, .25, .382, .5, .618, .75, 1], gannsq:[.125, .25, .375, .5, .625, .75, .875], gannfix:[.125, .25, .375, .5, .625, .75, .875],
+  gannfan:[.125, .25, .333, .5, 1, 2, 3, 4, 8]};
+const LV_OFF = {fibch:[2.618, 3.618, 4.236], fibtime:[3.618, 4.236], fibcirc:[.236, .786, 3.618, 4.236], fibtz:[144], fibarcs:[.236, .786]};
+function lvList(d){ if (!d.lv2 && LV_DEF[d.type]) d.lv2 = LV_DEF[d.type].map((v, i) => ({v, on:!(LV_OFF[d.type] || []).includes(v), c:FIB_COL[i % FIB_COL.length]})); return d.lv2 || []; }
+const lvOn = (d, col) => lvList(d).filter(l => l.on).map(l => ({v:l.v, c:d.multi ? l.c : col}));
+let curD = null;
+const bgFill = (d, col, def) => d.bg === false ? null : hexA(d.bgC || col, d.bgA != null ? d.bgA : def);
 function ptLabels(Q, names, col){
-  ctx.font = 'bold 11px -apple-system,Segoe UI,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  if (curD && curD.lbl === false) return; if (curD && curD.lblC) col = curD.lblC;
+  ctx.font = `bold ${curD && curD.fs || 11}px -apple-system,Segoe UI,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   Q.forEach((q, i) => { if (!names[i]) return; const nb = [Q[i - 1], Q[i + 1]].filter(Boolean), up = nb.length ? q.y <= Math.min(...nb.map(z => z.y)) : true;
     const y = up ? q.y - 12 : q.y + 12, w = ctx.measureText(names[i]).width + 8; ctx.fillStyle = col; ctx.fillRect(q.x - w/2, y - 8, w, 16); ctx.fillStyle = '#fff'; ctx.fillText(names[i], q.x, y + .5); });
 }
-function ratioTag(a, b, txt){ const m = mid(a, b); ctx.font = '10px ui-monospace,monospace'; const w = ctx.measureText(txt).width + 8;
+function ratioTag(a, b, txt){ if (curD && curD.ratios === false) return; const m = mid(a, b); ctx.font = '10px ui-monospace,monospace'; const w = ctx.measureText(txt).width + 8;
   ctx.fillStyle = hexA(TH.bg, .85); ctx.fillRect(m.x - w/2, m.y - 7, w, 14); ctx.fillStyle = TH.txt; ctx.textAlign = 'center'; ctx.fillText(txt, m.x, m.y + .5); }
-function rangeProfile(i1, i2, x0, x1, col){
+// TradingView-style volume profile for a range of candles: buy / sell split rows, POC, value area (VAH / VAL)
+function rangeProfile(i1, i2, x0, x1, col, d = {}){
   const C = S.candles; i1 = clamp(Math.round(i1), 0, C.length - 1); i2 = clamp(Math.round(i2), 0, C.length - 1); if (i2 < i1) [i1, i2] = [i2, i1];
-  const br = Math.max(1, Math.ceil((V.hi - V.lo)/S.row/70)), bins = new Map(); let tot = 0;
-  for (let i = i1; i <= i2; i++) for (const [k, L] of C[i].lv){ const b = Math.floor(k/br), v = L.b + L.s; bins.set(b, (bins.get(b) || 0) + v); tot += v; }
+  let lo = Infinity, hi = -Infinity; for (let i = i1; i <= i2; i++){ lo = Math.min(lo, C[i].l); hi = Math.max(hi, C[i].h); }
+  if (!isFinite(lo) || hi <= lo) return;
+  const rows = clamp(d.rows || 24, 4, 200), bs = (hi - lo)/rows, B = Array.from({length:rows}, () => ({b:0, s:0})); let tot = 0;
+  for (let i = i1; i <= i2; i++){ const c = C[i];
+    if (c.lv.size) for (const [k, L] of c.lv){ const r = clamp(Math.floor(((k + .5)*S.row - lo)/bs), 0, rows - 1); B[r].b += L.b; B[r].s += L.s; tot += L.b + L.s; }
+    else { const v = c.buy + c.sell, r = clamp(Math.floor(((c.h + c.l)/2 - lo)/bs), 0, rows - 1); B[r].b += c.buy; B[r].s += c.sell; tot += v; } }
   if (!tot) return;
-  const keys = [...bins.keys()].sort((a, b) => a - b); let pk = keys[0]; for (const k of keys) if (bins.get(k) > bins.get(pk)) pk = k;
-  let lo = keys.indexOf(pk), hi = lo, acc = bins.get(pk);
-  while (acc < tot*.7 && (lo > 0 || hi < keys.length - 1)){ const vd = lo > 0 ? bins.get(keys[lo - 1]) : -1, vu = hi < keys.length - 1 ? bins.get(keys[hi + 1]) : -1; if (vu >= vd){ hi++; acc += vu; } else { lo--; acc += vd; } }
-  const w = Math.max(30, (x1 - x0)*.6), mx = bins.get(pk), hB = br*S.row/ppp();
-  for (const [k, v] of bins){ const y = yOf((k + 1)*br*S.row); ctx.fillStyle = k >= keys[lo] && k <= keys[hi] ? hexA(col, .5) : hexA(col, .22); ctx.fillRect(x0, y + .5, w*v/mx, Math.max(1, hB - 1)); }
-  const yp = yOf((pk + .5)*br*S.row); ctx.strokeStyle = COL.gold; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x0, yp); ctx.lineTo(Math.max(x1, x0 + w), yp); ctx.stroke();
-  for (const [k, nm] of [[keys[hi] + 1, 'VAH'], [keys[lo], 'VAL']]){ const y = yOf(k*br*S.row); ctx.setLineDash([3, 3]); ctx.strokeStyle = hexA(col, .7); ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(Math.max(x1, x0 + w), y); ctx.stroke(); ctx.setLineDash([]); }
+  let pk = 0; B.forEach((x, r) => { if (x.b + x.s > B[pk].b + B[pk].s) pk = r; });
+  let a = pk, z = pk, acc = B[pk].b + B[pk].s; const VA = clamp(d.va || 70, 10, 100)/100;
+  while (acc < tot*VA && (a > 0 || z < rows - 1)){ const vd = a > 0 ? B[a - 1].b + B[a - 1].s : -1, vu = z < rows - 1 ? B[z + 1].b + B[z + 1].s : -1; if (vu >= vd){ z++; acc += vu; } else { a--; acc += vd; } }
+  const boxW = Math.max(40, x1 - x0), W = boxW*clamp(d.wpct || 40, 5, 100)/100, mx = Math.max(...B.map(x => x.b + x.s)), right = d.place === 'right';
+  const upC = d.upC || '#26a69a', dnC = d.dnC || '#ef5350', yT = yOf(hi), yB = yOf(lo);
+  ctx.fillStyle = hexA(col, .05); ctx.fillRect(x0, yT, boxW, yB - yT);
+  for (let r = 0; r < rows; r++){ const x = B[r]; if (!(x.b + x.s)) continue;
+    const y1 = yOf(lo + (r + 1)*bs), h = Math.max(1, yOf(lo + r*bs) - y1 - 1), inVA = r >= a && r <= z, al = inVA ? .75 : .3;
+    const wb = W*x.b/mx, ws = W*x.s/mx;
+    if (right){ ctx.fillStyle = hexA(upC, al); ctx.fillRect(x0 + boxW - wb - ws, y1 + .5, wb, h); ctx.fillStyle = hexA(dnC, al); ctx.fillRect(x0 + boxW - ws, y1 + .5, ws, h); }
+    else { ctx.fillStyle = hexA(upC, al); ctx.fillRect(x0, y1 + .5, wb, h); ctx.fillStyle = hexA(dnC, al); ctx.fillRect(x0 + wb, y1 + .5, ws, h); }
+  }
+  const lab = (txt, y, c) => { ctx.font = '600 10px -apple-system,Segoe UI,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(txt).width + 8;
+    ctx.fillStyle = hexA(TH.bg, .85); ctx.fillRect(x0 + boxW + 3, y - 7, tw, 14); ctx.fillStyle = c; ctx.fillText(txt, x0 + boxW + 7, y); };
+  const pocP = lo + (pk + .5)*bs, yp = yOf(pocP);
+  if (d.poc !== false){ ctx.strokeStyle = d.pocC || '#ff1744'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x0, yp); ctx.lineTo(d.pocExt ? pw() : x0 + boxW, yp); ctx.stroke(); ctx.lineWidth = 1;
+    if (d.lbls !== false) lab(`POC ${P(pocP)}`, yp, d.pocC || '#ff1744'); }
+  if (d.vaLines !== false) for (const [p, nm] of [[lo + (z + 1)*bs, 'VAH'], [lo + a*bs, 'VAL']]){ const y = yOf(p); ctx.setLineDash([4, 3]); ctx.strokeStyle = hexA(col, .8); ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + boxW, y); ctx.stroke(); ctx.setLineDash([]);
+    if (d.lbls !== false) lab(`${nm} ${P(p)}`, y, col); }
+  if (d.lbls !== false){ const tb = B.reduce((s, x) => s + x.b, 0), dl = tb - (tot - tb); ctx.font = '600 10px -apple-system,Segoe UI,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillStyle = TH.dim; ctx.fillText(`Vol ${S.unit}${fmt(tot)} · Δ ${S.unit}${sgn(dl)} · ${i2 - i1 + 1} bars`, x0 + 4, yB + 4); }
 }
 function candlesIn(t1, t2){ let a = Math.round(tIdx(t1)), b = Math.round(tIdx(t2)); if (a > b) [a, b] = [b, a]; return [clamp(a, 0, S.candles.length - 1), clamp(b, 0, S.candles.length - 1)]; }
 
@@ -1494,7 +1527,7 @@ function renderTool(d, Q, PW, PH){
   const poly = (P, close, fillA) => { if (P.length < 2) return; ctx.beginPath(); P.forEach((q, i) => i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); if (close) ctx.closePath();
     if (fillA && d.bg !== false){ ctx.fillStyle = hexA(d.bgC || col, d.bgA != null ? d.bgA : fillA); ctx.fill(); } ctx.stroke(); };
   const pr = q => pAt(q.y), baseDash = DASH[d.ls] || [], dsh = (on) => ctx.setLineDash(on ? [4, 4] : baseDash);
-  const lab = (txt, x, y, align = 'center') => { ctx.font = '10px ui-monospace,monospace'; ctx.fillStyle = col; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(txt, x, y); };
+  const lab = (txt, x, y, align = 'center') => { if (d.lbl === false) return; ctx.font = `${d.fs || 10}px ui-monospace,monospace`; ctx.fillStyle = col; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(txt, x, y); };
   const t = d.type, pts = d.pts;
   if (t.startsWith('g:')){ const kind = t.split(':')[1], g = TL[t].g, s = d.fs || (kind === 'sticker' ? 14 : kind === 'emoji' ? 28 : 24);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -1518,37 +1551,39 @@ function renderTool(d, Q, PW, PH){
       let sx = 0, sy = 0, sxx = 0, sxy = 0; for (let i = a; i <= b; i++){ const x = i - a, y = S.candles[i].c; sx += x; sy += y; sxx += x*x; sxy += x*y; }
       const m = (n*sxy - sx*sy)/(n*sxx - sx*sx || 1), c0 = (sy - m*sx)/n; let ss = 0; for (let i = a; i <= b; i++){ ss += (S.candles[i].c - (c0 + m*(i - a)))**2; } const sd = Math.sqrt(ss/n);
       const L = k => [{x:xF(a), y:yOf(c0 + k*sd)}, {x:xF(b), y:yOf(c0 + m*(n - 1) + k*sd)}];
-      const [u1, u2] = L(2), [l1, l2] = L(-2); ctx.fillStyle = hexA(col, .07); ctx.beginPath(); ctx.moveTo(u1.x, u1.y); ctx.lineTo(u2.x, u2.y); ctx.lineTo(l2.x, l2.y); ctx.lineTo(l1.x, l1.y); ctx.fill();
-      const [c1, c2] = L(0); seg(c1, c2); dsh(1); seg(u1, u2); seg(l1, l2); dsh(0); break; }
+      const dv = d.dev != null ? d.dev : 2, [u1, u2] = L(dv), [l1, l2] = L(-dv); if (d.bg !== false){ ctx.fillStyle = bgFill(d, col, .07); ctx.beginPath(); ctx.moveTo(u1.x, u1.y); ctx.lineTo(u2.x, u2.y); ctx.lineTo(l2.x, l2.y); ctx.lineTo(l1.x, l1.y); ctx.fill(); }
+      const [c1, c2] = L(0); seg(c1, c2); dsh(1); if (d.upper !== false) seg(u1, u2); if (d.lower !== false) seg(l1, l2); dsh(0);
+      if (d.lbl !== false){ ctx.fillStyle = col; lab(`σ${dv}`, u2.x + 4, u2.y, 'left'); } break; }
     case 'pitchfork': case 'schiff': case 'mschiff': case 'ipitch': { if (Q.length < 3){ seg(A, B); break; }
       const O = t === 'schiff' ? {x:A.x, y:(A.y + B.y)/2} : t === 'mschiff' ? mid(A, B) : t === 'ipitch' ? mid(A, Cq) : A, M = mid(B, Cq), dv = {x:M.x - O.x, y:M.y - O.y};
       if (t !== 'pitchfork'){ dsh(1); seg(A, O); dsh(0); } seg(B, Cq); ray(O, M); ray(B, {x:B.x + dv.x, y:B.y + dv.y}); ray(Cq, {x:Cq.x + dv.x, y:Cq.y + dv.y});
-      ctx.fillStyle = hexA(col, .06); ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(B.x + dv.x*20, B.y + dv.y*20); ctx.lineTo(Cq.x + dv.x*20, Cq.y + dv.y*20); ctx.lineTo(Cq.x, Cq.y); ctx.fill(); break; }
+      for (const k of (d.pfLv || [])){ ray({x:B.x + (Cq.x - B.x)*(.5 - k/2), y:B.y + (Cq.y - B.y)*(.5 - k/2)}, {x:B.x + (Cq.x - B.x)*(.5 - k/2) + dv.x, y:B.y + (Cq.y - B.y)*(.5 - k/2) + dv.y}); ray({x:B.x + (Cq.x - B.x)*(.5 + k/2), y:B.y + (Cq.y - B.y)*(.5 + k/2)}, {x:B.x + (Cq.x - B.x)*(.5 + k/2) + dv.x, y:B.y + (Cq.y - B.y)*(.5 + k/2) + dv.y}); }
+      if (d.bg !== false){ ctx.fillStyle = bgFill(d, col, .06); ctx.beginPath(); ctx.moveTo(B.x, B.y); ctx.lineTo(B.x + dv.x*20, B.y + dv.y*20); ctx.lineTo(Cq.x + dv.x*20, Cq.y + dv.y*20); ctx.lineTo(Cq.x, Cq.y); ctx.fill(); } break; }
     case 'fibext': { if (d.tl !== false){ ctx.save(); ctx.strokeStyle = d.tlc || col; ctx.lineWidth = 1; ctx.setLineDash([4, 4]); poly(Q); ctx.restore(); } if (Q.length < 3) break;
       const p1 = pts[0].p, p2 = pts[1].p, p3 = pts[2].p; drawFibLevels(d, Math.min(Cq.x, Cq.x + Math.abs(B.x - A.x)), Cq.x + Math.abs(B.x - A.x), L => p3 + (p2 - p1)*L, col, PW); break; }
     case 'fibch': { seg(A, B); if (Q.length < 3) break; const off = Cq.y - (A.y + (B.y - A.y)*((Cq.x - A.x)/((B.x - A.x) || 1)));
-      for (const L of [0, .236, .382, .5, .618, .786, 1, 1.618]){ const o = off*L; seg({x:A.x, y:A.y + o}, {x:B.x, y:B.y + o}); lab(String(L), A.x - 4, A.y + o, 'right'); } break; }
-    case 'fibtz': { const dx = B.x - A.x; if (Math.abs(dx) < 2) break; [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89].forEach(F => { const x = A.x + dx*F; seg({x, y:0}, {x, y:PH}); lab(String(F), x + 3, 12, 'left'); }); break; }
+      const LL = lvOn(d, col); if (d.bg !== false && LL.length > 1){ const v0 = Math.min(...LL.map(l => l.v)), v1 = Math.max(...LL.map(l => l.v)); ctx.fillStyle = bgFill(d, col, .06); ctx.beginPath(); ctx.moveTo(A.x, A.y + off*v0); ctx.lineTo(B.x, B.y + off*v0); ctx.lineTo(B.x, B.y + off*v1); ctx.lineTo(A.x, A.y + off*v1); ctx.fill(); }
+      for (const {v:L, c} of LL){ const o = off*L; ctx.strokeStyle = c; seg({x:A.x, y:A.y + o}, {x:B.x, y:B.y + o}); ctx.fillStyle = c; lab(String(L), A.x - 4, A.y + o, 'right'); } break; }
+    case 'fibtz': { const dx = B.x - A.x; if (Math.abs(dx) < 2) break; lvOn(d, col).forEach(({v:F, c}) => { const x = A.x + dx*F; ctx.strokeStyle = c; seg({x, y:0}, {x, y:PH}); lab(String(F), x + 3, 12, 'left'); }); break; }
     case 'fibfan': { const dx = B.x - A.x, dy = B.y - A.y; dsh(1); ctx.strokeRect(Math.min(A.x, B.x), Math.min(A.y, B.y), Math.abs(dx), Math.abs(dy)); dsh(0);
-      for (const L of [.25, .382, .5, .618, .75, 1]){ ray(A, {x:B.x, y:A.y + dy*L}); if (L < 1) ray(A, {x:A.x + dx*L, y:B.y}); lab(String(L), B.x + 4, A.y + dy*L, 'left'); } break; }
-    case 'fibtime': { dsh(1); poly(Q); dsh(0); if (Q.length < 3) break; const dx = B.x - A.x; for (const L of [0, .382, .5, .618, 1, 1.382, 1.618, 2, 2.618, 3]){ const x = Cq.x + dx*L; seg({x, y:0}, {x, y:PH}); lab(String(L), x + 3, 12, 'left'); } break; }
-    case 'fibcirc': { const r = dist(A, B); dsh(1); seg(A, B); dsh(0); for (const L of [.382, .5, .618, 1, 1.618, 2.618]){ ctx.beginPath(); ctx.arc(A.x, A.y, r*L, 0, 7); ctx.stroke(); } break; }
+      for (const {v:L, c} of lvOn(d, col)){ ctx.strokeStyle = c; ray(A, {x:B.x, y:A.y + dy*L}); if (L < 1 && d.timeFan !== false) ray(A, {x:A.x + dx*L, y:B.y}); lab(String(L), B.x + 4, A.y + dy*L, 'left'); } break; }
+    case 'fibtime': { dsh(1); poly(Q); dsh(0); if (Q.length < 3) break; const dx = B.x - A.x; for (const {v:L, c} of lvOn(d, col)){ const x = Cq.x + dx*L; ctx.strokeStyle = c; seg({x, y:0}, {x, y:PH}); lab(String(L), x + 3, 12, 'left'); } break; }
+    case 'fibcirc': { const r = dist(A, B); dsh(1); seg(A, B); dsh(0); for (const {v:L, c} of lvOn(d, col)){ ctx.strokeStyle = c; ctx.beginPath(); ctx.arc(A.x, A.y, r*L, 0, 7); ctx.stroke(); lab(String(L), A.x + r*L*.707 + 4, A.y - r*L*.707, 'left'); } break; }
     case 'fibspiral': { const r0 = dist(A, B), a0 = Math.atan2(B.y - A.y, B.x - A.x); if (r0 < 2) break; ctx.beginPath();
       for (let k = 0; k <= 400; k++){ const th = -6*Math.PI + k*(7.5*Math.PI/400), r = r0*Math.pow(PHI, th/(Math.PI/2)), x = A.x + r*Math.cos(a0 + th), y = A.y + r*Math.sin(a0 + th); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
       ctx.stroke(); dsh(1); seg(A, B); dsh(0); break; }
     case 'fibarcs': { const r = dist(A, B), upHalf = A.y < B.y; dsh(1); seg(A, B); dsh(0);
-      for (const L of [.382, .5, .618, 1]){ ctx.beginPath(); ctx.arc(B.x, B.y, r*L, upHalf ? Math.PI : 0, upHalf ? 2*Math.PI : Math.PI); ctx.stroke(); lab(String(L), B.x, B.y + (upHalf ? -r*L - 6 : r*L + 6)); } break; }
+      for (const {v:L, c} of lvOn(d, col)){ ctx.strokeStyle = c; ctx.beginPath(); ctx.arc(B.x, B.y, r*L, upHalf ? Math.PI : 0, upHalf ? 2*Math.PI : Math.PI); ctx.stroke(); lab(String(L), B.x, B.y + (upHalf ? -r*L - 6 : r*L + 6)); } break; }
     case 'fibwedge': { seg(A, B); if (Q.length < 3) break; seg(A, Cq); const r = dist(A, B), a1 = Math.atan2(B.y - A.y, B.x - A.x), a2 = Math.atan2(Cq.y - A.y, Cq.x - A.x);
-      for (const L of [.236, .382, .5, .618, .786, 1]){ ctx.beginPath(); ctx.arc(A.x, A.y, r*L, Math.min(a1, a2), Math.max(a1, a2)); ctx.stroke(); } break; }
-    case 'pitchfan': { if (Q.length < 3){ seg(A, B); break; } seg(B, Cq); for (const L of [0, .25, .382, .5, .618, .75, 1]) ray(A, {x:B.x + (Cq.x - B.x)*L, y:B.y + (Cq.y - B.y)*L}); break; }
+      for (const {v:L, c} of lvOn(d, col)){ ctx.strokeStyle = c; ctx.beginPath(); ctx.arc(A.x, A.y, r*L, Math.min(a1, a2), Math.max(a1, a2)); ctx.stroke(); lab(String(L), A.x + r*L*Math.cos(a1) + 4, A.y + r*L*Math.sin(a1), 'left'); } break; }
+    case 'pitchfan': { if (Q.length < 3){ seg(A, B); break; } seg(B, Cq); for (const {v:L, c} of lvOn(d, col)){ ctx.strokeStyle = c; const T2 = {x:B.x + (Cq.x - B.x)*L, y:B.y + (Cq.y - B.y)*L}; ray(A, T2); lab(String(L), T2.x + 4, T2.y, 'left'); } break; }
     case 'gannbox': case 'gannsq': case 'gannfix': { let B2 = B; if (t === 'gannfix'){ const s = Math.max(Math.abs(B.x - A.x), Math.abs(B.y - A.y)); B2 = {x:A.x + Math.sign(B.x - A.x || 1)*s, y:A.y + Math.sign(B.y - A.y || 1)*s}; }
-      const x1 = Math.min(A.x, B2.x), y1 = Math.min(A.y, B2.y), w = Math.abs(B2.x - A.x), h = Math.abs(B2.y - A.y); ctx.fillStyle = hexA(col, .05); ctx.fillRect(x1, y1, w, h); ctx.strokeRect(x1, y1, w, h);
-      const lv = t === 'gannbox' ? [.25, .382, .5, .618, .75] : [.125, .25, .375, .5, .625, .75, .875]; ctx.globalAlpha = .55;
-      for (const L of lv){ seg({x:x1 + w*L, y:y1}, {x:x1 + w*L, y:y1 + h}); seg({x:x1, y:y1 + h*L}, {x:x1 + w, y:y1 + h*L}); }
-      ctx.globalAlpha = 1; seg({x:x1, y:y1}, {x:x1 + w, y:y1 + h}); seg({x:x1, y:y1 + h}, {x:x1 + w, y:y1}); break; }
-    case 'gannfan': { const dx = B.x - A.x, dy = B.y - A.y; for (const [u, v, nm] of [[1, 8, '1/8'], [1, 4, '1/4'], [1, 3, '1/3'], [1, 2, '1/2'], [1, 1, '1/1'], [2, 1, '2/1'], [3, 1, '3/1'], [4, 1, '4/1'], [8, 1, '8/1']]){
+      const x1 = Math.min(A.x, B2.x), y1 = Math.min(A.y, B2.y), w = Math.abs(B2.x - A.x), h = Math.abs(B2.y - A.y); if (d.bg !== false){ ctx.fillStyle = bgFill(d, col, .05); ctx.fillRect(x1, y1, w, h); } ctx.strokeRect(x1, y1, w, h); ctx.globalAlpha = .7;
+      for (const {v:L, c} of lvOn(d, col)){ ctx.strokeStyle = c; seg({x:x1 + w*L, y:y1}, {x:x1 + w*L, y:y1 + h}); seg({x:x1, y:y1 + h*L}, {x:x1 + w, y:y1 + h*L}); lab(String(L), x1 + w*L, y1 - 8); lab(String(L), x1 - 4, y1 + h*L, 'right'); }
+      ctx.globalAlpha = 1; ctx.strokeStyle = col; if (d.diag !== false){ seg({x:x1, y:y1}, {x:x1 + w, y:y1 + h}); seg({x:x1, y:y1 + h}, {x:x1 + w, y:y1}); } break; }
+    case 'gannfan': { const dx = B.x - A.x, dy = B.y - A.y; for (const {v:rt, c} of lvOn(d, col)){ const u = rt >= 1 ? rt : 1, v = rt >= 1 ? 1 : Math.round(1/rt), nm = rt >= 1 ? `${rt}/1` : `1/${v}`; ctx.strokeStyle = c;
       const P2 = {x:A.x + dx*u/Math.max(u, v)*(v > u ? 1 : 1), y:A.y + dy*v/Math.max(u, v)}; const Pq = {x:A.x + dx*(u >= v ? 1 : u/v), y:A.y + dy*(v >= u ? 1 : v/u)}; ray(A, Pq); lab(nm, Pq.x + 4, Pq.y, 'left'); } break; }
-    case 'xabcd': case 'cypher': { poly(Q); ctx.fillStyle = hexA(col, .12); for (const tri of [[0, 1, 2], [2, 3, 4]]) if (Q[tri[2]]){ ctx.beginPath(); tri.forEach((k, i) => i ? ctx.lineTo(Q[k].x, Q[k].y) : ctx.moveTo(Q[k].x, Q[k].y)); ctx.fill(); }
+    case 'xabcd': case 'cypher': { poly(Q); ctx.fillStyle = bgFill(d, col, .12) || 'rgba(0,0,0,0)'; for (const tri of [[0, 1, 2], [2, 3, 4]]) if (Q[tri[2]]){ ctx.beginPath(); tri.forEach((k, i) => i ? ctx.lineTo(Q[k].x, Q[k].y) : ctx.moveTo(Q[k].x, Q[k].y)); ctx.fill(); }
       dsh(1); for (const [a, b] of [[0, 2], [1, 3], [2, 4], [0, 4]]) if (Q[b]) seg(Q[a], Q[b]); dsh(0);
       const pv = pts.map(q => q.p), R = (a, b, c, e) => Math.abs((pv[c] - pv[e])/((pv[a] - pv[b]) || 1)).toFixed(3);
       if (Q[2]) ratioTag(Q[0], Q[2], R(0, 1, 1, 2)); if (Q[3]) ratioTag(Q[1], Q[3], R(1, 2, 2, 3)); if (Q[4]){ ratioTag(Q[2], Q[4], R(2, 3, 3, 4)); ratioTag(Q[0], Q[4], R(0, 1, 1, 4)); }
@@ -1569,31 +1604,44 @@ function renderTool(d, Q, PW, PH){
     case 'sine': { const dx = B.x - A.x, amp = (B.y - A.y)/2; if (Math.abs(dx) < 3) break; ctx.beginPath();
       for (let x = 0; x <= PW; x += 3){ const y = A.y + amp*(1 - Math.cos(Math.PI*(x - A.x)/dx)); x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); break; }
     case 'forecast': { seg(A, B); arrowHead(A, B); const p1 = pts[0].p, p2 = (pts[1] || pts[0]).p, bars = Math.round(tIdx((pts[1] || pts[0]).t) - tIdx(pts[0].t));
-      bubble(d, B.x + 8, B.y - 10, [`${p2 >= p1 ? '▲' : '▼'} ${(100*(p2 - p1)/p1).toFixed(2)}%  (${P(p2 - p1)})`, `in ${bars} bars`], {bg: p2 >= p1 ? COL.buy : COL.sell, fg: p2 >= p1 ? '#03121f' : '#fff'}); break; }
+      if (d.lbl !== false) bubble(d, B.x + 8, B.y - 10, [`${p2 >= p1 ? '▲' : '▼'} ${(100*(p2 - p1)/p1).toFixed(2)}%  (${P(p2 - p1)})`, `in ${bars} bars`], {bg: p2 >= p1 ? (d.upC || COL.buy) : (d.dnC || COL.sell), fg: p2 >= p1 ? '#03121f' : '#fff'}); break; }
     case 'bars': { dsh(1); ctx.strokeRect(Math.min(A.x, B.x), 0, Math.abs(B.x - A.x), PH); dsh(0); if (Q.length < 3) break;
-      const [a, b] = candlesIn(pts[0].t, pts[1].t), C = S.candles, shift = Math.round(tIdx(pts[2].t)) - a, dp = pts[2].p - C[a].o, bw = Math.max(1, V.cw*.6); ctx.globalAlpha = .5;
-      for (let i = a; i <= b; i++){ const c = C[i], x = xF(i + shift), up = c.c >= c.o; ctx.fillStyle = up ? COL.buy : COL.sell; ctx.fillRect(x - .5, yOf(c.h + dp), 1, yOf(c.l + dp) - yOf(c.h + dp));
-        ctx.fillRect(x - bw/2, Math.min(yOf(c.o + dp), yOf(c.c + dp)), bw, Math.max(1, Math.abs(yOf(c.o + dp) - yOf(c.c + dp)))); } ctx.globalAlpha = 1; break; }
-    case 'ghost': { ctx.globalAlpha = .55; const bw = Math.max(1, V.cw*.6);
+      const [a, b] = candlesIn(pts[0].t, pts[1].t), C = S.candles, shift = Math.round(tIdx(pts[2].t)) - a, base = C[a].o, bw = Math.max(1, V.cw*.6), md = d.bmode || 'candles';
+      const mp = v => pts[2].p + (d.mirror ? -(v - base) : (v - base)), xi = i => xF((d.flip ? b - (i - a) : i - a) + a + shift); ctx.globalAlpha = d.op != null ? d.op : .5;
+      if (md === 'line' || md === 'hl2'){ ctx.beginPath(); for (let i = a; i <= b; i++){ const c = C[i], v = md === 'line' ? c.c : (c.h + c.l)/2, x = xi(i), y = yOf(mp(v)); i === a ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.strokeStyle = col; ctx.lineWidth = 1.6; ctx.stroke(); }
+      else for (let i = a; i <= b; i++){ const c = C[i], x = xi(i), o = mp(c.o), cl = mp(c.c), hh = Math.max(mp(c.h), mp(c.l)), ll = Math.min(mp(c.h), mp(c.l)), up = cl >= o;
+        ctx.fillStyle = ctx.strokeStyle = d.one ? col : (up ? COL.buy : COL.sell);
+        if (md === 'hlbars'){ ctx.fillRect(x - .5, yOf(hh), 1, yOf(ll) - yOf(hh)); ctx.fillRect(x - bw/2, yOf(o), bw/2, 1); ctx.fillRect(x, yOf(cl), bw/2, 1); }
+        else if (md === 'oc'){ ctx.fillRect(x - bw/2, Math.min(yOf(o), yOf(cl)), bw, Math.max(1, Math.abs(yOf(o) - yOf(cl)))); }
+        else { ctx.fillRect(x - .5, yOf(hh), 1, yOf(ll) - yOf(hh)); ctx.fillRect(x - bw/2, Math.min(yOf(o), yOf(cl)), bw, Math.max(1, Math.abs(yOf(o) - yOf(cl)))); } }
+      ctx.globalAlpha = 1; ctx.lineWidth = 1; break; }
+    case 'ghost': { ctx.globalAlpha = d.op != null ? d.op : .55; const bw = Math.max(1, V.cw*.6), wk = d.wick != null ? d.wick : .6;
       for (let s2 = 1; s2 < pts.length; s2++){ const i1 = tIdx(pts[s2 - 1].t), i2 = tIdx(pts[s2].t), n = Math.max(1, Math.round(i2 - i1));
-        for (let k = 0; k < n; k++){ const o = pts[s2 - 1].p + (pts[s2].p - pts[s2 - 1].p)*k/n, c = pts[s2 - 1].p + (pts[s2].p - pts[s2 - 1].p)*(k + 1)/n, x = xF(i1 + k + 1), up = c >= o, wick = Math.abs(c - o)*.6 + S.row;
-          ctx.fillStyle = up ? COL.buy : COL.sell; ctx.fillRect(x - .5, yOf(Math.max(o, c) + wick), 1, yOf(Math.min(o, c) - wick) - yOf(Math.max(o, c) + wick)); ctx.fillRect(x - bw/2, Math.min(yOf(o), yOf(c)), bw, Math.max(1, Math.abs(yOf(o) - yOf(c)))); } }
+        for (let k = 0; k < n; k++){ const o = pts[s2 - 1].p + (pts[s2].p - pts[s2 - 1].p)*k/n, c = pts[s2 - 1].p + (pts[s2].p - pts[s2 - 1].p)*(k + 1)/n, x = xF(i1 + k + 1), up = c >= o, wick = Math.abs(c - o)*wk + S.row;
+          ctx.fillStyle = d.one ? col : (up ? (d.upC || COL.buy) : (d.dnC || COL.sell)); ctx.fillRect(x - .5, yOf(Math.max(o, c) + wick), 1, yOf(Math.min(o, c) - wick) - yOf(Math.max(o, c) + wick)); ctx.fillRect(x - bw/2, Math.min(yOf(o), yOf(c)), bw, Math.max(1, Math.abs(yOf(o) - yOf(c)))); } }
       ctx.globalAlpha = 1; dsh(1); poly(Q); dsh(0); break; }
     case 'sector': { const r = dist(A, B), a1 = Math.atan2(B.y - A.y, B.x - A.x), a2 = Q.length > 2 ? Math.atan2(Cq.y - A.y, Cq.x - A.x) : a1;
-      ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.arc(A.x, A.y, r, a1, a2, a2 < a1); ctx.closePath(); ctx.fillStyle = hexA(col, .12); ctx.fill(); ctx.stroke(); break; }
-    case 'avwap': { const C = S.candles, a = clamp(Math.round(tIdx(pts[0].t)), 0, C.length - 1); let pv = 0, vv = 0; ctx.beginPath(); let st = false;
-      for (let i = a; i < C.length; i++){ const c = C[i], v = c.buy + c.sell || 1; pv += (c.h + c.l + c.c)/3*v; vv += v; const x = xF(i), y = yOf(pv/vv); if (x < -10) continue; st ? ctx.lineTo(x, y) : (ctx.moveTo(x, y), st = true); }
-      ctx.lineWidth = 2; ctx.stroke(); lab('AVWAP', A.x, A.y + 14); break; }
+      ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.arc(A.x, A.y, r, a1, a2, a2 < a1); ctx.closePath(); if (d.bg !== false){ ctx.fillStyle = hexA(d.bgC || col, d.bgA != null ? d.bgA : .12); ctx.fill(); } ctx.stroke(); break; }
+    case 'avwap': { const C = S.candles, a = clamp(Math.round(tIdx(pts[0].t)), 0, C.length - 1), src = d.src || 'hlc3'; let pv = 0, vv = 0, p2 = 0; const P3 = [];
+      for (let i = a; i < C.length; i++){ const c = C[i], v = c.buy + c.sell || 1, tp = src === 'close' ? c.c : src === 'hl2' ? (c.h + c.l)/2 : src === 'ohlc4' ? (c.o + c.h + c.l + c.c)/4 : (c.h + c.l + c.c)/3;
+        pv += tp*v; vv += v; p2 += tp*tp*v; const vw = pv/vv; P3.push([xF(i), vw, Math.sqrt(Math.max(0, p2/vv - vw*vw))]); }
+      const ln = (k, dash, w, c2) => { ctx.beginPath(); let st = false; for (const q of P3){ if (q[0] < -10) continue; const y = yOf(q[1] + k*q[2]); st ? ctx.lineTo(q[0], y) : (ctx.moveTo(q[0], y), st = true); } ctx.setLineDash(dash); ctx.lineWidth = w; ctx.strokeStyle = c2; ctx.stroke(); ctx.setLineDash([]); };
+      const bands = [[1, d.b1], [2, d.b2], [3, d.b3]].filter(x => x[1]);
+      if (bands.length && d.bandFill !== false){ const k = Math.max(...bands.map(x => x[0])); ctx.beginPath(); P3.forEach((q, j) => j ? ctx.lineTo(q[0], yOf(q[1] + k*q[2])) : ctx.moveTo(q[0], yOf(q[1] + k*q[2])));
+        for (let j = P3.length - 1; j >= 0; j--) ctx.lineTo(P3[j][0], yOf(P3[j][1] - k*P3[j][2])); ctx.closePath(); ctx.fillStyle = hexA(d.bandC || col, .07); ctx.fill(); }
+      for (const [k] of bands){ ln(k, [4, 3], 1, hexA(d.bandC || col, .75)); ln(-k, [4, 3], 1, hexA(d.bandC || col, .75)); }
+      ln(0, DASH[d.ls] || [], d.w || 2, col);
+      if (d.lbl !== false){ const q = P3[P3.length - 1]; lab('AVWAP' + (q ? ' ' + P(q[1]) : ''), A.x, A.y + 14); } break; }
     case 'frvp': { const x0 = Math.min(A.x, B.x), x1 = Math.max(A.x, B.x); dsh(1); seg({x:x0, y:0}, {x:x0, y:PH}); seg({x:x1, y:0}, {x:x1, y:PH}); dsh(0);
-      rangeProfile(tIdx(pts[0].t), tIdx((pts[1] || pts[0]).t), x0, x1, col); break; }
-    case 'avp': { dsh(1); seg({x:A.x, y:0}, {x:A.x, y:PH}); dsh(0); rangeProfile(tIdx(pts[0].t), S.candles.length - 1, A.x, xF(S.candles.length - 1), col); break; }
+      rangeProfile(tIdx(pts[0].t), tIdx((pts[1] || pts[0]).t), x0, x1, col, d); break; }
+    case 'avp': { dsh(1); seg({x:A.x, y:0}, {x:A.x, y:PH}); dsh(0); rangeProfile(tIdx(pts[0].t), S.candles.length - 1, A.x, xF(S.candles.length - 1), col, d); break; }
     case 'drange': case 'dprange': { const x0 = Math.min(A.x, B.x), w = Math.abs(B.x - A.x), y0 = t === 'drange' ? Math.min(A.y, B.y) - 20 : Math.min(A.y, B.y), h = t === 'drange' ? Math.abs(B.y - A.y) + 40 : Math.abs(B.y - A.y);
-      ctx.fillStyle = hexA(col, .12); ctx.fillRect(x0, y0, w, h); ctx.strokeRect(x0, y0, w, h); seg({x:x0, y:(A.y + B.y)/2}, {x:x0 + w, y:(A.y + B.y)/2}); arrowHead(A.x < B.x ? {x:x0, y:(A.y + B.y)/2} : {x:x0 + w, y:(A.y + B.y)/2}, A.x < B.x ? {x:x0 + w, y:(A.y + B.y)/2} : {x:x0, y:(A.y + B.y)/2}, 8);
+      if (d.bg !== false){ ctx.fillStyle = hexA(d.bgC || col, d.bgA != null ? d.bgA : .12); ctx.fillRect(x0, y0, w, h); } ctx.strokeRect(x0, y0, w, h); seg({x:x0, y:(A.y + B.y)/2}, {x:x0 + w, y:(A.y + B.y)/2}); arrowHead(A.x < B.x ? {x:x0, y:(A.y + B.y)/2} : {x:x0 + w, y:(A.y + B.y)/2}, A.x < B.x ? {x:x0 + w, y:(A.y + B.y)/2} : {x:x0, y:(A.y + B.y)/2}, 8);
       const [a, b] = candlesIn(pts[0].t, (pts[1] || pts[0]).t); let vol = 0; for (let i = a; i <= b; i++) vol += S.candles[i].buy + S.candles[i].sell;
       const ms = Math.abs((pts[1] || pts[0]).t - pts[0].t), hh = Math.floor(ms/3600000), mm = Math.round(ms%3600000/60000), lines = [`${b - a} bars · ${hh}h ${mm}m`, `Vol ${S.unit}${fmt(vol)}`];
       if (t === 'dprange'){ const dp = (pts[1] || pts[0]).p - pts[0].p; lines.unshift(`${dp >= 0 ? '+' : ''}${P(dp)} (${(100*dp/pts[0].p).toFixed(2)}%)`); }
-      bubble(d, x0 + w/2, y0 + h + 6, lines, {cx:1, bg:hexA(col, .9)}); break; }
-    case 'hl': { ctx.globalAlpha = .35; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; poly(Q); break; }
+      if (d.lbl !== false) bubble(d, x0 + w/2, y0 + h + 6, lines, {cx:1, bg:hexA(d.lblC || col, .9)}); break; }
+    case 'hl': { ctx.globalAlpha = d.op != null ? d.op : .35; ctx.lineWidth = d.hw || 12; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; poly(Q); break; }
     case 'arrow': seg(A, B); arrowHead(A, B); break;
     case 'arrowmk': { const an = Math.atan2(B.y - A.y, B.x - A.x), L = dist(A, B), w = 7, hl = Math.min(22, L*.4), nx = -Math.sin(an), ny = Math.cos(an), ux = Math.cos(an), uy = Math.sin(an), bx = B.x - ux*hl, by = B.y - uy*hl;
       const P2 = [{x:A.x + nx*w*.4, y:A.y + ny*w*.4}, {x:bx + nx*w, y:by + ny*w}, {x:bx + nx*w*2.2, y:by + ny*w*2.2}, B, {x:bx - nx*w*2.2, y:by - ny*w*2.2}, {x:bx - nx*w, y:by - ny*w}, {x:A.x - nx*w*.4, y:A.y - ny*w*.4}];
@@ -1734,6 +1782,11 @@ function setTool(t){
   cv.style.cursor = t === 'cursor' ? 'default' : 'crosshair'; dirty = true;
 }
 let posX = [];
+function posRisk(d, e, sl){   // account + risk settings → position size
+  if (!(d.acct > 0)) return null; const dist = Math.abs(e - sl); if (!dist) return null;
+  const risk = d.riskMode === '$' ? (d.risk || 0) : d.acct*(d.risk || 1)/100, lotSz = d.lot > 0 ? d.lot : (/^XAU/.test(S.sym || '') ? 100 : /^XAG/.test(S.sym || '') ? 5000 : S.src && S.src.kind === 'fx' ? 100000 : 0);
+  let q = risk/dist; if (lotSz && d.roundLots !== false){ const lots = Math.max(0.01, Math.floor(q/lotSz*100)/100); q = lots*lotSz; return {q, lots, risk:dist*q, acct:d.acct}; }
+  return {q, lots:null, risk:dist*q, acct:d.acct}; }
 function posQty(e){ const u = +$('posQty').value; if (u > 0) return u; const s = S.sym || '';
   if (/^XAU/.test(s)) return 100; if (/^XAG/.test(s)) return 5000; if (S.src && S.src.kind === 'fx') return 100000; return 100000/e; }
 function posState(d, e, tp, sl, up){   // did price reach target or stop first (inside the box)?
@@ -1785,7 +1838,7 @@ function drawDrawings(PW, PH){
   if (sbFor !== selId || ($('selBar').style.display === 'none') === !!selId) syncSelBar();
   const list = hideDraw ? [] : drawings.slice(); if (draft && draft.pts.length) list.push(draft);
   for (const d of list){
-    if (d.hid || !visOnTf(d)) continue;
+    if (d.hid || !visOnTf(d)) continue; curD = d;
     const sel = d.id === selId, col = d.color || drawColor, Q = scr(d);
     ctx.save(); ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = (d.w || 1.5) + (sel || d === draft ? .5 : 0); ctx.setLineDash(DASH[d.ls] || []);
     ctx.font = '11px ui-monospace,Menlo,monospace'; ctx.textBaseline = 'middle';
@@ -1812,21 +1865,27 @@ function drawDrawings(PW, PH){
       case 'range': {
         box(A, B, hexA(col, .12)); const mx = (A.x + B.x)/2; seg({x:mx, y:A.y}, {x:mx, y:B.y});
         const p1 = d.pts[0].p, p2 = (d.pts[1] || d.pts[0]).p, dp = p2 - p1, bars = Math.round(tIdx((d.pts[1] || d.pts[0]).t) - tIdx(d.pts[0].t));
-        label(`${dp >= 0 ? '+' : ''}${P(dp)} (${(100*dp/p1).toFixed(2)}%) · ${bars} bars`, mx, Math.max(A.y, B.y) + 14, dp >= 0 ? COL.buy : COL.sell, '#03121f'); break; }
+        if (d.lbl !== false){ let vol = 0; if (d.vol){ const [ia, ib] = candlesIn(d.pts[0].t, (d.pts[1] || d.pts[0]).t); for (let i = ia; i <= ib; i++) vol += S.candles[i].buy + S.candles[i].sell; }
+          label(`${dp >= 0 ? '+' : ''}${P(dp)} (${(100*dp/p1).toFixed(2)}%)${d.ticks ? ` · ${Math.round(Math.abs(dp)/(S.tick || S.row))} ticks` : ''} · ${bars} bars${d.vol ? ` · Vol ${S.unit}${fmt(vol)}` : ''}`, mx, Math.max(A.y, B.y) + 14, dp >= 0 ? (d.upC || COL.buy) : (d.dnC || COL.sell), '#03121f'); } break; }
       case 'long': case 'short': {
-        const [E, T, Sx] = Q, x1 = Math.min(E.x, T.x), x2 = Math.max(E.x, T.x), pp = posPts(d);
-        ctx.fillStyle = hexA(COL.buy, .2); ctx.fillRect(x1, Math.min(E.y, T.y), x2 - x1, Math.abs(T.y - E.y));
-        ctx.fillStyle = hexA(COL.sell, .2); ctx.fillRect(x1, Math.min(E.y, Sx.y), x2 - x1, Math.abs(Sx.y - E.y));
+        const [E, T, Sx] = Q, x1 = Math.min(E.x, T.x), x2 = Math.max(E.x, T.x), pp = posPts(d), tpC = d.tpC || COL.buy, slC = d.slC || COL.sell, fa = d.bgA != null ? d.bgA : .2;
+        ctx.fillStyle = hexA(tpC, fa); ctx.fillRect(x1, Math.min(E.y, T.y), x2 - x1, Math.abs(T.y - E.y));
+        ctx.fillStyle = hexA(slC, fa); ctx.fillRect(x1, Math.min(E.y, Sx.y), x2 - x1, Math.abs(Sx.y - E.y));
         ctx.strokeStyle = TH.dim; seg({x:x1, y:E.y}, {x:x2, y:E.y});
         const e = pp[0].p, tp = pp[1].p, sl = pp[2].p, rr = Math.abs(tp - e)/Math.max(1e-12, Math.abs(e - sl)), upP = d.type === 'long';
         ctx.strokeStyle = hexA(COL.buy, .8); seg({x:x1, y:T.y}, {x:x2, y:T.y}); ctx.strokeStyle = hexA(COL.sell, .8); seg({x:x1, y:Sx.y}, {x:x2, y:Sx.y});
         ctx.font = '600 11px -apple-system,Segoe UI,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
         const pc = p => `${p >= e ? '+' : ''}${(100*(p - e)/e).toFixed(2)}%`;
-        ctx.fillStyle = COL.buy; ctx.fillText(`TP ${P(tp)} (${pc(tp)})`, x1 + 6, T.y + (T.y < E.y ? 11 : -11));
-        ctx.fillStyle = COL.sell; ctx.fillText(`SL ${P(sl)} (${pc(sl)})`, x1 + 6, Sx.y + (Sx.y < E.y ? 11 : -11));
-        ctx.fillStyle = TH.txt; ctx.fillText(`RR ${rr.toFixed(2)}`, x1 + 6, E.y + (upP ? 10 : -10));
+        const rq = posRisk(d, e, sl), money = v => (v >= 0 ? '' : '-') + '$' + Math.abs(v).toLocaleString(undefined, {maximumFractionDigits:2});
+        if (d.lbl !== false){
+          ctx.fillStyle = tpC; ctx.fillText(`TP ${P(tp)} (${pc(tp)})${d.ticks ? ` · ${Math.round(Math.abs(tp - e)/(S.tick || S.row))} ticks` : ''}${rq ? ` · ${money(Math.abs(tp - e)*rq.q)}` : ''}`, x1 + 6, T.y + (T.y < E.y ? 11 : -11));
+          ctx.fillStyle = slC; ctx.fillText(`SL ${P(sl)} (${pc(sl)})${d.ticks ? ` · ${Math.round(Math.abs(sl - e)/(S.tick || S.row))} ticks` : ''}${rq ? ` · ${money(-Math.abs(sl - e)*rq.q)}` : ''}`, x1 + 6, Sx.y + (Sx.y < E.y ? 11 : -11));
+          ctx.fillStyle = TH.txt; ctx.fillText(`RR ${rr.toFixed(2)}`, x1 + 6, E.y + (upP ? 10 : -10)); }
+        if (rq && d.stats !== false && !d.preview){ const lines = [`${upP ? 'Long' : 'Short'} ${P(e)}`, `Qty ${rq.q >= 100 ? Math.round(rq.q).toLocaleString() : rq.q.toFixed(rq.q >= 1 ? 2 : 4)}${rq.lots != null ? ` (${rq.lots.toFixed(2)} lots)` : ''}`,
+            `Risk ${money(rq.risk)} (${(100*rq.risk/rq.acct).toFixed(2)}%)`, `Reward ${money(Math.abs(tp - e)*rq.q)} · RR ${rr.toFixed(2)}`];
+          if (!d.compact) bubble(d, (x1 + x2)/2, T.y < E.y ? T.y - 72 : T.y + 8, lines, {cx:1, bg:hexA(TH.bg, .9), fg:TH.txt}); }
         if (S.candles.length && !d.preview && d.pts.length >= 2){
-          const st = posState(d, e, tp, sl, upP), px = st.hit ? st.px : S.candles[S.candles.length - 1].c, q = posQty(e);
+          const st = posState(d, e, tp, sl, upP), px = st.hit ? st.px : S.candles[S.candles.length - 1].c, q = rq ? rq.q : posQty(e);
           const pnl = (px - e)*q*(upP ? 1 : -1), pr = 100*(px - e)/e*(upP ? 1 : -1), qc = /USDT?$/.test(S.sym || '') ? 'USD' : (S.sym || '').slice(-3);
           const txt = `${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)} ${qc} (${pr >= 0 ? '+' : ''}${pr.toFixed(2)}%)`;
           ctx.font = '700 11px ui-monospace,Menlo,monospace'; let bx = x2 + 6; const by = E.y - 10, pcol = pnl >= 0 ? COL.buy : COL.sell;
@@ -1844,6 +1903,15 @@ function drawDrawings(PW, PH){
       case 'brush': { ctx.beginPath(); Q.forEach((q, k) => k ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); ctx.stroke(); break; }
       default: renderTool(d, Q, PW, PH);
     }
+    if (d.text && !TEXT_SELF.has(d.type) && !d.type.startsWith('g:') && Q.length){ const A2 = Q[0], B2 = Q[1] || Q[0], fs = d.fs || 12;
+      ctx.font = `${d.bold === false ? '' : 'bold '}${d.italic ? 'italic ' : ''}${fs}px -apple-system,Segoe UI,sans-serif`; ctx.fillStyle = d.tfg || col; ctx.textBaseline = 'bottom';
+      let tx, ty, an = 0; const xs = Q.map(q => q.x), ys = Q.map(q => q.y);
+      if (d.type === 'hline' || d.type === 'hray' || d.type === 'alert'){ const pos = d.txtPos || 'right'; tx = pos === 'left' ? (d.type === 'hray' ? A2.x : 56) + 6 : pos === 'center' ? (d.type === 'hray' ? (A2.x + PW)/2 : PW/2) : PW - 6; ty = A2.y - 3; ctx.textAlign = pos === 'left' ? 'left' : pos === 'center' ? 'center' : 'right'; }
+      else if (d.type === 'vline'){ tx = A2.x; ty = 0; an = -Math.PI/2; ctx.textAlign = 'right'; ctx.save(); ctx.translate(A2.x - 3, 14); ctx.rotate(an); ctx.fillText(d.text, 0, 0); ctx.restore(); tx = null; }
+      else if (LINE2.has(d.type)){ const pos = d.txtPos || 'center', f = pos === 'left' ? 0 : pos === 'right' ? 1 : .5; tx = A2.x + (B2.x - A2.x)*f; ty = A2.y + (B2.y - A2.y)*f - 4; an = Math.atan2(B2.y - A2.y, B2.x - A2.x); if (an > Math.PI/2 || an < -Math.PI/2) an += Math.PI;
+        ctx.textAlign = pos === 'left' ? 'left' : pos === 'right' ? 'right' : 'center'; ctx.save(); ctx.translate(tx, ty); ctx.rotate(an); ctx.fillText(d.text, 0, 0); ctx.restore(); tx = null; }
+      else { tx = (Math.min(...xs) + Math.max(...xs))/2; ty = (Math.min(...ys) + Math.max(...ys))/2 + fs/2; ctx.textAlign = 'center'; }
+      if (tx != null) ctx.fillText(d.text, tx, ty); }
     if (sel || d === draft) for (const h of handlesOf(d, Q)){ ctx.fillStyle = TH.bg; ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(h.x, h.y, 5, 0, 7); ctx.fill(); ctx.stroke(); }
     ctx.restore();
   }
@@ -1862,6 +1930,8 @@ function drawTags(PW){
 }
 // ───────── drawing styles (TradingView-like) ─────────
 const DASH = {solid:[], dash:[7, 5], dot:[2, 4]};
+const TEXT_SELF = new Set(['text', 'note', 'pnote', 'pin', 'table', 'callout', 'comment', 'plabel', 'signpost', 'flag', 'idea', 'image', 'long', 'short', 'range', 'drange', 'dprange', 'forecast']);
+const LINE2 = new Set(['trend', 'ray', 'ext', 'info', 'angle', 'arrow', 'arrowmk', 'regress']);
 if (!CanvasRenderingContext2D.prototype.roundRect) CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h){ this.rect(x, y, w, h); };
 const FIB_ALL = [0, .236, .382, .5, .618, .786, 1, 1.618, 2.618, 3.618, 4.236, 1.272, 1.414, 2.272, 2.414, 2, 3, 3.272, 3.414, 4, 4.272, 4.414, 4.618, 4.764];
 const FIB_COL = ['#787b86', '#f23645', '#ff9800', '#4caf50', '#089981', '#00bcd4', '#787b86', '#2962ff', '#f23645', '#9c27b0', '#e91e63', '#ff9800', '#089981', '#ff9800', '#4caf50', '#089981', '#00bcd4', '#787b86', '#2962ff', '#f23645', '#9c27b0', '#e91e63', '#ff9800', '#089981'];
@@ -1887,7 +1957,7 @@ const TF_CAT = [['m', 'Minutes', 60, 1, 59], ['h', 'Hours', 3600, 1, 24], ['D', 
 function visOnTf(d){ if (!d.vis) return true; const tf = S.tfMs/1000;
   for (let i = TF_CAT.length - 1; i >= 0; i--){ const [k, , sec] = TF_CAT[i]; if (tf >= sec){ const v = d.vis[k]; if (!v) return true; const n = Math.round(tf/sec); return v[0] && n >= v[1] && n <= v[2]; } }
   return true; }
-const STYLE_KEYS = ['color', 'w', 'ls', 'ext', 'bg', 'bgA', 'bgC', 'lv', 'one', 'oneC', 'rev', 'prices', 'lbl', 'lvMode', 'lblH', 'lblV', 'fs', 'tl', 'tlc', 'mid', 'stats', 'bold', 'italic', 'vis'];
+const STYLE_KEYS = ['lv2', 'multi', 'diag', 'timeFan', 'dev', 'upper', 'lower', 'pfLv', 'ratios', 'hw', 'tfg', 'tbg', 'txtPos', 'tpC', 'slC', 'acct', 'risk', 'riskMode', 'lot', 'roundLots', 'ticks', 'compact', 'upC', 'dnC', 'bmode', 'mirror', 'flip', 'op', 'wick', 'src', 'b1', 'b2', 'b3', 'bandC', 'bandFill', 'vol', 'lblC', 'rows', 'va', 'wpct', 'place', 'upC', 'dnC', 'poc', 'pocC', 'pocExt', 'vaLines', 'lbls', 'color', 'w', 'ls', 'ext', 'bg', 'bgA', 'bgC', 'lv', 'one', 'oneC', 'rev', 'prices', 'lbl', 'lvMode', 'lblH', 'lblV', 'fs', 'tl', 'tlc', 'mid', 'stats', 'bold', 'italic', 'vis'];
 const styleOf = d => { const o = {}; for (const k of STYLE_KEYS) if (d[k] !== undefined) o[k] = JSON.parse(JSON.stringify(d[k])); return o; };
 const selD = () => drawings.find(z => z.id === selId);
 const PALETTE = ['#ffffff','#d1d4dc','#b2b5be','#9598a1','#787b86','#5d606b','#434651','#2a2e39','#131722','#000000',
@@ -1971,7 +2041,7 @@ function openDs(d){ dsD = d; dsBak = JSON.parse(JSON.stringify(d)); dsTab = 'sty
 function renderDs(){
   const d = dsD, isFib = d.type === 'fib' || d.type === 'fibext', isLine = ['trend', 'ray', 'ext', 'fib', 'fibext', 'hray', 'info', 'angle'].includes(d.type) || isFib, isTxt = d.type === 'text' || (TL[d.type] && TL[d.type].txt) || d.type.startsWith('g:');
   const area = ['rect', 'range'].includes(d.type) || (TL[d.type] && TL[d.type].area) || isFib;
-  const tabs = [['style', 'Style'], ...(isTxt ? [['text', 'Text']] : []), ['coords', 'Coordinates'], ['vis', 'Visibility']];
+  const tabs = [['style', 'Style'], ...(d.type.startsWith('g:') || ['long', 'short', 'frvp', 'avp', 'avwap', 'brush'].includes(d.type) ? (isTxt ? [['text', 'Text']] : []) : [['text', 'Text']]), ['coords', 'Coordinates'], ['vis', 'Visibility']];
   $('dsTabs').innerHTML = tabs.map(([k, n]) => `<button data-t="${k}"${k === dsTab ? ' class="on"' : ''}>${n}</button>`).join('');
   $('dsTabs').querySelectorAll('button').forEach(b => b.onclick = () => { dsTab = b.dataset.t; renderDs(); });
   const sel = (id, opts, v) => `<select id="${id}">${opts.map(([k, n]) => `<option value="${k}"${String(k) === String(v) ? ' selected' : ''}>${n}</option>`).join('')}</select>`;
@@ -1989,9 +2059,55 @@ function renderDs(){
       <div class="r"><label><input type="checkbox" id="dsLbl"${d.lbl !== false ? ' checked' : ''}> Levels</label>${sel('dsLvM', [['values', 'Values'], ['percent', 'Percents']], d.lvMode || 'values')}</div>
       <div class="r"><label>Labels</label>${sel('dsLH', [['left', 'Left'], ['right', 'Right']], d.lblH || 'left')} ${sel('dsLV', [['top', 'Top'], ['middle', 'Middle'], ['bottom', 'Bottom']], d.lblV || 'middle')}</div>
       <div class="r"><label>Font size</label>${sel('dsFs', [10, 11, 12, 14, 16, 20, 24].map(v => [v, v]), String(d.fs || 11))}</div>`; }
+    else if (LV_DEF[d.type]){ const lv = lvList(d);
+      h += `<div class="lvg">${lv.map((l, i) => `<div><input type="checkbox" data-l2o="${i}"${l.on ? ' checked' : ''}><input type="number" step="0.001" data-l2v="${i}" value="${l.v}"${l.on ? '' : ' disabled'}><input type="color" data-l2c="${i}" value="${l.c}"></div>`).join('')}</div>
+      <div class="r"><label><input type="checkbox" id="lvMulti"${d.multi ? ' checked' : ''}> Colour each level</label><label><input type="checkbox" id="dsLbl"${d.lbl !== false ? ' checked' : ''}> Level labels</label>${sel('dsFs', [9, 10, 11, 12, 14, 16].map(v => [v, v + 'px']), String(d.fs || 10))}</div>
+      ${['fibch', 'gannbox', 'gannsq', 'gannfix'].includes(d.type) ? `<div class="r"><label><input type="checkbox" id="dsBg"${d.bg !== false ? ' checked' : ''}> Background</label><input type="color" id="dsBgC" value="${d.bgC || d.color || drawColor}"><input type="range" id="dsBgA" min="0" max="60" value="${Math.round((d.bgA != null ? d.bgA : .06)*100)}" style="width:130px"></div>` : ''}
+      ${d.type.startsWith('gann') && d.type !== 'gannfan' ? `<div class="r"><label><input type="checkbox" id="gnDiag"${d.diag !== false ? ' checked' : ''}> Diagonals</label></div>` : ''}${d.type === 'fibfan' ? `<div class="r"><label><input type="checkbox" id="ffT"${d.timeFan !== false ? ' checked' : ''}> Time (vertical) fan lines</label></div>` : ''}`; }
+    else if (['channel', 'flat', 'disjoint', 'regress', 'pitchfork', 'schiff', 'mschiff', 'ipitch', 'xabcd', 'cypher', 'sector', 'rotrect', 'circle', 'ellipse', 'triangle', 'polyline', 'path', 'arc', 'curve', 'dcurve'].includes(d.type) || (TL[d.type] && TL[d.type].area)){
+      h += `<div class="r"><label><input type="checkbox" id="dsBg"${d.bg !== false ? ' checked' : ''}> Background</label><input type="color" id="dsBgC" value="${d.bgC || d.color || drawColor}"><input type="range" id="dsBgA" min="0" max="80" value="${Math.round((d.bgA != null ? d.bgA : .1)*100)}" style="width:140px"></div>`;
+      if (d.type === 'regress') h += `<div class="r"><label>Deviation (σ)</label><input type="number" id="rgDev" min="0.5" max="5" step="0.5" value="${d.dev != null ? d.dev : 2}"><label><input type="checkbox" id="rgUp"${d.upper !== false ? ' checked' : ''}> Upper</label><label><input type="checkbox" id="rgLo"${d.lower !== false ? ' checked' : ''}> Lower</label><label><input type="checkbox" id="dsLbl"${d.lbl !== false ? ' checked' : ''}> Label</label></div>`;
+      if (['pitchfork', 'schiff', 'mschiff', 'ipitch'].includes(d.type)) h += `<div class="r"><label>Extra levels</label>${[.25, .382, .5, .618, .75, 1.5, 2].map(k => `<label><input type="checkbox" data-pf="${k}"${(d.pfLv || []).includes(k) ? ' checked' : ''}> ${k}</label>`).join('')}</div>`;
+      if (['xabcd', 'cypher'].includes(d.type)) h += `<div class="r"><label><input type="checkbox" id="dsLbl"${d.lbl !== false ? ' checked' : ''}> Point labels</label><label><input type="checkbox" id="ptR"${d.ratios !== false ? ' checked' : ''}> Ratios</label><input type="color" id="ptLc" value="${d.lblC || d.color || drawColor}"></div>`; }
+    else if (['hs', 'abcd', 'tripat', 'drives', 'ew5', 'ewabc', 'ewtri', 'ewwxy', 'ewwxyxz'].includes(d.type))
+      h += `<div class="r"><label><input type="checkbox" id="dsLbl"${d.lbl !== false ? ' checked' : ''}> Point labels</label><input type="color" id="ptLc" value="${d.lblC || d.color || drawColor}">${sel('dsFs', [9, 10, 11, 12, 14, 16, 20].map(v => [v, v + 'px']), String(d.fs || 11))}<label><input type="checkbox" id="ptR"${d.ratios !== false ? ' checked' : ''}> Ratios</label></div>`;
+    else if (d.type === 'hl') h += `<div class="r"><label>Highlighter width</label><input type="range" id="hlW" min="4" max="40" value="${d.hw || 12}" style="width:140px"><label>Opacity</label><input type="range" id="bpOp" min="10" max="90" value="${Math.round((d.op != null ? d.op : .35)*100)}" style="width:110px"></div>`;
+    else if (d.type === 'long' || d.type === 'short') h += `<div class="r"><label>Target / stop colours</label><input type="color" id="psTp" value="${d.tpC || '#1fd38a'}"><input type="color" id="psSl" value="${d.slC || '#ff4d5e'}"><label>Opacity</label><input type="range" id="dsBgA" min="5" max="60" value="${Math.round((d.bgA != null ? d.bgA : .2)*100)}" style="width:110px"></div>
+      <div class="hsec" style="margin:12px 0 4px">ACCOUNT &amp; RISK</div>
+      <div class="r"><label>Account size $</label><input type="number" id="psAcct" min="0" step="any" value="${d.acct || ''}" placeholder="e.g. 1000"></div>
+      <div class="r"><label>Risk</label><input type="number" id="psRisk" min="0" step="any" value="${d.risk != null ? d.risk : 1}">${sel('psRm', [['%', '% of account'], ['$', '$ amount']], d.riskMode || '%')}</div>
+      <div class="r"><label>Lot size (units)</label><input type="number" id="psLot" min="0" step="any" value="${d.lot || ''}" placeholder="auto: gold 100 oz"><label><input type="checkbox" id="psRl"${d.roundLots !== false ? ' checked' : ''}> Round to 0.01 lot</label></div>
+      <div class="r"><label>Entry / target / stop</label><input type="number" step="any" id="psE" value="${+P(posPts(d)[0].p)}"><input type="number" step="any" id="psT" value="${+P(posPts(d)[1].p)}"><input type="number" step="any" id="psS" value="${+P(posPts(d)[2].p)}"></div>
+      <div class="r"><label><input type="checkbox" id="dsLbl"${d.lbl !== false ? ' checked' : ''}> Price labels</label><label><input type="checkbox" id="psTk"${d.ticks ? ' checked' : ''}> Show ticks</label><label><input type="checkbox" id="psSt"${d.stats !== false ? ' checked' : ''}> Stats box</label><label><input type="checkbox" id="psCp"${d.compact ? ' checked' : ''}> Compact</label></div>
+      <div style="color:var(--dim);font-size:11px">With an account size set, the box shows position size, risk and reward, and the live P&amp;L uses that size.</div>`;
+    else if (d.type === 'forecast') h += `<div class="r"><label>Up / down colours</label><input type="color" id="fcUp" value="${d.upC || '#1fd38a'}"><input type="color" id="fcDn" value="${d.dnC || '#ff4d5e'}"></div>
+      <div class="r"><label><input type="checkbox" id="dsLbl"${d.lbl !== false ? ' checked' : ''}> Label (% · price · bars)</label></div>`;
+    else if (d.type === 'bars') h += `<div class="r"><label>Mode</label>${sel('bpM', [['candles', 'Candles'], ['hlbars', 'HL bars'], ['oc', 'Open–close bodies'], ['line', 'Line (close)'], ['hl2', 'Line (HL2)']], d.bmode || 'candles')}</div>
+      <div class="r"><label><input type="checkbox" id="bpMir"${d.mirror ? ' checked' : ''}> Mirrored (upside down)</label><label><input type="checkbox" id="bpFlip"${d.flip ? ' checked' : ''}> Flipped (back to front)</label></div>
+      <div class="r"><label><input type="checkbox" id="dsOne"${d.one ? ' checked' : ''}> One colour</label><label>Opacity</label><input type="range" id="bpOp" min="10" max="100" value="${Math.round((d.op != null ? d.op : .5)*100)}" style="width:120px"></div>`;
+    else if (d.type === 'ghost') h += `<div class="r"><label>Up / down colours</label><input type="color" id="fcUp" value="${d.upC || '#1fd38a'}"><input type="color" id="fcDn" value="${d.dnC || '#ff4d5e'}"><label><input type="checkbox" id="dsOne"${d.one ? ' checked' : ''}> One colour</label></div>
+      <div class="r"><label>Wick size</label><input type="range" id="ghW" min="0" max="200" value="${Math.round((d.wick != null ? d.wick : .6)*100)}" style="width:130px"><label>Opacity</label><input type="range" id="bpOp" min="10" max="100" value="${Math.round((d.op != null ? d.op : .55)*100)}" style="width:110px"></div>`;
+    else if (d.type === 'avwap') h += `<div class="r"><label>Source</label>${sel('avS', [['hlc3', 'HLC3 (typical)'], ['close', 'Close'], ['hl2', 'HL2'], ['ohlc4', 'OHLC4']], d.src || 'hlc3')}</div>
+      <div class="r"><label>Bands</label><label><input type="checkbox" id="avB1"${d.b1 ? ' checked' : ''}> ±1σ</label><label><input type="checkbox" id="avB2"${d.b2 ? ' checked' : ''}> ±2σ</label><label><input type="checkbox" id="avB3"${d.b3 ? ' checked' : ''}> ±3σ</label><input type="color" id="avBC" value="${d.bandC || d.color || drawColor}"><label><input type="checkbox" id="avBF"${d.bandFill !== false ? ' checked' : ''}> Fill</label></div>
+      <div class="r"><label><input type="checkbox" id="dsLbl"${d.lbl !== false ? ' checked' : ''}> Label</label></div>`;
+    else if (d.type === 'range' || d.type === 'drange' || d.type === 'dprange') h += `<div class="r"><label><input type="checkbox" id="dsBg"${d.bg !== false ? ' checked' : ''}> Background</label><input type="color" id="dsBgC" value="${d.bgC || d.color || drawColor}"><input type="range" id="dsBgA" min="0" max="80" value="${Math.round((d.bgA != null ? d.bgA : .12)*100)}" style="width:140px"></div>
+      <div class="r"><label><input type="checkbox" id="dsLbl"${d.lbl !== false ? ' checked' : ''}> Label</label>${d.type === 'range' ? `<label><input type="checkbox" id="psTk"${d.ticks ? ' checked' : ''}> Ticks</label><label><input type="checkbox" id="rgV"${d.vol ? ' checked' : ''}> Volume</label><input type="color" id="fcUp" value="${d.upC || '#1fd38a'}"><input type="color" id="fcDn" value="${d.dnC || '#ff4d5e'}">` : `<input type="color" id="rgLc" value="${d.lblC || d.color || drawColor}">`}</div>`;
+    else if (d.type === 'frvp' || d.type === 'avp') h += `<div class="r"><label>Rows</label><input type="number" id="vpRows" min="4" max="200" value="${d.rows || 24}"></div>
+      <div class="r"><label>Value area %</label><input type="number" id="vpVa" min="10" max="100" value="${d.va || 70}"></div>
+      <div class="r"><label>Width % of box</label><input type="number" id="vpW" min="5" max="100" value="${d.wpct || 40}"></div>
+      <div class="r"><label>Placement</label>${sel('vpPl', [['left', 'Left'], ['right', 'Right']], d.place || 'left')}</div>
+      <div class="r"><label>Up / down volume</label><input type="color" id="vpUp" value="${d.upC || '#26a69a'}"><input type="color" id="vpDn" value="${d.dnC || '#ef5350'}"></div>
+      <div class="r"><label><input type="checkbox" id="vpPoc"${d.poc !== false ? ' checked' : ''}> POC</label><input type="color" id="vpPocC" value="${d.pocC || '#ff1744'}"><label><input type="checkbox" id="vpPocX"${d.pocExt ? ' checked' : ''}> Extend POC right</label></div>
+      <div class="r"><label><input type="checkbox" id="vpVaL"${d.vaLines !== false ? ' checked' : ''}> VAH / VAL lines</label><label><input type="checkbox" id="vpLb"${d.lbls !== false ? ' checked' : ''}> Labels</label></div>`;
     else if (area) h += `<div class="r"><label><input type="checkbox" id="dsBg"${d.bg !== false ? ' checked' : ''}> Background</label><input type="color" id="dsBgC" value="${d.bgC || d.color || drawColor}"><input type="range" id="dsBgA" min="0" max="80" value="${Math.round((d.bgA != null ? d.bgA : .13)*100)}" style="width:150px"></div>`;
   }
-  if (dsTab === 'text'){
+  if (dsTab === 'text' && !isTxt){
+    h += `<div class="r" style="align-items:flex-start"><label>Text</label><textarea id="dsTxt" rows="2" placeholder="Shown on the drawing" style="flex:1;background:var(--inbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:6px;font:inherit">${(d.text || '').replace(/</g, '&lt;')}</textarea></div>
+      <div class="r"><label>Colour / size</label><input type="color" id="txC" value="${d.tfg || d.color || drawColor}">${sel('dsFs', [10, 11, 12, 13, 14, 16, 20, 24, 28].map(v => [v, v + 'px']), String(d.fs || 12))}<label><input type="checkbox" id="dsBold"${d.bold !== false ? ' checked' : ''}> Bold</label><label><input type="checkbox" id="dsIt"${d.italic ? ' checked' : ''}> Italic</label></div>
+      ${['trend', 'ray', 'ext', 'info', 'angle', 'arrow', 'arrowmk', 'regress', 'hline', 'hray', 'alert'].includes(d.type) ? `<div class="r"><label>Position</label>${sel('txP', [['left', 'Left'], ['center', 'Centre'], ['right', 'Right']], d.txtPos || (d.type === 'hline' || d.type === 'hray' ? 'right' : 'center'))}</div>` : ''}`;
+  }
+  if (dsTab === 'text' && isTxt && !d.type.startsWith('g:') && d.type !== 'text') h += `<div class="r"><label>Box / text colour</label><input type="color" id="txBg" value="${d.tbg || d.color || drawColor}"><input type="color" id="txC" value="${d.tfg || '#ffffff'}"></div>`;
+  if (dsTab === 'text' && isTxt){
     h += `<div class="r"><label>Size</label>${sel('dsFs', [10, 11, 12, 13, 14, 16, 20, 24, 28, 32, 40, 48].map(v => [v, v]), String(d.fs || (d.type.startsWith('g:') ? (d.type.includes('sticker') ? 14 : 28) : 13)))}</div>
       <div class="r"><label>Colour</label><input type="color" id="dsCol" value="${d.color || drawColor}"></div>`;
     if (!d.type.startsWith('g:')) h += `<div class="r"><label><input type="checkbox" id="dsBold"${d.bold !== false ? ' checked' : ''}> Bold</label><label><input type="checkbox" id="dsIt"${d.italic ? ' checked' : ''}> Italic</label></div>
@@ -2021,6 +2137,27 @@ function wireDs(){
   on('dsBg', 'change', t => d.bg = t.checked); on('dsBgA', 'input', t => d.bgA = t.value/100); on('dsBgC', 'input', t => d.bgC = t.value);
   on('dsRev', 'change', t => d.rev = t.checked); on('dsPr', 'change', t => d.prices = t.checked); on('dsLbl', 'change', t => d.lbl = t.checked);
   on('dsLvM', 'change', t => d.lvMode = t.value); on('dsLH', 'change', t => d.lblH = t.value); on('dsLV', 'change', t => d.lblV = t.value); on('dsFs', 'change', t => d.fs = +t.value);
+  on('txC', 'input', t => d.tfg = t.value); on('txBg', 'input', t => d.tbg = t.value); on('txP', 'change', t => d.txtPos = t.value);
+  on('lvMulti', 'change', t => d.multi = t.checked); on('gnDiag', 'change', t => d.diag = t.checked); on('ffT', 'change', t => d.timeFan = t.checked);
+  on('rgDev', 'input', t => d.dev = +t.value || 2); on('rgUp', 'change', t => d.upper = t.checked); on('rgLo', 'change', t => d.lower = t.checked);
+  on('ptR', 'change', t => d.ratios = t.checked); on('ptLc', 'input', t => d.lblC = t.value); on('hlW', 'input', t => d.hw = +t.value);
+  B.querySelectorAll('[data-pf]').forEach(el => el.onchange = () => { d.pfLv = [...B.querySelectorAll('[data-pf]')].filter(x => x.checked).map(x => +x.dataset.pf); upd(); });
+  B.querySelectorAll('[data-l2o]').forEach(el => el.onchange = () => { const i = +el.dataset.l2o; lvList(d)[i].on = el.checked; B.querySelector(`[data-l2v="${i}"]`).disabled = !el.checked; upd(); });
+  B.querySelectorAll('[data-l2v]').forEach(el => el.oninput = () => { const v = parseFloat(el.value); if (isFinite(v)){ lvList(d)[+el.dataset.l2v].v = v; upd(); } });
+  B.querySelectorAll('[data-l2c]').forEach(el => el.oninput = () => { lvList(d)[+el.dataset.l2c].c = el.value; d.multi = true; const m = B.querySelector('#lvMulti'); if (m) m.checked = true; upd(); });
+  on('psTp', 'input', t => d.tpC = t.value); on('psSl', 'input', t => d.slC = t.value); on('psAcct', 'input', t => d.acct = +t.value || 0); on('psRisk', 'input', t => d.risk = +t.value);
+  on('psRm', 'change', t => d.riskMode = t.value); on('psLot', 'input', t => d.lot = +t.value || 0); on('psRl', 'change', t => d.roundLots = t.checked);
+  on('psTk', 'change', t => d.ticks = t.checked); on('psSt', 'change', t => d.stats = t.checked); on('psCp', 'change', t => d.compact = t.checked);
+  const setPos = (i, t) => { const v = parseFloat(t.value); if (!isFinite(v)) return; if (d.pts.length < 3) d.pts = posPts(d); d.pts[i].p = v; };
+  on('psE', 'input', t => setPos(0, t)); on('psT', 'input', t => setPos(1, t)); on('psS', 'input', t => setPos(2, t));
+  on('fcUp', 'input', t => d.upC = t.value); on('fcDn', 'input', t => d.dnC = t.value);
+  on('bpM', 'change', t => d.bmode = t.value); on('bpMir', 'change', t => d.mirror = t.checked); on('bpFlip', 'change', t => d.flip = t.checked); on('bpOp', 'input', t => d.op = t.value/100); on('ghW', 'input', t => d.wick = t.value/100);
+  on('avS', 'change', t => d.src = t.value); on('avB1', 'change', t => d.b1 = t.checked); on('avB2', 'change', t => d.b2 = t.checked); on('avB3', 'change', t => d.b3 = t.checked); on('avBC', 'input', t => d.bandC = t.value); on('avBF', 'change', t => d.bandFill = t.checked);
+  on('rgV', 'change', t => d.vol = t.checked); on('rgLc', 'input', t => d.lblC = t.value);
+  on('vpRows', 'input', t => d.rows = +t.value || 24); on('vpVa', 'input', t => d.va = +t.value || 70); on('vpW', 'input', t => d.wpct = +t.value || 40);
+  on('vpPl', 'change', t => d.place = t.value); on('vpUp', 'input', t => d.upC = t.value); on('vpDn', 'input', t => d.dnC = t.value);
+  on('vpPoc', 'change', t => d.poc = t.checked); on('vpPocC', 'input', t => d.pocC = t.value); on('vpPocX', 'change', t => d.pocExt = t.checked);
+  on('vpVaL', 'change', t => d.vaLines = t.checked); on('vpLb', 'change', t => d.lbls = t.checked);
   on('dsBold', 'change', t => d.bold = t.checked); on('dsIt', 'change', t => d.italic = t.checked); on('dsTxt', 'input', t => d.text = t.value);
   B.querySelectorAll('[data-lo]').forEach(el => el.onchange = () => { const i = +el.dataset.lo; fibLv(d)[i].on = el.checked; B.querySelector(`[data-lv="${i}"]`).disabled = !el.checked; upd(); });
   B.querySelectorAll('[data-lv]').forEach(el => el.oninput = () => { const v = parseFloat(el.value); if (isFinite(v)){ fibLv(d)[+el.dataset.lv].v = v; upd(); } });
@@ -2056,6 +2193,8 @@ function hitDraw(x, y, touch){
       case 'hray': hit = Math.abs(y - A.y) < R && x >= A.x - R; break;
       case 'vline': hit = Math.abs(x - A.x) < R; break;
       case 'rect': case 'range': hit = inBox(A, B); break;
+      case 'frvp': { const [i1, i2] = candlesIn(d.pts[0].t, (d.pts[1] || d.pts[0]).t); let lo = Infinity, hi = -Infinity; for (let i = i1; i <= i2; i++){ lo = Math.min(lo, S.candles[i].l); hi = Math.max(hi, S.candles[i].h); }
+        hit = x >= Math.min(A.x, B.x) - R && x <= Math.max(A.x, B.x) + R && y >= yOf(hi) - R && y <= yOf(lo) + R; break; }
       case 'fib': { const p1 = d.pts[0].p, p2 = (d.pts[1] || d.pts[0]).p, lv = fibLv(d).filter(l => l.on); if (!lv.length){ hit = inBox(A, B); break; }
         const ys = lv.map(l => yOf(p2 + (p1 - p2)*l.v)), ex = lineExt(d), xa = ex.l ? 0 : Math.min(A.x, B.x), xb = ex.r ? pw() : Math.max(A.x, B.x);
         hit = x >= xa - R && x <= xb + R && y >= Math.min(...ys) - R && y <= Math.max(...ys) + R; break; }
