@@ -177,7 +177,7 @@
   .rpq button.on{background:var(--acc);color:#03121f;border-color:var(--acc)} #rpModal input[type=date],#rpModal input[type=time]{background:var(--inbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:5px 8px;font:inherit}
   #lat{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--dim);margin-left:6px;white-space:nowrap}
   #rpBar button.on{background:var(--acc);color:#03121f;border-color:var(--acc)} #rpBar .rt{color:var(--dim);font-family:ui-monospace,Menlo,monospace;font-size:11px}
-  .drag-h{cursor:grab}
+  .drag-h{cursor:grab} #ppH,#lgHd,#kl,#rpBar > b,#dtG{touch-action:none}
   /* top-left indicator legend (like the video) */
   #legend{position:absolute;left:54px;top:6px;z-index:6;font-size:12px;color:var(--txt);max-width:calc(100% - 300px);min-width:150px;user-select:none}
   #legend .lg{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:1px 6px;border-radius:6px;line-height:22px}
@@ -3343,14 +3343,20 @@ $('syncIn').onclick = () => {
 };
 
 // ───────── movable panels (drag the title; a click still folds them) ─────────
-function makeMovable(el, handle, key){
+// move any panel by dragging it — finger or mouse, phone or PC. Position is remembered on this device; double-tap the handle to put it back.
+function makeMovable(el, handle, key, test){
   handle.classList.add('drag-h'); let st = null;
-  try{ const q = JSON.parse(localStorage.getItem('pos_' + key) || 'null'); if (q && window.innerWidth >= 600){ el.style.left = q.l + 'px'; el.style.top = q.t + 'px'; el.style.right = 'auto'; el.style.bottom = 'auto'; } }catch(e){}
-  handle.addEventListener('pointerdown', e => { if (window.innerWidth < 600) return; const r = el.getBoundingClientRect(), w = wrap.getBoundingClientRect();
-    st = {x:e.clientX, y:e.clientY, l:r.left - w.left, t:r.top - w.top, moved:false}; handle.setPointerCapture(e.pointerId); });
-  handle.addEventListener('pointermove', e => { if (!st) return; const dx = e.clientX - st.x, dy = e.clientY - st.y; if (!st.moved && Math.hypot(dx, dy) < 5) return; st.moved = true;
-    const w = wrap.getBoundingClientRect(); el.style.left = clamp(st.l + dx, 0, w.width - 60) + 'px'; el.style.top = clamp(st.t + dy, 0, w.height - 30) + 'px'; el.style.right = 'auto'; el.style.bottom = 'auto'; });
-  handle.addEventListener('pointerup', e => { if (st && st.moved){ el._noClick = true; setTimeout(() => el._noClick = false, 0); try{ localStorage.setItem('pos_' + key, JSON.stringify({l:parseFloat(el.style.left), t:parseFloat(el.style.top)})); }catch(err){} } st = null; });
+  const place = (l, t) => { const w = wrap.getBoundingClientRect(), r = el.getBoundingClientRect(); el.style.transform = 'none'; el.style.right = 'auto'; el.style.bottom = 'auto';
+    el.style.left = clamp(l, 0, Math.max(0, w.width - Math.min(r.width, w.width))) + 'px'; el.style.top = clamp(t, 0, Math.max(0, w.height - 30)) + 'px'; };
+  try{ const q = JSON.parse(localStorage.getItem('pos_' + key) || 'null'); if (q) requestAnimationFrame(() => place(q.l, q.t)); }catch(e){}
+  handle.addEventListener('pointerdown', e => { if (test && !test(e)) return; if (e.target.closest('button,input,select,a,textarea,.bx,.g,[data-g],[data-x]') && !e.target.closest('.drag-only')) return;
+    const r = el.getBoundingClientRect(), w = wrap.getBoundingClientRect(); st = {x:e.clientX, y:e.clientY, l:r.left - w.left, t:r.top - w.top, moved:false, id:e.pointerId}; });
+  window.addEventListener('pointermove', e => { if (!st || e.pointerId !== st.id) return; const dx = e.clientX - st.x, dy = e.clientY - st.y; if (!st.moved && Math.hypot(dx, dy) < 6) return;
+    if (!st.moved){ st.moved = true; try{ handle.setPointerCapture(st.id); }catch(err){} } e.preventDefault(); place(st.l + dx, st.t + dy); });
+  const end = () => { if (st && st.moved){ el._noClick = true; setTimeout(() => el._noClick = false, 0); try{ localStorage.setItem('pos_' + key, JSON.stringify({l:parseFloat(el.style.left), t:parseFloat(el.style.top)})); }catch(err){} } st = null; };
+  window.addEventListener('pointerup', end, true); window.addEventListener('pointercancel', end, true);
+  handle.addEventListener('dblclick', e => { if (test && !test(e)) return; for (const k of ['left', 'top', 'right', 'bottom', 'transform']) el.style[k] = ''; try{ localStorage.removeItem('pos_' + key); }catch(err){} });
+  window.addEventListener('resize', () => { if (el.style.left) place(parseFloat(el.style.left), parseFloat(el.style.top)); });
 }
 
 // ───────── Analysis hub ─────────
@@ -3757,7 +3763,7 @@ function renderLegend(force){
     if (isFinite(whTh)){ const sv = String(wSl(whTh)); if (ws.value !== sv) ws.value = sv; setText($('lgWhV'), money(whTh)); } else setText($('lgWhV'), '—'); }
 }
 legend.addEventListener('click', e => {
-  if (e.target.closest('#lgHd')){ legend.classList.toggle('min'); try{ localStorage.setItem('lgMin', legend.classList.contains('min') ? '1' : '0'); }catch(err){} renderLegend(true); return; }
+  if (e.target.closest('#lgHd')){ if (legend._noClick) return; legend.classList.toggle('min'); try{ localStorage.setItem('lgMin', legend.classList.contains('min') ? '1' : '0'); }catch(err){} renderLegend(true); return; }
   const x = e.target.closest('[data-x]'); if (x){ setInd(x.dataset.x, false); renderLegend(true); return; }
   const g = e.target.closest('[data-g]'); if (g){ e.stopPropagation(); if (['idx', 'news', 'mtfb'].includes(g.dataset.g)) openIdx(); else $('setBtn').click(); }
 });
@@ -3786,6 +3792,8 @@ function syncPP(){
   $('ppCv').textContent = pp.classList.contains('min') ? '▸' : '▾';
 }
 makeMovable(pp, $('ppH'), 'pp');
+makeMovable(legend, legend, 'legend', e => !!e.target.closest('#lgHd'));
+makeMovable($('rpBar'), $('rpBar').querySelector('b'), 'rpBar');
 $('ppH').onclick = () => { if (pp._noClick) return; pp.classList.toggle('min'); try{ localStorage.setItem('ppMin', pp.classList.contains('min') ? '1' : '0'); }catch(e){} syncPP(); };
 $('ppLoupe').onclick = () => { setInd('xray', !ON.xray); syncPP(); };
 $('ppFollow').onclick = () => { lensFollow = !lensFollow; lensPin = false; if (lensFollow) lensFixed = false; try{ localStorage.setItem('lensX', lensFixed ? '1' : '0'); }catch(e){} if (!ON.xray) setInd('xray', true); try{ localStorage.setItem('lensF', '1'); }catch(e){} syncPP(); dirty = true; };
