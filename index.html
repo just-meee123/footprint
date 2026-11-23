@@ -145,6 +145,8 @@
   #idxMtf table{width:100%} #idxMtf td,#idxMtf th{padding:.3em .7em;font-size:1em} #idxMtf th{font-size:.85em}
   #idxMtf .rz{position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;touch-action:none;pointer-events:auto;background:linear-gradient(135deg,transparent 55%,var(--acc) 55%);opacity:.8}
   #idxMtf .sb{display:inline-block;width:3.6em;height:.5em;border-radius:.25em;background:var(--line2);vertical-align:middle;margin-right:.4em;overflow:hidden} #idxMtf .sb i{display:block;height:100%;border-radius:.25em}
+  #indMenu label.pi{display:flex;align-items:center;gap:8px} #indMenu label.pi small{color:var(--dim);font-size:10.5px;margin-left:2px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #indMenu label.pi a{color:var(--acc);text-decoration:none;padding:0 4px} #indMenu .beta{font-size:9.5px;border:1px solid var(--line2);border-radius:5px;padding:0 4px;color:var(--dim)}
   .ixr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 2px;border-bottom:1px solid var(--line2);font-size:13px}
   .ixr input[type=color]{width:44px;height:28px;padding:0 2px;border:1px solid var(--line2);border-radius:6px;background:var(--inbg);cursor:pointer}
   .ixr select,.ixr input[type=number],.ixr input[type=text]{background:var(--inbg);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:5px 8px;font:inherit;width:120px}
@@ -234,6 +236,10 @@
   <div id="status"><div id="dot"></div><span id="stxt">idle</span><span id="lat"></span></div>
 </div>
 
+<div id="proModal" class="modal"><div class="mbox" style="width:min(440px,96vw)">
+  <div class="mhd" style="align-items:center"><b id="proT" style="flex:1;font-size:16px;padding-left:4px"></b><button id="proX">✕</button></div>
+  <div id="proBody" style="padding:4px 14px 16px;overflow:auto"></div>
+</div></div>
 <div id="rpModal" class="modal"><div class="mbox" style="width:min(430px,96vw)">
   <div class="mhd" style="align-items:center"><b style="flex:1;font-size:16px;padding-left:4px">⏮ Bar replay</b><button id="rpMx">✕</button></div>
   <div style="padding:6px 14px 16px;overflow:auto">
@@ -275,30 +281,33 @@
 
 <div id="indMenu" class="menu">
   <div class="t">★ PRO</div>
-  <label><input type="checkbox" data-k="xray" checked> XRay lens (footprint window)</label>
-  <label><input type="checkbox" data-k="fp"> Footprint candles (POC + value area)</label>
-  <label><input type="checkbox" data-k="whales"> Whale bubbles (large trades)</label>
+  <label class="pi"><input type="checkbox" data-k="umb"> Umbrella<small>trailing curve + Buy/Sell</small><a href="#" data-pro="umb">⚙</a></label>
+  <label class="pi"><input type="checkbox" data-k="heat"> Pulse<small>volume heatmap + rolling POC</small><a href="#" data-pro="heat">⚙</a></label>
+  <label class="pi"><input type="checkbox" data-k="pulse2"> Pulse V2 <span class="beta">Beta</span><small>order-flow delta bursts</small><a href="#" data-pro="pulse2">⚙</a></label>
+  <label class="pi"><input type="checkbox" data-k="xray" checked> XRay<small>footprint loupe window</small><a href="#" data-pro="xray">⚙</a></label>
+  <label class="pi"><input type="checkbox" data-k="whales"> Whales Map<small>large-trade bubbles</small><a href="#" data-pro="whales">⚙</a></label>
+  <label class="pi"><input type="checkbox" data-k="liq"> Inside Levels<small>liquidity above / below price</small><a href="#" data-pro="liq">⚙</a></label>
+  <label class="pi"><input type="checkbox" data-k="fp"> Print Pro<small>footprint candles · POC · value area</small><a href="#" data-pro="fp">⚙</a></label>
+  <label class="pi"><input type="checkbox" data-k="aur"> Aurora<small>regime glow + Buy/Sell</small><a href="#" data-pro="aur">⚙</a></label>
+  <label class="pi"><input type="checkbox" data-k="lux"> Binary Lux<small>Hull trend line + momentum pane</small><a href="#" data-pro="lux">⚙</a></label>
+  <label class="pi"><input type="checkbox" data-k="binlex"> Binlex<small>multi-RSI oscillator pane</small><a href="#" data-pro="binlex">⚙</a></label>
+  <label class="pi"><input type="checkbox" data-k="brk"> Breakout<small>squeeze breakout pane</small><a href="#" data-pro="brk">⚙</a></label>
+  <label class="pi"><input type="checkbox" data-k="zones"> Saga<small>supply &amp; demand zones</small><a href="#" data-pro="zones">⚙</a></label>
+  <div class="t" style="margin-top:6px">More order flow</div>
+  <label><input type="checkbox" data-k="prints" checked> Big prints (glow lines)</label>
   <label><input type="checkbox" data-k="vp"> Volume profile (POC · VA · HVN · LVN)</label>
-  <label><input type="checkbox" data-k="liq"> Liquidity levels (above / below price)</label>
-  <label><input type="checkbox" data-k="heat"> Volume heatmap + rolling POC</label>
   <label><input type="checkbox" data-k="imb"> Imbalances · stacked zones · absorption</label>
   <label><input type="checkbox" data-k="sess"> Sessions (Asia / London / NY) + PDH / PDL</label>
   <label><input type="checkbox" data-k="vwap"> VWAP (daily) ± bands</label>
   <label><input type="checkbox" data-k="cvd"> CVD pane (cumulative delta)</label>
-  <label style="border-top:1px solid var(--line2);padding-top:8px;margin-top:4px"><input type="checkbox" data-k="idx"> <b>Idanelfx</b> — structure, order blocks, FVG, Dbot, sessions, news <a href="#" id="idxOpen" style="margin-left:auto;color:var(--acc)">⚙</a></label>
-  <label><input type="checkbox" data-k="news"> 📅 CPI / NFP countdown board</label>
-  <label><input type="checkbox" data-k="mtfb"> 🧭 Trend board (15m · 1H · 4H · 1D)</label>
-  <div class="t" style="margin-top:6px">Trend &amp; signals</div>
-  <label><input type="checkbox" data-k="umb"> Trend umbrella (trailing curve + Buy/Sell)</label>
-  <label><input type="checkbox" data-k="lux"> Hull trend line + momentum pane</label>
-  <label><input type="checkbox" data-k="aur"> Regime glow (background bands + Buy/Sell)</label>
-  <label><input type="checkbox" data-k="zones"> Supply &amp; demand zones</label>
-  <label><input type="checkbox" data-k="binlex"> Multi-RSI oscillator pane</label>
-  <label><input type="checkbox" data-k="brk"> Squeeze breakout pane</label>
-  <label><input type="checkbox" data-k="prints" checked> Big prints (glow lines)</label>
   <label><input type="checkbox" data-k="levels" checked> Key Levels</label>
   <label><input type="checkbox" data-k="senti" checked> Buy / Sell pressure</label>
+  <div class="t" style="margin-top:6px">My indicators</div>
+  <label><input type="checkbox" data-k="idx"> <b>Idanelfx</b> — structure, order blocks, FVG, Dbot, sessions, news <a href="#" id="idxOpen" style="margin-left:auto;color:var(--acc)">⚙</a></label>
+  <label><input type="checkbox" data-k="news"> 📅 CPI / NFP countdown board</label>
+  <label><input type="checkbox" data-k="mtfb"> 🧭 Trend board (15m · 1H · 4H · 1D)</label>
   <div class="t" style="margin-top:6px">Chart</div>
+  <label class="pi"><input type="checkbox" data-k="sbrk"> Session breaks<small>vertical lines at each new day / week / session</small><a href="#" data-pro="sbrk">⚙</a></label>
   <label><input type="checkbox" id="showDtb" checked> Drawing toolbar</label>
 </div>
 
@@ -431,7 +440,7 @@ const RP = {on:false, pick:false, full:null, n:0, timer:null, spd:1, mode:null, 
 const S = {ht:[], rowMul:1, baseRow:0, fpMin:0, whales:[], trades:[], k1:[], dk:[], dt:[], off:0, duka:false, candles:[], tfMs:60000, row:0, dec:2, mode:'delta', bigTh:250000, nPrints:6,
            ws:null, wsBuf:[], back:false, lastId:-1, sess:0, unit:'$'};
 const V = {cw:9, panX:0, follow:true, auto:true, W:0, H:0, dpr:1, lo:0, hi:1};
-const ON = {xray:true, fp:false, whales:false, vp:false, liq:false, heat:false, umb:false, lux:false, aur:false, zones:false, binlex:false, brk:false, prints:true, levels:true, senti:true, imb:false, sess:false, vwap:false, cvd:false, idx:false, news:true, mtfb:true};
+const ON = {xray:true, fp:false, whales:false, vp:false, liq:false, heat:false, umb:false, lux:false, aur:false, zones:false, binlex:false, brk:false, prints:true, levels:true, senti:true, imb:false, sess:false, vwap:false, cvd:false, idx:false, news:true, mtfb:true, pulse2:false, sbrk:false};
 let lens = null, prints = [], keyLv = [], buyPct = 50, lensFollow = false, lensPin = false, lensFixed = false, bigOn = true;
 let hover = {x:-1, y:-1, in:false}, pinned = null, panelHover = null;
 let dirty = true, derivedDirty = true;
@@ -547,7 +556,7 @@ function derive(){
   if (ON.whales) whaleCut();
   if (ON.liq) calcLiq();
   if (ON.heat) calcHeat();
-  if (ON.umb || ON.lux || ON.aur || ON.zones || ON.binlex || ON.brk) calcTA();
+  if (ON.umb || ON.lux || ON.aur || ON.zones || ON.binlex || ON.brk || ON.pulse2) calcTA();
   renderKL();
 }
 function renderKL(){
@@ -1097,7 +1106,7 @@ function openWS(src, sym, my, hostIdx, retry = 0){
 // ───────── geometry ─────────
 const AX = 72, TH_H = 22, VH = 56, TOP = 12;
 const pw = () => V.W - AX, ph = () => V.H - TH_H, priceH = () => ph() - VH - TOP - 8 - panes().length*paneH();
-const panes = () => ['cvd', 'lux', 'binlex', 'brk'].filter(k => ON[k]), paneH = () => clamp(ph()*0.15, 60, 120);
+const panes = () => ['cvd', 'lux', 'binlex', 'brk', 'pulse2'].filter(k => ON[k] && (k !== 'lux' || PC.luxPane) && (k !== 'pulse2' || PC.p2Pane)), paneH = () => clamp(ph()*0.15, 60, 120);
 const xF = f => pw() - 80 + V.panX - (S.candles.length - 1 - f)*V.cw;
 const iAt = x => S.candles.length - 1 - (pw() - 80 + V.panX - x)/V.cw;
 const yOf = p => TOP + (V.hi - p)/(V.hi - V.lo)*priceH();
@@ -1187,8 +1196,9 @@ function draw(){
 
   if (ON.heat) drawHeat(PW, PH);
   if (ON.sess) drawSessions(PW, PH, a, b);
+  if (ON.sbrk) drawSessBreaks(PW, PH, a, b);
   if (ON.idx) drawIdxBack(PW, PH, a, b);
-  if (TA && (ON.aur || ON.zones)){ const sv = {umb:ON.umb, lux:ON.lux}; ON.umb = ON.lux = false; const sg = TA.sig; TA.sig = []; drawTA(PW); TA.sig = sg; ON.umb = sv.umb; ON.lux = sv.lux; }
+  if (TA && (ON.aur || ON.zones)){ const sv = {umb:ON.umb, lux:ON.lux, p2:ON.pulse2}; ON.umb = ON.lux = ON.pulse2 = false; const sg = TA.sig; TA.sig = []; drawTA(PW); TA.sig = sg; ON.umb = sv.umb; ON.lux = sv.lux; ON.pulse2 = sv.p2; }
   // key level lines
   if (ON.levels) for (const l of keyLv){ const y = Math.round(yOf(l.p)) + .5;
     ctx.setLineDash([2, 4]); ctx.strokeStyle = hexA(l.d >= 0 ? COL.buy : COL.sell, .35);
@@ -1233,7 +1243,7 @@ function draw(){
   if (ON.liq) drawLiq(PW);
   if (ON.vp) drawProfile(PW, PH, a, b);
   if (ON.whales) drawWhales(PW, PH);
-  if (TA && (ON.umb || ON.lux || TA.sig.length)){ const sv = {aur:ON.aur, zones:ON.zones}; ON.aur = ON.zones = false; drawTA(PW); ON.aur = sv.aur; ON.zones = sv.zones; }
+  if (TA && (ON.umb || ON.lux || ON.pulse2 || TA.sig.length)){ const sv = {aur:ON.aur, zones:ON.zones}; ON.aur = ON.zones = false; drawTA(PW); ON.aur = sv.aur; ON.zones = sv.zones; }
 
   // Print Pro glowing bands
   if (ON.prints && prints.length){
@@ -2297,49 +2307,57 @@ function atrA(h, l, c, n){ const o = new Float64Array(c.length); let a = h[0] - 
 function stdA(x, n){ const m = smaA(x, n), o = new Float64Array(x.length); for (let i = 0; i < x.length; i++){ let s = 0, k = 0; for (let j = 0; j < n && i - j >= 0; j++){ s += (x[i - j] - m[i])**2; k++; } o[i] = Math.sqrt(s/k); } return o; }
 function calcTA(){
   const C = S.candles, N = C.length; if (N < 30){ TA = null; return; }
-  const i0 = Math.max(0, N - 3000), n = N - i0, o = new Float64Array(n), h = new Float64Array(n), l = new Float64Array(n), c = new Float64Array(n);
-  for (let j = 0; j < n; j++){ const k = C[i0 + j]; o[j] = k.o; h[j] = k.h; l[j] = k.l; c[j] = k.c; }
+  const i0 = Math.max(0, N - 3000), n = N - i0, o = new Float64Array(n), h = new Float64Array(n), l = new Float64Array(n), c = new Float64Array(n), dl = new Float64Array(n), vo = new Float64Array(n);
+  for (let j = 0; j < n; j++){ const k = C[i0 + j]; o[j] = k.o; h[j] = k.h; l[j] = k.l; c[j] = k.c; dl[j] = (k.buy || 0) - (k.sell || 0); vo[j] = (k.buy || 0) + (k.sell || 0); }
   const atr = atrA(h, l, c, 14), T = {t0:C[i0].t, n, sig:[]};
-  // trend umbrella: parabolic SAR (slow settings for a smooth curve)
-  if (ON.umb){ const sar = new Float64Array(n), tr = new Int8Array(n); let up = c[1] >= c[0], af = .015, ep = up ? h[0] : l[0], sv = up ? l[0] : h[0];
+  // Umbrella: parabolic trailing curve
+  if (ON.umb){ const a0 = PC.umbStart, st = PC.umbStep, mx = PC.umbMax, sar = new Float64Array(n), tr = new Int8Array(n); let up = c[1] >= c[0], af = a0, ep = up ? h[0] : l[0], sv = up ? l[0] : h[0];
     for (let j = 1; j < n; j++){
       sv = sv + af*(ep - sv);
       if (up){ sv = Math.min(sv, l[j - 1], j > 1 ? l[j - 2] : l[j - 1]);
-        if (l[j] < sv){ up = false; sv = ep; ep = l[j]; af = .015; T.sig.push({j, buy:false, src:'Umbrella'}); } else if (h[j] > ep){ ep = h[j]; af = Math.min(af + .015, .12); } }
+        if (l[j] < sv){ up = false; sv = ep; ep = l[j]; af = a0; if (PC.umbSig) T.sig.push({j, buy:false, src:'Umbrella'}); } else if (h[j] > ep){ ep = h[j]; af = Math.min(af + st, mx); } }
       else { sv = Math.max(sv, h[j - 1], j > 1 ? h[j - 2] : h[j - 1]);
-        if (h[j] > sv){ up = true; sv = ep; ep = h[j]; af = .015; T.sig.push({j, buy:true, src:'Umbrella'}); } else if (l[j] < ep){ ep = l[j]; af = Math.min(af + .015, .12); } }
+        if (h[j] > sv){ up = true; sv = ep; ep = h[j]; af = a0; if (PC.umbSig) T.sig.push({j, buy:true, src:'Umbrella'}); } else if (l[j] < ep){ ep = l[j]; af = Math.min(af + st, mx); } }
       sar[j] = sv; tr[j] = up ? 1 : -1; }
     sar[0] = sar[1]; tr[0] = tr[1]; T.sar = sar; T.tr = tr; }
-  // Hull trend line + momentum histogram
-  if (ON.lux){ const hm = hmaA(c, 55), mo = new Float64Array(n); T.hma = hm;
+  // Binary Lux: Hull trend line + momentum
+  if (ON.lux){ const hm = hmaA(c, PC.luxLen), mo = new Float64Array(n); T.hma = hm;
     for (let j = 0; j < n; j++) mo[j] = atr[j] ? (c[j] - hm[j])/atr[j] : 0; T.mo = mo;
-    for (let j = 3; j < n; j++){ const s1 = hm[j] - hm[j - 1], s0 = hm[j - 1] - hm[j - 2];
-      if (s0 <= 0 && s1 > 0 && mo[j] > 0) T.sig.push({j, buy:true, src:'Hull'}); if (s0 >= 0 && s1 < 0 && mo[j] < 0) T.sig.push({j, buy:false, src:'Hull'}); } }
-  // regime glow: trend (EMA 21 vs 55) + RSI
-  if (ON.aur){ const e1 = emaA(c, 21), e2 = emaA(c, 55), r = rsiA(c, 14), sc = new Float64Array(n); let armed = 0;
+    if (PC.luxSig) for (let j = 3; j < n; j++){ const s1 = hm[j] - hm[j - 1], s0 = hm[j - 1] - hm[j - 2];
+      if (s0 <= 0 && s1 > 0 && mo[j] > 0) T.sig.push({j, buy:true, src:'Binary Lux'}); if (s0 >= 0 && s1 < 0 && mo[j] < 0) T.sig.push({j, buy:false, src:'Binary Lux'}); } }
+  // Aurora: regime (fast vs slow EMA) + RSI
+  if (ON.aur){ const e1 = emaA(c, PC.aurFast), e2 = emaA(c, PC.aurSlow), r = rsiA(c, PC.aurRsi), sc = new Float64Array(n), arm = PC.aurArm; let armed = 0;
     for (let j = 0; j < n; j++){ sc[j] = 0.6*Math.tanh(atr[j] ? (e1[j] - e2[j])/atr[j] : 0) + 0.4*(r[j] - 50)/50;
-      if (sc[j] < -0.55) armed = -1; else if (sc[j] > 0.55) armed = 1;
-      if (j && armed === -1 && sc[j - 1] <= 0 && sc[j] > 0){ T.sig.push({j, buy:true, src:'Regime'}); armed = 0; }
-      if (j && armed === 1 && sc[j - 1] >= 0 && sc[j] < 0){ T.sig.push({j, buy:false, src:'Regime'}); armed = 0; } }
+      if (sc[j] < -arm) armed = -1; else if (sc[j] > arm) armed = 1;
+      if (PC.aurSig && j && armed === -1 && sc[j - 1] <= 0 && sc[j] > 0){ T.sig.push({j, buy:true, src:'Aurora'}); armed = 0; }
+      if (PC.aurSig && j && armed === 1 && sc[j - 1] >= 0 && sc[j] < 0){ T.sig.push({j, buy:false, src:'Aurora'}); armed = 0; } }
     T.sc = sc; }
-  // supply & demand zones: the base candle before a strong impulse candle
+  // Saga: supply & demand zones — the base candle before a strong impulse candle
   if (ON.zones){ const Z = [];
     for (let j = 2; j < n; j++){ const rg = h[j] - l[j];
-      if (rg > 1.8*atr[j - 1] && Math.abs(c[j] - o[j]) > 0.6*rg){ const up = c[j] > o[j], b = j - 1, z = {j:b, top:h[b], bot:l[b], up, end:null};
+      if (rg > PC.sagaImp*atr[j - 1] && Math.abs(c[j] - o[j]) > PC.sagaBody/100*rg){ const up = c[j] > o[j], b = j - 1, z = {j:b, top:h[b], bot:l[b], up, end:null};
         for (let k = j + 1; k < n; k++) if (up ? c[k] < z.bot : c[k] > z.top){ z.end = k; break; }
         if (!Z.some(q => q.up === up && q.end == null && Math.abs(q.top - z.top) < atr[j]*0.5)) Z.push(z); } }
-    T.zones = Z.slice(-25); }
-  // multi-RSI oscillator
-  if (ON.binlex){ T.rsis = [7, 14, 21, 28].map(p => rsiA(c, p)); const avg = new Float64Array(n);
+    T.zones = (PC.sagaBroken ? Z : Z.filter(z => z.end == null)).slice(-PC.sagaMax); }
+  // Binlex: four RSIs
+  if (ON.binlex){ T.rsis = [PC.blx1, PC.blx2, PC.blx3, PC.blx4].map(p => rsiA(c, p)); const avg = new Float64Array(n);
     for (let j = 0; j < n; j++) avg[j] = (T.rsis[0][j] + T.rsis[1][j] + T.rsis[2][j] + T.rsis[3][j])/4;
-    for (let j = 1; j < n; j++){ if (avg[j - 1] < 30 && avg[j] >= 30) T.sig.push({j, buy:true, src:'Multi-RSI'}); if (avg[j - 1] > 70 && avg[j] <= 70) T.sig.push({j, buy:false, src:'Multi-RSI'}); } }
-  // squeeze breakout: Bollinger inside Keltner = squeeze; momentum histogram
-  if (ON.brk){ const sm = smaA(c, 20), sd = stdA(c, 20), em = emaA(c, 20), at = atrA(h, l, c, 20), sq = new Int8Array(n), val = new Float64Array(n);
-    for (let j = 0; j < n; j++){ sq[j] = (sm[j] - 2*sd[j] > em[j] - 1.5*at[j] && sm[j] + 2*sd[j] < em[j] + 1.5*at[j]) ? 1 : 0;
-      let hh = -Infinity, ll = Infinity; for (let k = Math.max(0, j - 19); k <= j; k++){ hh = Math.max(hh, h[k]); ll = Math.min(ll, l[k]); }
+    if (PC.blxSig) for (let j = 1; j < n; j++){ if (avg[j - 1] < PC.blxOs && avg[j] >= PC.blxOs) T.sig.push({j, buy:true, src:'Binlex'}); if (avg[j - 1] > PC.blxOb && avg[j] <= PC.blxOb) T.sig.push({j, buy:false, src:'Binlex'}); } }
+  // Breakout: Bollinger inside Keltner = squeeze
+  if (ON.brk){ const L = PC.brkLen, sm = smaA(c, L), sd = stdA(c, L), em = emaA(c, L), at = atrA(h, l, c, L), sq = new Int8Array(n), val = new Float64Array(n);
+    for (let j = 0; j < n; j++){ sq[j] = (sm[j] - PC.brkBb*sd[j] > em[j] - PC.brkKc*at[j] && sm[j] + PC.brkBb*sd[j] < em[j] + PC.brkKc*at[j]) ? 1 : 0;
+      let hh = -Infinity, ll = Infinity; for (let k = Math.max(0, j - L + 1); k <= j; k++){ hh = Math.max(hh, h[k]); ll = Math.min(ll, l[k]); }
       val[j] = c[j] - ((hh + ll)/2 + sm[j])/2; }
     const mom = emaA(val, 5); T.sq = sq; T.mom = mom;
-    for (let j = 1; j < n; j++) if (sq[j - 1] && !sq[j]) T.sig.push({j, buy: mom[j] > 0, src:'Squeeze'}); }
+    if (PC.brkSig) for (let j = 1; j < n; j++) if (sq[j - 1] && !sq[j]) T.sig.push({j, buy: mom[j] > 0, src:'Breakout'}); }
+  // Pulse V2 (Beta): bursts of real buy/sell delta. Delta is smoothed, then scored against its own recent spread (z-score);
+  // a burst is a candle whose delta score passes the threshold. Signals need the burst to agree with the trend EMA.
+  if (ON.pulse2){ const L = PC.p2Len, sm = emaA(dl, PC.p2Smooth), z = new Float64Array(n), tr = emaA(c, PC.p2Trend), bursts = [];
+    for (let j = 0; j < n; j++){ let s1 = 0, s2 = 0, k = 0; for (let q = Math.max(0, j - L + 1); q <= j; q++){ s1 += sm[q]; s2 += sm[q]*sm[q]; k++; }
+      const mu = s1/k, sd = Math.sqrt(Math.max(0, s2/k - mu*mu)) || 1; z[j] = (sm[j] - mu)/sd;
+      if (Math.abs(z[j]) >= PC.p2Th && vo[j] > 0 && (!j || Math.abs(z[j - 1]) < PC.p2Th)){ bursts.push({j, up:z[j] > 0, z:z[j]});
+        if (PC.p2Sig && (z[j] > 0) === (c[j] > tr[j])) T.sig.push({j, buy:z[j] > 0, src:'Pulse V2'}); } }
+    T.p2 = z; T.p2b = bursts; T.p2tr = tr; }
   TA = T;
 }
 const taX = j => xF(TA.base + j);
@@ -2350,22 +2368,27 @@ function drawTA(PW){
   if (jB < jA) return;
   // regime background
   if (ON.aur && TA.sc){ for (let j = jA; j <= jB; j++){ const v = TA.sc[j], x = taX(j) - V.cw/2;
-      ctx.fillStyle = v >= 0 ? `rgba(38,166,154,${Math.min(.2, Math.abs(v)*.22)})` : `rgba(170,60,140,${Math.min(.2, Math.abs(v)*.22)})`; ctx.fillRect(x, 0, V.cw + .5, priceH() + TOP + 8); } }
+      ctx.fillStyle = hexA(v >= 0 ? PC.aurUp : PC.aurDn, Math.min(.2, Math.abs(v)*.22)*PC.aurGlow/100*2); ctx.fillRect(x, 0, V.cw + .5, priceH() + TOP + 8); } }
   // supply & demand zones
   if (ON.zones && TA.zones) for (const z of TA.zones){ const x1 = taX(z.j) - V.cw/2, x2 = z.end != null ? taX(z.end) : PW; if (x2 < 0 || x1 > PW) continue;
-    const y1 = yOf(z.top), y2 = yOf(z.bot), rgb = z.up ? '60,200,80' : '235,80,80', g = ctx.createLinearGradient(x1, 0, x2, 0);
-    g.addColorStop(0, `rgba(${rgb},${z.end != null ? .18 : .4})`); g.addColorStop(1, `rgba(${rgb},${z.end != null ? .05 : .12})`);
-    ctx.fillStyle = g; ctx.fillRect(x1, y1, x2 - x1, Math.max(2, y2 - y1)); ctx.strokeStyle = `rgba(${rgb},.6)`; ctx.strokeRect(x1 + .5, y1 + .5, x2 - x1, Math.max(2, y2 - y1)); }
+    const y1 = yOf(z.top), y2 = yOf(z.bot), zc = z.up ? PC.sagaUp : PC.sagaDn, g = ctx.createLinearGradient(x1, 0, x2, 0);
+    g.addColorStop(0, hexA(zc, z.end != null ? .18 : .4)); g.addColorStop(1, hexA(zc, z.end != null ? .05 : .12));
+    ctx.fillStyle = g; ctx.fillRect(x1, y1, x2 - x1, Math.max(2, y2 - y1)); ctx.strokeStyle = hexA(zc, .6); ctx.strokeRect(x1 + .5, y1 + .5, x2 - x1, Math.max(2, y2 - y1)); }
   // trend umbrella
-  if (ON.umb && TA.sar){ for (let j = Math.max(1, jA); j <= jB; j++){ const up = TA.tr[j] > 0, col = up ? COL.buy : COL.sell;
+  if (ON.pulse2 && TA.p2b && PC.p2Dots) for (const b of TA.p2b){ if (b.j < jA || b.j > jB) continue; const cd = S.candles[TA.base + b.j]; if (!cd) continue;
+    const r = clamp(3 + (Math.abs(b.z) - PC.p2Th)*4, 3, 14)*clamp(V.cw/8, .6, 1.6), x = taX(b.j), y = b.up ? yOf(cd.l) + r + 4 : yOf(cd.h) - r - 4, col = b.up ? PC.p2Up : PC.p2Dn;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r*1.8); g.addColorStop(0, hexA(col, .9)); g.addColorStop(.5, hexA(col, .35)); g.addColorStop(1, hexA(col, 0));
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r*1.8, 0, 7); ctx.fill(); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, Math.max(2, r*.45), 0, 7); ctx.fill(); }
+  if (ON.pulse2 && TA.p2tr && PC.p2Line){ ctx.strokeStyle = hexA('#9b8cff', .8); ctx.lineWidth = 1.4; ctx.beginPath(); for (let j = jA; j <= jB; j++){ const y = yOf(TA.p2tr[j]); j === jA ? ctx.moveTo(taX(j), y) : ctx.lineTo(taX(j), y); } ctx.stroke(); ctx.lineWidth = 1; }
+  if (ON.umb && TA.sar){ for (let j = Math.max(1, jA); j <= jB; j++){ const up = TA.tr[j] > 0, col = up ? PC.umbUp : PC.umbDn;
       if (TA.tr[j - 1] !== TA.tr[j]) continue;
       const x0 = taX(j - 1), x1 = taX(j), s0 = yOf(TA.sar[j - 1]), s1 = yOf(TA.sar[j]), c0 = yOf(S.candles[TA.base + j - 1] ? S.candles[TA.base + j - 1].c : TA.sar[j - 1]), c1 = yOf(S.candles[TA.base + j] ? S.candles[TA.base + j].c : TA.sar[j]);
-      ctx.fillStyle = hexA(col, .1); ctx.beginPath(); ctx.moveTo(x0, s0); ctx.lineTo(x1, s1); ctx.lineTo(x1, c1); ctx.lineTo(x0, c0); ctx.closePath(); ctx.fill();
+      if (PC.umbFill){ ctx.fillStyle = hexA(col, .1); ctx.beginPath(); ctx.moveTo(x0, s0); ctx.lineTo(x1, s1); ctx.lineTo(x1, c1); ctx.lineTo(x0, c0); ctx.closePath(); ctx.fill(); }
       ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, s0); ctx.lineTo(x1, s1); ctx.stroke(); }
     ctx.lineWidth = 1; }
   // Hull trend line
   if (ON.lux && TA.hma){ for (let j = Math.max(1, jA); j <= jB; j++){ const up = TA.hma[j] >= TA.hma[j - 1];
-      ctx.strokeStyle = up ? COL.buy : COL.sell; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(taX(j - 1), yOf(TA.hma[j - 1])); ctx.lineTo(taX(j), yOf(TA.hma[j])); ctx.stroke(); }
+      ctx.strokeStyle = up ? PC.luxUp : PC.luxDn; ctx.lineWidth = PC.luxW; ctx.beginPath(); ctx.moveTo(taX(j - 1), yOf(TA.hma[j - 1])); ctx.lineTo(taX(j), yOf(TA.hma[j])); ctx.stroke(); }
     ctx.lineWidth = 1; }
   // Buy / Sell flags
   ctx.font = 'bold 10px -apple-system,Segoe UI,sans-serif'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
@@ -2386,15 +2409,18 @@ function drawPanes(PW){
     const top = ph() - VH - (L.length - idx)*h;
     ctx.fillStyle = TH.bg; ctx.fillRect(0, top, PW, h); ctx.strokeStyle = TH.grid; ctx.beginPath(); ctx.moveTo(0, top + .5); ctx.lineTo(PW + AX, top + .5); ctx.stroke();
     ctx.fillStyle = TH.dim; ctx.font = '10px -apple-system,Segoe UI,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-    ctx.fillText(k === 'lux' ? 'Momentum (vs Hull)' : k === 'binlex' ? 'Multi-RSI 7/14/21/28' : 'Squeeze breakout', PW - 6, top + 3);
+    ctx.fillText(k === 'lux' ? 'Binary Lux · momentum' : k === 'binlex' ? `Binlex · RSI ${PC.blx1}/${PC.blx2}/${PC.blx3}/${PC.blx4}` : k === 'pulse2' ? `Pulse V2 · delta score (±${PC.p2Th})` : 'Breakout · squeeze', PW - 6, top + 3);
     if (jB < jA) return;
     const mid = top + h/2, X = j => xF(base + j), bw = Math.max(1, V.cw*0.7);
     if (k === 'lux' && TA.mo){ let mx = 2; for (let j = jA; j <= jB; j++) mx = Math.max(mx, Math.abs(TA.mo[j]));
       for (let j = jA; j <= jB; j++){ const v = TA.mo[j], hh = v/mx*(h/2 - 8); ctx.fillStyle = v > 1.5 ? COL.buy : v < -1.5 ? COL.sell : 'rgba(123,97,255,.8)'; ctx.fillRect(X(j) - bw/2, mid - Math.max(0, hh), bw, Math.abs(hh)); } }
     if (k === 'binlex' && TA.rsis){ const yR = v => top + 8 + (100 - v)/100*(h - 16);
-      ctx.setLineDash([3, 3]); ctx.strokeStyle = hexA(TH.txt, .25); for (const lv of [30, 70]){ ctx.beginPath(); ctx.moveTo(0, yR(lv)); ctx.lineTo(PW, yR(lv)); ctx.stroke(); } ctx.setLineDash([]);
+      ctx.setLineDash([3, 3]); ctx.strokeStyle = hexA(TH.txt, .25); for (const lv of [PC.blxOs, PC.blxOb]){ ctx.beginPath(); ctx.moveTo(0, yR(lv)); ctx.lineTo(PW, yR(lv)); ctx.stroke(); } ctx.setLineDash([]);
       ['#26a69a', '#4fb3ff', '#ffb02e', '#ff4d5e'].forEach((col, r) => { ctx.strokeStyle = col; ctx.lineWidth = 1.3; ctx.beginPath();
         for (let j = jA; j <= jB; j++){ const y = yR(TA.rsis[r][j]); j === jA ? ctx.moveTo(X(j), y) : ctx.lineTo(X(j), y); } ctx.stroke(); }); ctx.lineWidth = 1; }
+    if (k === 'pulse2' && TA.p2){ const sc = (h/2 - 10)/Math.max(PC.p2Th*1.6, 3), yZ = v => mid - clamp(v, -h/2/sc, h/2/sc)*sc;
+      ctx.setLineDash([3, 3]); ctx.strokeStyle = hexA(TH.txt, .25); for (const lv of [PC.p2Th, -PC.p2Th]){ ctx.beginPath(); ctx.moveTo(0, yZ(lv)); ctx.lineTo(PW, yZ(lv)); ctx.stroke(); } ctx.setLineDash([]);
+      for (let j = jA; j <= jB; j++){ const v = TA.p2[j], y = yZ(v), hot = Math.abs(v) >= PC.p2Th; ctx.fillStyle = hexA(v >= 0 ? PC.p2Up : PC.p2Dn, hot ? .95 : .4); ctx.fillRect(X(j) - bw/2, Math.min(mid, y), bw, Math.abs(y - mid)); } }
     if (k === 'brk' && TA.mom){ let mx = 1e-12; for (let j = jA; j <= jB; j++) mx = Math.max(mx, Math.abs(TA.mom[j]));
       for (let j = jA; j <= jB; j++){ const v = TA.mom[j], hh = v/mx*(h/2 - 12), rising = j && Math.abs(v) > Math.abs(TA.mom[j - 1]);
         ctx.fillStyle = v >= 0 ? (rising ? '#4fb3ff' : 'rgba(79,179,255,.5)') : (rising ? '#f5c542' : 'rgba(245,197,66,.5)'); ctx.fillRect(X(j) - bw/2, mid - Math.max(0, hh), bw, Math.abs(hh));
@@ -2403,6 +2429,80 @@ function drawPanes(PW){
   });
 }
 
+// ═════════════ PRO indicator settings (indtrade names) ═════════════
+const PC_DEF = {umbStart:.015, umbStep:.015, umbMax:.12, umbFill:true, umbSig:true, umbUp:'#1fd38a', umbDn:'#ff4d5e',
+  luxLen:55, luxW:2.2, luxPane:true, luxSig:true, luxUp:'#1fd38a', luxDn:'#ff4d5e',
+  aurFast:21, aurSlow:55, aurRsi:14, aurArm:.55, aurGlow:50, aurSig:true, aurUp:'#26a69a', aurDn:'#aa3c8c',
+  sagaImp:1.8, sagaBody:60, sagaMax:25, sagaBroken:true, sagaUp:'#3cc850', sagaDn:'#eb5050',
+  blx1:7, blx2:14, blx3:21, blx4:28, blxOb:70, blxOs:30, blxSig:true,
+  brkLen:20, brkBb:2, brkKc:1.5, brkSig:true,
+  p2Len:50, p2Smooth:3, p2Th:2, p2Trend:50, p2Dots:true, p2Line:false, p2Pane:true, p2Sig:true, p2Up:'#22d3ee', p2Dn:'#ff4fa3',
+  sbTz:'GMT+1', sbDay:true, sbWeek:true, sbMonth:false, sbAs:false, sbLd:false, sbNy:false, sbLbl:true, sbStyle:'Dashed', sbW:1, sbOp:60,
+  sbDayC:'#787b86', sbWeekC:'#2962ff', sbMonthC:'#e6c800', sbAsC:'#f23645', sbLdC:'#2962ff', sbNyC:'#e6c800'};
+let PC = {...PC_DEF}; try{ Object.assign(PC, JSON.parse(localStorage.getItem('proCfg') || '{}')); }catch(e){}
+const savePC = () => { try{ localStorage.setItem('proCfg', JSON.stringify(PC)); }catch(e){} };
+// 'main:<id>' rows edit an existing control in ⚙ Settings (so both places stay the same)
+const PRO_UI = {
+  umb:['Umbrella', 'A trailing curve that follows the trend (parabolic stop). It flips side when price crosses it and prints Buy / Sell.',
+    [['umbStart', 'f', 'Start speed', .005, .1, .005], ['umbStep', 'f', 'Speed step', .005, .1, .005], ['umbMax', 'f', 'Max speed', .05, .5, .01], ['umbFill', 'b', 'Shade between curve and price'], ['umbSig', 'b', 'Buy / Sell labels'], ['umbUp', 'c', 'Up colour'], ['umbDn', 'c', 'Down colour']]],
+  heat:['Pulse', 'Volume heatmap behind the candles with a rolling POC (the price with the most volume over the window).', [['main:hmWin', 'n', 'Heatmap window (bars)', 5, 300]]],
+  pulse2:['Pulse V2 (Beta)', 'Finds bursts of real buying or selling (delta) that are unusual compared with the recent bars. Glowing dots mark the bursts; Buy / Sell needs the burst to agree with the trend line.',
+    [['p2Th', 'f', 'Burst threshold (score)', 1, 5, .1], ['p2Len', 'n', 'Lookback (bars)', 10, 300], ['p2Smooth', 'n', 'Smoothing', 1, 20], ['p2Trend', 'n', 'Trend EMA length', 5, 400], ['p2Dots', 'b', 'Glow dots on candles'], ['p2Line', 'b', 'Show trend line'], ['p2Pane', 'b', 'Score pane under the chart'], ['p2Sig', 'b', 'Buy / Sell labels'], ['p2Up', 'c', 'Buying colour'], ['p2Dn', 'c', 'Selling colour']]],
+  xray:['XRay', 'The footprint loupe. Use Print Pro (bottom right) for Loupe / Follow / Fixed, and drag the corner to resize it.', []],
+  whales:['Whales Map', 'Bubbles on single large trades. Bigger bubble = bigger trade.', [['main:whTh', 'n', 'Whale size ≥ $ (0 = automatic)', 0, 1e9, 10000]]],
+  liq:['Inside Levels', 'Price levels above and below the current price where a lot of volume traded — likely support, resistance and liquidity.', []],
+  fp:['Print Pro', 'Footprint candles: buy × sell volume at each price inside every candle, with the POC and value area.', [['main:fpMin', 'n', 'Only show rows with |Δ| ≥', 0, 1e12, 100000]]],
+  aur:['Aurora', 'Glowing background that shows the regime: green when the fast EMA and RSI lean up, purple when they lean down. Buy / Sell when the regime turns after a stretch.',
+    [['aurFast', 'n', 'Fast EMA', 2, 200], ['aurSlow', 'n', 'Slow EMA', 5, 400], ['aurRsi', 'n', 'RSI length', 2, 50], ['aurArm', 'f', 'Stretch needed for a signal', .1, .95, .05], ['aurGlow', 'n', 'Glow strength %', 10, 100], ['aurSig', 'b', 'Buy / Sell labels'], ['aurUp', 'c', 'Bullish glow'], ['aurDn', 'c', 'Bearish glow']]],
+  lux:['Binary Lux', 'Hull moving average coloured by slope, with a momentum pane (distance of price from the Hull line in ATRs).',
+    [['luxLen', 'n', 'Hull length', 5, 300], ['luxW', 'f', 'Line width', 1, 6, .2], ['luxPane', 'b', 'Momentum pane'], ['luxSig', 'b', 'Buy / Sell labels'], ['luxUp', 'c', 'Rising colour'], ['luxDn', 'c', 'Falling colour']]],
+  binlex:['Binlex', 'Four RSIs in one pane. Buy when their average climbs out of oversold, Sell when it drops out of overbought.',
+    [['blx1', 'n', 'RSI 1', 2, 100], ['blx2', 'n', 'RSI 2', 2, 100], ['blx3', 'n', 'RSI 3', 2, 100], ['blx4', 'n', 'RSI 4', 2, 100], ['blxOb', 'n', 'Overbought', 55, 95], ['blxOs', 'n', 'Oversold', 5, 45], ['blxSig', 'b', 'Buy / Sell labels']]],
+  brk:['Breakout', 'Squeeze: Bollinger Bands inside Keltner Channels = market coiling (red dots). When the squeeze releases, the momentum bars show which way it breaks.',
+    [['brkLen', 'n', 'Length', 5, 100], ['brkBb', 'f', 'Bollinger multiplier', .5, 4, .1], ['brkKc', 'f', 'Keltner multiplier', .5, 4, .1], ['brkSig', 'b', 'Buy / Sell on release']]],
+  sbrk:['Session breaks', 'Vertical lines where a new day, week or month starts (like TradingView’s session breaks), plus optional lines at the Asian, London and New York opens.',
+    [['sbTz', 'z', 'Time zone'], ['sbDay', 'b', 'New day'], ['sbDayC', 'c', 'Day colour'], ['sbWeek', 'b', 'New week'], ['sbWeekC', 'c', 'Week colour'], ['sbMonth', 'b', 'New month'], ['sbMonthC', 'c', 'Month colour'],
+     ['sbAs', 'b', 'Asian open (01:00 GMT+1)'], ['sbAsC', 'c', 'Asian colour'], ['sbLd', 'b', 'London open (08:00 GMT+1)'], ['sbLdC', 'c', 'London colour'], ['sbNy', 'b', 'New York open (13:00 GMT+1)'], ['sbNyC', 'c', 'New York colour'],
+     ['sbStyle', ['Solid', 'Dashed', 'Dotted'], 'Line style'], ['sbW', 'n', 'Line width', 1, 4], ['sbOp', 'n', 'Opacity %', 10, 100], ['sbLbl', 'b', 'Labels (Mon 24, W48, Dec…)']]],
+  zones:['Saga', 'Supply and demand zones: the base candle before a strong impulse. Zones fade once price closes through them.',
+    [['sagaImp', 'f', 'Impulse size (× ATR)', 1, 5, .1], ['sagaBody', 'n', 'Impulse body % of range', 30, 95], ['sagaMax', 'n', 'Max zones', 1, 100], ['sagaBroken', 'b', 'Keep broken zones (faded)'], ['sagaUp', 'c', 'Demand colour'], ['sagaDn', 'c', 'Supply colour']]]
+};
+// Session breaks: vertical lines at new day / week / month (and optional session opens)
+function drawSessBreaks(PW, PH, a, b){
+  const C = S.candles, N = C.length; if (N < 2) return; const tz = PC.sbTz, dash = PC.sbStyle === 'Dashed' ? [6, 4] : PC.sbStyle === 'Dotted' ? [2, 3] : [], al = PC.sbOp/100;
+  const opens = [[PC.sbAs, 60, PC.sbAsC, 'Asia'], [PC.sbLd, 480, PC.sbLdC, 'London'], [PC.sbNy, 780, PC.sbNyC, 'New York']].filter(q => q[0]);
+  const intra = S.tfMs < 86400000, MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const line = (x, col, w, txt) => { ctx.strokeStyle = hexA(col, al); ctx.lineWidth = w; ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(Math.round(x) + .5, 0); ctx.lineTo(Math.round(x) + .5, PH - VH); ctx.stroke(); ctx.setLineDash([]); ctx.lineWidth = 1;
+    if (PC.sbLbl && txt){ ctx.font = '600 10px -apple-system,Segoe UI,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillStyle = hexA(col, Math.min(1, al + .25)); ctx.fillText(txt, x + 3, PH - VH - 4); } };
+  const cutOn = !!opens.length && intra && S.tfMs <= 3600000;
+  for (let i = Math.max(1, a - 1); i <= Math.min(N - 1, b + 1); i++){
+    const p = local(C[i - 1].t, tz), q = local(C[i].t, tz), x = xF(i) - V.cw/2, newDay = Math.floor((C[i].t + tzOff(C[i].t, tz))/86400000) !== Math.floor((C[i - 1].t + tzOff(C[i - 1].t, tz))/86400000);
+    const newMonth = p.getUTCMonth() !== q.getUTCMonth(), newWeek = newDay && isoWeek(q) !== isoWeek(p);
+    if (PC.sbMonth && newMonth) line(x, PC.sbMonthC, PC.sbW + 1, MON[q.getUTCMonth()] + (q.getUTCMonth() === 0 ? ' ' + q.getUTCFullYear() : ''));
+    else if (PC.sbWeek && newWeek && (intra || S.tfMs < 604800000)) line(x, PC.sbWeekC, PC.sbW + .5, 'W' + isoWeek(q));
+    else if (PC.sbDay && newDay && intra) line(x, PC.sbDayC, PC.sbW, DAY[q.getUTCDay()] + ' ' + q.getUTCDate());
+    if (cutOn){
+      for (const [, mn, col, nm] of opens){ const g = local(C[i].t, 'GMT+1'), gp = local(C[i - 1].t, 'GMT+1'), a1 = gp.getUTCHours()*60 + gp.getUTCMinutes(), b1 = g.getUTCHours()*60 + g.getUTCMinutes();
+        if ((a1 < mn && b1 >= mn) || (b1 < a1 && (a1 < mn || b1 >= mn))) line(x, col, PC.sbW, nm); } } }
+}
+function isoWeek(d){ const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())), day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day); const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - y0)/86400000 + 1)/7); }
+function openPro(k){
+  const [nm, desc, rows] = PRO_UI[k]; let h = `<label class="ixr" style="font-weight:700"><span>Show ${nm}</span><input type="checkbox" class="sw" id="proOn"${ON[k] ? ' checked' : ''}></label><p style="color:var(--dim);font-size:12px;line-height:1.5;margin:8px 2px">${desc}</p>`;
+  for (const [key, ty, label, mn, mx, stp] of rows){ const main = key.startsWith('main:'), v = main ? $(key.slice(5)).value : PC[key];
+    if (ty === 'b') h += `<label class="ixr"><span>${label}</span><input type="checkbox" class="sw" data-pc="${key}"${v ? ' checked' : ''}></label>`;
+    else if (ty === 'c') h += `<label class="ixr"><span>${label}</span><input type="color" data-pc="${key}" value="${v}"></label>`;
+    else if (ty === 'z' || Array.isArray(ty)) h += `<label class="ixr"><span>${label}</span><select data-pc="${key}">${(ty === 'z' ? TZ_LIST : ty).map(o => `<option${o === v ? ' selected' : ''}>${o}</option>`).join('')}</select></label>`;
+    else h += `<label class="ixr"><span>${label}</span><input type="number" data-pc="${key}" data-ty="${ty}" min="${mn}" max="${mx}" step="${stp || 1}" value="${v}"></label>`; }
+  if (rows.some(r => !r[0].startsWith('main:'))) h += `<button class="mbtn" id="proReset" style="margin-top:12px">Reset ${nm} to defaults</button>`;
+  $('proT').textContent = nm + ' settings'; $('proBody').innerHTML = h;
+  $('proOn').onchange = e => setInd(k, e.target.checked);
+  $('proBody').querySelectorAll('[data-pc]').forEach(el => el.onchange = () => { const key = el.dataset.pc;
+    if (key.startsWith('main:')){ const m = $(key.slice(5)); m.value = el.value; m.dispatchEvent(new Event('change')); return; }
+    PC[key] = el.type === 'checkbox' ? el.checked : el.type === 'color' || el.tagName === 'SELECT' ? el.value : (el.dataset.ty === 'f' ? parseFloat(el.value) : parseInt(el.value));
+    if (!(PC[key] === PC[key])) PC[key] = PC_DEF[key]; savePC(); derivedDirty = dirty = true; });
+  if ($('proReset')) $('proReset').onclick = () => { for (const [key] of rows) if (key in PC_DEF) PC[key] = PC_DEF[key]; savePC(); openPro(k); derivedDirty = dirty = true; };
+  $('proModal').classList.add('open');
+}
 // ═════════════ IDANELFX — price action suite (ported from "DANIEL INDICATOR v3") ═════════════
 // Market structure, order blocks, FVG, EQH/EQL, zones and the strong/weak high-low logic follow
 // "Price Action Concepts" by RUDYINDICATOR (CC BY-NC-SA 4.0). Dbot follows HPotter's open-source ATR
@@ -2824,6 +2924,9 @@ function openIdx(){
 $('idxX').onclick = () => $('idxModal').classList.remove('open');
 $('idxModal').addEventListener('click', e => { if (e.target.id === 'idxModal') $('idxModal').classList.remove('open'); });
 
+$('proX').onclick = () => $('proModal').classList.remove('open');
+$('proModal').addEventListener('click', e => { if (e.target.id === 'proModal') $('proModal').classList.remove('open'); });
+document.querySelectorAll('#indMenu [data-pro]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); openPro(a.dataset.pro); }));
 $('idxOpen').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); openIdx(); });
 // ═════════════ order-flow extras ═════════════
 const DAY = 86400000;
@@ -3724,7 +3827,7 @@ $('bAuto').onclick = () => { V.auto = true; dirty = true; };
 $('bFp').onclick = () => setInd('fp', !ON.fp);
 try{ S.fpMin = +(localStorage.getItem('fpMin') || 0); $('fpMin').value = S.fpMin || 0; }catch(e){}
 // ── top-left legend: symbol, active indicators, quick sliders ──
-const IND_NAME = {news:'CPI / NFP', mtfb:'Trend board', idx:'Idanelfx', imb:'Imbalances', sess:'Sessions', vwap:'VWAP', cvd:'CVD', xray:'Loupe', fp:'Print Pro', whales:'Whales Map', vp:'Volume Profile', liq:'Inside Levels', heat:'Pulse', umb:'Umbrella', lux:'Binary Lux', aur:'Aurora', zones:'Saga', binlex:'Binlex', brk:'Breakout', prints:'Big Prints', levels:'Key Levels', senti:'Pressure'};
+const IND_NAME = {sbrk:'Session breaks', pulse2:'Pulse V2', news:'CPI / NFP', mtfb:'Trend board', idx:'Idanelfx', imb:'Imbalances', sess:'Sessions', vwap:'VWAP', cvd:'CVD', xray:'Loupe', xray:'XRay', fp:'Print Pro', whales:'Whales Map', vp:'Volume Profile', liq:'Inside Levels', heat:'Pulse', umb:'Umbrella', lux:'Binary Lux', aur:'Aurora', zones:'Saga', binlex:'Binlex', brk:'Breakout', prints:'Big Prints', levels:'Key Levels', senti:'Pressure'};
 const legend = $('legend');
 const wSl = v => Math.round(100*(Math.log10(Math.max(1e4, v)) - 4)/3.3);   // slider 0..100 → $10k..$20M
 const slW = s => Math.pow(10, 4 + 3.3*s/100);
@@ -3765,7 +3868,7 @@ function renderLegend(force){
 legend.addEventListener('click', e => {
   if (e.target.closest('#lgHd')){ if (legend._noClick) return; legend.classList.toggle('min'); try{ localStorage.setItem('lgMin', legend.classList.contains('min') ? '1' : '0'); }catch(err){} renderLegend(true); return; }
   const x = e.target.closest('[data-x]'); if (x){ setInd(x.dataset.x, false); renderLegend(true); return; }
-  const g = e.target.closest('[data-g]'); if (g){ e.stopPropagation(); if (['idx', 'news', 'mtfb'].includes(g.dataset.g)) openIdx(); else $('setBtn').click(); }
+  const g = e.target.closest('[data-g]'); if (g){ e.stopPropagation(); if (['idx', 'news', 'mtfb'].includes(g.dataset.g)) openIdx(); else if (PRO_UI[g.dataset.g]) openPro(g.dataset.g); else $('setBtn').click(); }
 });
 legend.addEventListener('pointerdown', e => e.stopPropagation());
 try{ const m = localStorage.getItem('lgMin'); if (m === '1' || (m == null && window.innerWidth < 600)) legend.classList.add('min'); }catch(e){}
