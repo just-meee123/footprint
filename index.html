@@ -137,7 +137,9 @@
   #idxNews[data-pos="Top Center"]{top:60px;bottom:auto} #idxNews[data-pos="Middle Left"]{left:56px;top:45%;bottom:auto;transform:none}
   #idxNews[data-pos="Middle Right"]{left:auto;right:80px;top:45%;bottom:auto;transform:none} #idxMtf{right:80px;top:180px}
   @media (max-width:600px){#idxNews,#idxNews[data-pos]{left:6px;right:auto;transform:none;font-size:9px;max-width:calc(100% - 80px);overflow:hidden} #idxNews:not([data-pos^="Top"]):not([data-pos^="Middle"]){bottom:60px} #idxMtf{right:74px;top:120px;font-size:9px}}
-  #idxNews,#idxMtf{overflow:hidden} #idxNews table{width:100%} #idxNews .rz,#idxNews .hd{pointer-events:auto}
+  #idxNews,#idxMtf{overflow:hidden} #idxNews table{width:100%}
+  #idxNewsB{max-height:min(60vh,34em);overflow:auto;pointer-events:auto} #idxNews td.ev{max-width:16em;overflow:hidden;text-overflow:ellipsis} #idxNews .imp{display:inline-block;width:.6em;height:.6em;border-radius:50%;margin-right:.3em;vertical-align:middle}
+  #idxNews tr.sec td{color:var(--dim);font-weight:600;font-size:.85em;padding-top:.6em;letter-spacing:.04em} #idxNews .tag{font-size:.8em;border:1px solid var(--line2);border-radius:.4em;padding:0 .3em;margin-left:.3em;color:#f7931a} #idxNews .rz,#idxNews .hd{pointer-events:auto}
   .ixtab .bx{cursor:pointer;opacity:.6;padding:0 .2em;pointer-events:auto} .ixtab .bx:hover{opacity:1;color:#ff5c6c}
   #idxNews .hd{display:flex;align-items:center;gap:6px;padding:.35em .7em;cursor:move;touch-action:none;user-select:none;-webkit-user-select:none;color:var(--txt);font-family:-apple-system,Segoe UI,sans-serif;border-bottom:1px solid var(--line2)}
   #idxNews .rz{position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;touch-action:none;background:linear-gradient(135deg,transparent 55%,var(--acc) 55%);opacity:.8}
@@ -304,7 +306,7 @@
   <label><input type="checkbox" data-k="senti" checked> Buy / Sell pressure</label>
   <div class="t" style="margin-top:6px">My indicators</div>
   <label><input type="checkbox" data-k="idx"> <b>Idanelfx</b> — structure, order blocks, FVG, Dbot, sessions, news <a href="#" id="idxOpen" style="margin-left:auto;color:var(--acc)">⚙</a></label>
-  <label><input type="checkbox" data-k="news"> 📅 CPI / NFP countdown board</label>
+  <label><input type="checkbox" data-k="news"> 📅 News countdown (CPI · NFP · all market news)</label>
   <label><input type="checkbox" data-k="mtfb"> 🧭 Trend board (15m · 1H · 4H · 1D)</label>
   <div class="t" style="margin-top:6px">Chart</div>
   <label class="pi"><input type="checkbox" data-k="sbrk"> Session breaks<small>vertical lines at each new day / week / session</small><a href="#" data-pro="sbrk">⚙</a></label>
@@ -385,7 +387,7 @@
     <div class="hlp"><b>Loupe</b> — a magnifier over the chart. <b>Follow</b>: the lens moves with the cursor, click pins it. <b>Fixed</b> 🔒: the lens size is locked — you can still drag it anywhere, but it can't be resized until you tap Fixed again. Unlocked: drag the box to move it, pull the bottom-right corner (or the wheel over it) to resize, click the chart to move it there, <b>Shift+drag</b> or <b>⬚</b> draws a new area. <b>L</b> toggles, <b>[ ]</b> less / more magnification, <b>Esc</b> turns it off.<br><b>Big prints</b> — boxes every footprint row and trade bigger than the $ amount (type 500k or 1M).<br><b>Classic</b> sell×buy · <b>Delta</b> buy−sell · <b>Volume</b> total.</div>
   </div>
   <div id="ppTip"></div>
-  <div id="idxNews" class="ixtab"><div class="hd" id="idxNewsH"><span style="opacity:.6">⠿</span><b style="flex:1">CPI / NFP</b><span class="bx" id="idxNewsX" title="Hide (turn back on in Indicators)">✕</span></div><div id="idxNewsB"></div><div class="rz" id="idxNewsR" title="Drag to resize"></div></div><div id="idxMtf" class="ixtab"><div class="hd" id="idxMtfH"><span style="opacity:.6">⠿</span><b style="flex:1">Trend board</b><span id="idxMtfS" title="Data source" style="opacity:.6;font-weight:400"></span><span class="bx" id="idxMtfX" title="Hide (turn back on in Indicators)">✕</span></div><div id="idxMtfB"></div><div class="rz" id="idxMtfR" title="Drag to resize"></div></div>
+  <div id="idxNews" class="ixtab"><div class="hd" id="idxNewsH"><span style="opacity:.6">⠿</span><b style="flex:1">News countdown</b><span class="bx" id="idxNewsX" title="Hide (turn back on in Indicators)">✕</span></div><div id="idxNewsB"></div><div class="rz" id="idxNewsR" title="Drag to resize"></div></div><div id="idxMtf" class="ixtab"><div class="hd" id="idxMtfH"><span style="opacity:.6">⠿</span><b style="flex:1">Trend board</b><span id="idxMtfS" title="Data source" style="opacity:.6;font-weight:400"></span><span class="bx" id="idxMtfX" title="Hide (turn back on in Indicators)">✕</span></div><div id="idxMtfB"></div><div class="rz" id="idxMtfR" title="Drag to resize"></div></div>
   <div id="selBar"><span class="sg" title="Drag">⋮⋮</span><button id="sbTpl" title="Template">▦+</button><button id="sbCol" title="Colour"><i id="sbColI"></i></button>
     <button id="sbW" title="Line width"><i id="sbWI"></i></button><button id="sbLs" title="Line style">┄</button><button id="sbLock" title="Lock">🔓</button>
     <button id="sbSet" title="Settings">⚙</button><button id="sbDel" title="Remove">🗑</button><button id="sbMore" title="More">⋯</button></div>
@@ -1197,6 +1199,7 @@ function draw(){
   if (ON.heat) drawHeat(PW, PH);
   if (ON.sess) drawSessions(PW, PH, a, b);
   if (ON.sbrk) drawSessBreaks(PW, PH, a, b);
+  if (ON.news && IC.calOn && IC.calLines && CAL.ev.length) drawCalLines(PW, PH);
   if (ON.idx) drawIdxBack(PW, PH, a, b);
   if (TA && (ON.aur || ON.zones)){ const sv = {umb:ON.umb, lux:ON.lux, p2:ON.pulse2}; ON.umb = ON.lux = ON.pulse2 = false; const sg = TA.sig; TA.sig = []; drawTA(PW); TA.sig = sg; ON.umb = sv.umb; ON.lux = sv.lux; ON.pulse2 = sv.p2; }
   // key level lines
@@ -2515,6 +2518,7 @@ const IDX_DEF = {
   acc:false, accMode:'Fast', swLbl:false, mtb:false,
   fvg:false, fvgType:'FVG', fvgNum:5, fvgExt:10, fvgMit:'Close',
   news:true, newsWarn:24, newsLines:true, newsAlert:30,
+  calOn:true, calImp:'High + Medium', calCur:'All', calRows:8, calCrypto:false, calLines:true, calAlert:true, calPast:false,
   db:true, dbKey:3, dbAtr:10, dbTs:true, dbBar:true,
   ss:true, ssDays:10, ssStyle:'Solid', ssTitle:true, ssMid:false, ssRange:false, ssAs:true, ssLd:true, ssNy:true,
   kz:true, kzPos:'Bottom', kzLbl:true, kz1:true, kz2:true, kz3:true, kz4:true,
@@ -2690,6 +2694,39 @@ function newsDates(){
 const nextRel = L => L.find(x => x.t > Date.now() - 5*60000);
 function fmtLeft(ms){ const s = Math.max(0, Math.floor(ms/1000)), d = Math.floor(s/86400), h = Math.floor(s%86400/3600), m = Math.floor(s%3600/60), x = s%60, p = v => String(v).padStart(2, '0');
   return (d ? d + 'd ' : '') + `${p(h)}h ${p(m)}m ${p(x)}s`; }
+function drawCalLines(PW, PH){ const now = Date.now(), L = calList().filter(e => e.imp === 'High' && e.t > now - 3600000).slice(0, 12); let lastX = -1e9, k = 0;
+  for (const e of L){ const x = xF(tIdx(e.t)); if (x < 0 || x > PW) continue; ctx.strokeStyle = hexA('#f23645', .55); ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(x, 40); ctx.lineTo(x, PH - VH); ctx.stroke(); ctx.setLineDash([]);
+    k = x - lastX < 70 ? k + 1 : 0; lastX = x; ctx.font = '600 9.5px -apple-system,Segoe UI,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; const txt = e.cur + ' ' + e.title, w = Math.min(160, ctx.measureText(txt).width + 8);
+    ctx.fillStyle = hexA('#f23645', .85); ctx.fillRect(x + 2, 44 + k*15, w, 13); ctx.save(); ctx.beginPath(); ctx.rect(x + 2, 44 + k*15, w, 13); ctx.clip(); ctx.fillStyle = '#fff'; ctx.fillText(txt, x + 6, 45.5 + k*15); ctx.restore(); } }
+// ── economic calendar (ForexFactory weekly feed through your relay, refreshed every 15 min) ──
+const CAL = {ev:[], at:0, err:null, busy:false};
+const CUR_FX = {USD:'USD', EUR:'EUR', GBP:'GBP', JPY:'JPY', AUD:'AUD', CAD:'CAD', CHF:'CHF', NZD:'NZD', CNY:'CNY'};
+async function calFetch(force){
+  if (CAL.busy || (!force && Date.now() - CAL.at < 900000)) return; const rl = dukaRelay(); if (!rl){ CAL.err = 'norelay'; return; }
+  CAL.busy = true; const out = [];
+  try{
+    for (const f of ['thisweek', 'nextweek']){
+      const r = await fetch(`${rl}/?u=${encodeURIComponent('https://nfs.faireconomy.media/ff_calendar_' + f + '.json')}`).catch(() => null);
+      if (!r){ if (f === 'thisweek') throw new Error('net'); continue; }
+      if (r.status === 403){ CAL.err = 'old'; throw new Error('old relay'); }
+      if (!r.ok){ if (f === 'thisweek') throw new Error('http ' + r.status); continue; }
+      const j = await r.json(); if (Array.isArray(j)) for (const e of j){ const t = Date.parse(e.date); if (!isFinite(t)) continue;
+        out.push({t, cur:(e.country || '').toUpperCase(), title:e.title || '', imp:e.impact || 'Low', fc:e.forecast || '', pv:e.previous || '', act:e.actual || ''}); } }
+    const seen = new Set(); CAL.ev = out.filter(e => { const k = e.t + e.cur + e.title; if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => a.t - b.t);
+    CAL.at = Date.now(); CAL.err = null;
+  }catch(e){ if (CAL.err !== 'old') CAL.err = 'net'; CAL.at = Date.now() - 780000; }   // retry in ~2 min
+  finally{ CAL.busy = false; }
+}
+setInterval(() => { if (ON.news && IC.calOn) calFetch(); }, 60000);
+const cryptoMover = e => e.cur === 'USD' && (e.imp === 'High' || /FOMC|Fed|Powell|CPI|PCE|Non-Farm|Payroll|Unemployment|GDP|PPI|Interest Rate/i.test(e.title));
+function calList(){
+  const imp = IC.calImp === 'High only' ? ['High'] : IC.calImp === 'All' ? ['High', 'Medium', 'Low', 'Holiday'] : ['High', 'Medium'];
+  let cur = null; if (IC.calCur === 'USD') cur = ['USD']; else if (IC.calCur === 'USD + EUR') cur = ['USD', 'EUR']; else if (IC.calCur === 'USD + EUR + GBP') cur = ['USD', 'EUR', 'GBP'];
+  else if (IC.calCur.startsWith('Majors')) cur = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'NZD'];
+  else if (IC.calCur === 'My symbol only'){ const sy = (S.sym || '').toUpperCase(); cur = Object.keys(CUR_FX).filter(c => sy.includes(c)); if (/USDT|USDC|BTC|ETH|XAU|XAG/.test(sy) && !cur.includes('USD')) cur.push('USD'); }
+  const now = Date.now(), dayStart = Math.floor((now + 3600000)/86400000)*86400000 - 3600000;
+  return CAL.ev.filter(e => imp.includes(e.imp) && (!cur || cur.includes(e.cur)) && (!IC.calCrypto || cryptoMover(e)) && (e.t > now - 5*60000 || (IC.calPast && e.t >= dayStart))); }
+const impCol = i => i === 'High' ? '#f23645' : i === 'Medium' ? '#ff9800' : i === 'Low' ? '#e6c800' : '#787b86';
 function renderNews(){
   const el = $('idxNews'); if (!el) return;
   if (!ON.news){ el.style.display = 'none'; return; }
@@ -2698,7 +2735,20 @@ function renderNews(){
     const cd = left <= 0 ? '<td class="rel">RELEASED</td>' : `<td${left <= warn ? ' class="warn"' : ` style="color:${col}"`}>${fmtLeft(left)}</td>`;
     return `<tr><td style="color:${col};font-weight:700">${nm}</td><td>${ddd} ${when}${r.auto ? ' (auto)' : ''}</td>${cd}</tr>`; };
   el.style.display = 'block'; el.dataset.pos = IC.newsPos; if (!el.dataset.sized) el.style.fontSize = {Small:'9px', Normal:'11px', Large:'13px'}[IC.newsSize];
-  $('idxNewsB').innerHTML = `<table><tr><th>NEWS</th><th>RELEASE (${IC.newsTz})</th><th>COUNTDOWN</th></tr>${row('CPI', IXC.cpi, N2.cpi)}${row('NFP', IXC.nfp, N2.nfp)}</table>`;
+  let cal = '';
+  if (IC.calOn){ calFetch(); const L = calList(), now = Date.now();
+    cal = `<tr class="sec"><td colspan="3">ALL MARKET NEWS${IC.calCrypto ? ' · crypto movers' : ''}</td></tr>`;
+    if (CAL.err === 'norelay') cal += `<tr><td colspan="3" style="color:var(--dim)">Paste your relay URL in ⚙ to load the news calendar</td></tr>`;
+    else if (CAL.err === 'old') cal += `<tr><td colspan="3" style="color:#ff9800">Update your Cloudflare relay to worker.js v3 to load all news</td></tr>`;
+    else if (!CAL.ev.length) cal += `<tr><td colspan="3" style="color:var(--dim)">${CAL.err ? 'News calendar unreachable — retrying…' : 'Loading news…'}</td></tr>`;
+    else if (!L.length) cal += `<tr><td colspan="3" style="color:var(--dim)">No more news this week for these filters</td></tr>`;
+    else for (const e of L.slice(0, IC.calRows)){ const left = e.t - now, lt = local(e.t, IC.newsTz), when = lt.toUTCString().slice(0, 3) + ' ' + lt.toISOString().slice(11, 16), ic = impCol(e.imp);
+      const cd = left <= 0 ? `<td class="${left > -5*60000 ? 'rel' : ''}" style="${left > -5*60000 ? '' : 'color:var(--dim)'}">${left > -5*60000 ? 'NOW' : (e.act ? 'Actual ' + e.act : 'Released')}</td>` : `<td${left <= warn && e.imp === 'High' ? ' class="warn"' : ''}>${fmtLeft(left)}</td>`;
+      const tip = `${e.cur} ${e.title}${e.fc ? ' · forecast ' + e.fc : ''}${e.pv ? ' · previous ' + e.pv : ''}`.replace(/"/g, '&quot;');
+      cal += `<tr title="${tip}"><td><span class="imp" style="background:${ic}"></span><b>${e.cur}</b></td><td class="ev">${e.title}${cryptoMover(e) ? '<span class="tag">₿</span>' : ''}<br><span style="color:var(--dim);font-size:.85em">${when}${e.fc ? ' · F ' + e.fc : ''}${e.pv ? ' · P ' + e.pv : ''}</span></td>${cd}</tr>`; }
+    if (IC.calAlert) for (const e of L) if (e.imp === 'High'){ const left = e.t - now, key = 'cal' + e.t + e.cur + e.title;
+      if (left > 0 && left <= IC.newsAlert*60000 && !idxSeen[key]){ idxSeen[key] = 1; fire(`${e.cur} ${e.title}`, `High-impact news in ${Math.ceil(left/60000)} min${cryptoMover(e) ? ' — moves forex AND crypto' : ''}`); } } }
+  $('idxNewsB').innerHTML = `<table><tr><th>NEWS</th><th>RELEASE (${IC.newsTz})</th><th>COUNTDOWN</th></tr>${row('CPI', IXC.cpi, N2.cpi)}${row('NFP', IXC.nfp, N2.nfp)}${cal}</table>`;
   if (IC.alNews) for (const [nm, L] of [['CPI', N2.cpi], ['NFP', N2.nfp]]){ const r = nextRel(L); if (!r) continue; const left = r.t - Date.now(), key = nm + r.t;
     if (left > 0 && left <= IC.newsAlert*60000 && !idxSeen[key]){ idxSeen[key] = 1; fire(nm + ' release', `US ${nm} comes out in ${Math.ceil(left/60000)} min — manage your positions`); } }
 }
@@ -2895,6 +2945,8 @@ const IDX_UI = [
   ['FAIR VALUE GAP', [['fvg', 'b', 'Show'], ['fvgType', ['FVG', 'VI', 'OG'], 'Type'], ['fvgUp', 'c', 'Bullish colour'], ['fvgDn', 'c', 'Bearish colour'], ['fvgNum', 'n', 'Show last', 1, 20], ['fvgExt', 'n', 'Extend FVG (bars)', 1, 100], ['fvgMit', ['Close', 'Wick'], 'Mitigation'], ['fvgTf', ['Chart', '5m', '15m', '1H', '4H', '1D'], 'Timeframe']]],
   ['NEWS COUNTDOWN (CPI / NFP)', [['news', 'b', 'Show CPI / NFP countdown'], ['newsPos', ['Top Left', 'Top Center', 'Middle Left', 'Bottom Left', 'Bottom Center', 'Middle Right'], 'Table position'], ['newsSize', ['Small', 'Normal', 'Large'], 'Text size'], ['newsTz', TZ_LIST, 'Display time zone'],
     ['newsWarn', 'n', 'Highlight when under (hours)', 1, 168], ['newsLines', 'b', 'Show release lines on chart'], ['newsAlert', 'n', 'Alert minutes before release', 1, 240], ['cpiC', 'c', 'CPI colour'], ['nfpC', 'c', 'NFP colour']]],
+  ['ALL MARKET NEWS (economic calendar)', [['calOn', 'b', 'Show all upcoming news'], ['calImp', ['High only', 'High + Medium', 'All'], 'Impact'], ['calCur', ['All', 'USD', 'USD + EUR', 'USD + EUR + GBP', 'Majors (USD EUR GBP JPY AUD CAD CHF NZD)', 'My symbol only'], 'Currencies'],
+    ['calCrypto', 'b', 'Only news that moves crypto (US high impact)'], ['calRows', 'n', 'How many to list', 3, 40], ['calPast', 'b', 'Keep today\'s released news in the list'], ['calLines', 'b', 'High-impact lines on chart'], ['calAlert', 'b', 'Alert before high-impact news']]],
   ['DBOT SIGNALS', [['db', 'b', 'Show Dbot buy / sell signals'], ['dbKey', 'f', 'Key value (sensitivity)', .5, 10], ['dbAtr', 'n', 'ATR period', 1, 50], ['dbTs', 'b', 'Show Dbot trailing stop'], ['dbBar', 'b', 'Dbot bar colour'], ['dbBuy', 'c', 'Buy colour'], ['dbSell', 'c', 'Sell colour']]],
   ['SESSIONS', [['ss', 'b', 'Show sessions'], ['ssTz', TZ_LIST, 'Session time zone'], ['ssDays', 'n', 'Days to show', 1, 40], ['ssStyle', ['Solid', 'Dashed', 'Dotted'], 'Box border style'], ['ssTitle', 'b', 'Show session titles'], ['ssMid', 'b', 'Show mid line'], ['ssRange', 'b', 'Show session range'],
     ['ssAs', 'b', 'Asian'], ['asT', 't', 'Asian time'], ['asC', 'c', 'Asian colour'], ['ssLd', 'b', 'London'], ['ldT', 't', 'London time'], ['ldC', 'c', 'London colour'], ['ssNy', 'b', 'New York'], ['nyT', 't', 'New York time'], ['nyC', 'c', 'New York colour']]],
@@ -3827,7 +3879,7 @@ $('bAuto').onclick = () => { V.auto = true; dirty = true; };
 $('bFp').onclick = () => setInd('fp', !ON.fp);
 try{ S.fpMin = +(localStorage.getItem('fpMin') || 0); $('fpMin').value = S.fpMin || 0; }catch(e){}
 // ── top-left legend: symbol, active indicators, quick sliders ──
-const IND_NAME = {sbrk:'Session breaks', pulse2:'Pulse V2', news:'CPI / NFP', mtfb:'Trend board', idx:'Idanelfx', imb:'Imbalances', sess:'Sessions', vwap:'VWAP', cvd:'CVD', xray:'Loupe', xray:'XRay', fp:'Print Pro', whales:'Whales Map', vp:'Volume Profile', liq:'Inside Levels', heat:'Pulse', umb:'Umbrella', lux:'Binary Lux', aur:'Aurora', zones:'Saga', binlex:'Binlex', brk:'Breakout', prints:'Big Prints', levels:'Key Levels', senti:'Pressure'};
+const IND_NAME = {sbrk:'Session breaks', pulse2:'Pulse V2', news:'News countdown', mtfb:'Trend board', idx:'Idanelfx', imb:'Imbalances', sess:'Sessions', vwap:'VWAP', cvd:'CVD', xray:'Loupe', xray:'XRay', fp:'Print Pro', whales:'Whales Map', vp:'Volume Profile', liq:'Inside Levels', heat:'Pulse', umb:'Umbrella', lux:'Binary Lux', aur:'Aurora', zones:'Saga', binlex:'Binlex', brk:'Breakout', prints:'Big Prints', levels:'Key Levels', senti:'Pressure'};
 const legend = $('legend');
 const wSl = v => Math.round(100*(Math.log10(Math.max(1e4, v)) - 4)/3.3);   // slider 0..100 → $10k..$20M
 const slW = s => Math.pow(10, 4 + 3.3*s/100);
