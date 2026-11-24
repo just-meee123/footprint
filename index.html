@@ -26,7 +26,10 @@
   #status{display:flex;align-items:center;gap:6px;margin-left:auto;font-size:11px;color:var(--dim)}
   #dot{width:8px;height:8px;border-radius:50%;background:#555}
   .menu{position:absolute;z-index:30;max-height:75vh;overflow:auto;background:var(--mbg);border:1px solid var(--line2);border-radius:10px;padding:8px;display:none;box-shadow:0 10px 30px rgba(0,0,0,.6);min-width:210px}
-  .menu.open{display:block}
+  .menu.open{display:block} .menu{max-width:calc(100vw - 16px);box-sizing:border-box}
+  @media (max-width:600px){ .menu label{white-space:normal;line-height:1.25} #indMenu label.pi small{display:none} #xp{max-width:calc(100vw - 12px)}
+    .ixtab{max-width:calc(100vw - 70px)} #idxNews td.ev{max-width:8.5em} #idxNews td,#idxNews th,#idxMtf td,#idxMtf th{padding:.25em .45em} }
+  .mbox{max-width:calc(100vw - 12px);box-sizing:border-box} .ixr span{min-width:0;overflow-wrap:anywhere} .ixr select,.ixr input[type=number],.ixr input[type=text]{max-width:46vw}
   .menu .t{font-size:11px;color:var(--gold);margin:2px 4px 6px;font-weight:700}
   .menu label{display:flex;align-items:center;gap:10px;padding:7px 6px;border-radius:6px;cursor:pointer}
   .menu label:hover{background:var(--hov)}
@@ -136,7 +139,7 @@
   #idxNews[data-pos="Bottom Left"]{left:56px;transform:none} #idxNews[data-pos="Top Left"]{left:56px;top:110px;bottom:auto;transform:none}
   #idxNews[data-pos="Top Center"]{top:60px;bottom:auto} #idxNews[data-pos="Middle Left"]{left:56px;top:45%;bottom:auto;transform:none}
   #idxNews[data-pos="Middle Right"]{left:auto;right:80px;top:45%;bottom:auto;transform:none} #idxMtf{right:80px;top:180px}
-  @media (max-width:600px){#idxNews,#idxNews[data-pos]{left:6px;right:auto;transform:none;font-size:9px;max-width:calc(100% - 80px);overflow:hidden} #idxNews:not([data-pos^="Top"]):not([data-pos^="Middle"]){bottom:60px} #idxMtf{right:74px;top:120px;font-size:9px}}
+  @media (max-width:600px){#idxMtf:not([style*="font-size"]){font-size:8.5px} #idxNews,#idxNews[data-pos]{left:6px;right:auto;transform:none;font-size:9px;max-width:calc(100% - 80px);overflow:hidden} #idxNews:not([data-pos^="Top"]):not([data-pos^="Middle"]){bottom:60px} #idxMtf{right:74px;top:120px;font-size:9px}}
   #idxNews,#idxMtf{overflow:hidden} #idxNews table{width:100%}
   #idxNewsB{max-height:min(60vh,34em);overflow:auto;pointer-events:auto} #idxNews td.ev{max-width:16em;overflow:hidden;text-overflow:ellipsis} #idxNews .imp{display:inline-block;width:.6em;height:.6em;border-radius:50%;margin-right:.3em;vertical-align:middle}
   #idxNews tr.sec td{color:var(--dim);font-weight:600;font-size:.85em;padding-top:.6em;letter-spacing:.04em} #idxNews .tag{font-size:.8em;border:1px solid var(--line2);border-radius:.4em;padding:0 .3em;margin-left:.3em;color:#f7931a} #idxNews .rz,#idxNews .hd{pointer-events:auto}
@@ -305,7 +308,7 @@
   <label><input type="checkbox" data-k="levels" checked> Key Levels</label>
   <label><input type="checkbox" data-k="senti" checked> Buy / Sell pressure</label>
   <div class="t" style="margin-top:6px">My indicators</div>
-  <label><input type="checkbox" data-k="idx"> <b>Idanelfx</b> — structure, order blocks, FVG, Dbot, sessions, news <a href="#" id="idxOpen" style="margin-left:auto;color:var(--acc)">⚙</a></label>
+  <label class="pi"><input type="checkbox" data-k="idx"> <b>Idanelfx</b><small>structure · order blocks · FVG · Dbot · sessions · news</small><a href="#" id="idxOpen">⚙</a></label>
   <label><input type="checkbox" data-k="news"> 📅 News countdown (CPI · NFP · all market news)</label>
   <label><input type="checkbox" data-k="mtfb"> 🧭 Trend board (15m · 1H · 4H · 1D)</label>
   <div class="t" style="margin-top:6px">Chart</div>
@@ -1325,6 +1328,9 @@ function draw(){
 function drawPanel(){
   if (!ON.xray || !lens){ xp.style.display = 'none'; return; }
   xp.style.display = 'flex';
+  { const W0 = wrap.clientWidth, H0 = wrap.clientHeight;   // keep the XRay window inside the screen (phones, rotation)
+    if (xp.offsetWidth > W0 - 8) xp.style.width = (W0 - 8) + 'px'; if (xp.offsetHeight > H0 - 8) xp.style.height = (H0 - 8) + 'px';
+    if (xp.offsetLeft + xp.offsetWidth > W0) xp.style.left = Math.max(0, W0 - xp.offsetWidth - 4) + 'px'; if (xp.offsetTop + xp.offsetHeight > H0) xp.style.top = Math.max(0, H0 - xp.offsetHeight - 4) + 'px'; }
   const dpr = V.dpr, w = xc.clientWidth, h = xc.clientHeight;
   if (xc.width !== Math.round(w*dpr) || xc.height !== Math.round(h*dpr)){ xc.width = Math.round(w*dpr); xc.height = Math.round(h*dpr); }
   const g = xctx; g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = TH.bg; g.fillRect(0, 0, w, h);
@@ -2705,11 +2711,11 @@ async function calFetch(force){
   if (CAL.busy || (!force && Date.now() - CAL.at < 900000)) return; const rl = dukaRelay(); if (!rl){ CAL.err = 'norelay'; return; }
   CAL.busy = true; const out = [];
   try{
-    for (const f of ['thisweek', 'nextweek']){
-      const r = await fetch(`${rl}/?u=${encodeURIComponent('https://nfs.faireconomy.media/ff_calendar_' + f + '.json')}`).catch(() => null);
+    for (const f of ['thisweek', 'nextweek']){ const src = 'https://nfs.faireconomy.media/ff_calendar_' + f + '.json';
+      let r = CAL.direct !== false ? await fetch(src).catch(() => null) : null; if (r && r.ok) CAL.direct = true; else { if (CAL.direct == null) CAL.direct = false; r = await fetch(`${rl}/?u=${encodeURIComponent(src)}`).catch(() => null); }
       if (!r){ if (f === 'thisweek') throw new Error('net'); continue; }
       if (r.status === 403){ CAL.err = 'old'; throw new Error('old relay'); }
-      if (!r.ok){ if (f === 'thisweek') throw new Error('http ' + r.status); continue; }
+      if (!r.ok){ if (f === 'thisweek'){ CAL.why = (await r.text().catch(() => '')).slice(0, 60) || ('error ' + r.status); throw new Error('http ' + r.status); } continue; }
       const j = await r.json(); if (Array.isArray(j)) for (const e of j){ const t = Date.parse(e.date); if (!isFinite(t)) continue;
         out.push({t, cur:(e.country || '').toUpperCase(), title:e.title || '', imp:e.impact || 'Low', fc:e.forecast || '', pv:e.previous || '', act:e.actual || ''}); } }
     const seen = new Set(); CAL.ev = out.filter(e => { const k = e.t + e.cur + e.title; if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => a.t - b.t);
@@ -2740,7 +2746,7 @@ function renderNews(){
     cal = `<tr class="sec"><td colspan="3">ALL MARKET NEWS${IC.calCrypto ? ' · crypto movers' : ''}</td></tr>`;
     if (CAL.err === 'norelay') cal += `<tr><td colspan="3" style="color:var(--dim)">Paste your relay URL in ⚙ to load the news calendar</td></tr>`;
     else if (CAL.err === 'old') cal += `<tr><td colspan="3" style="color:#ff9800">Update your Cloudflare relay to worker.js v3 to load all news</td></tr>`;
-    else if (!CAL.ev.length) cal += `<tr><td colspan="3" style="color:var(--dim)">${CAL.err ? 'News calendar unreachable — retrying…' : 'Loading news…'}</td></tr>`;
+    else if (!CAL.ev.length) cal += `<tr><td colspan="3" style="color:var(--dim)">${CAL.err ? 'News calendar unreachable' + (CAL.why ? ' (' + CAL.why + ')' : '') + ' — retrying…' : 'Loading news…'}</td></tr>`;
     else if (!L.length) cal += `<tr><td colspan="3" style="color:var(--dim)">No more news this week for these filters</td></tr>`;
     else for (const e of L.slice(0, IC.calRows)){ const left = e.t - now, lt = local(e.t, IC.newsTz), when = lt.toUTCString().slice(0, 3) + ' ' + lt.toISOString().slice(11, 16), ic = impCol(e.imp);
       const cd = left <= 0 ? `<td class="${left > -5*60000 ? 'rel' : ''}" style="${left > -5*60000 ? '' : 'color:var(--dim)'}">${left > -5*60000 ? 'NOW' : (e.act ? 'Actual ' + e.act : 'Released')}</td>` : `<td${left <= warn && e.imp === 'High' ? ' class="warn"' : ''}>${fmtLeft(left)}</td>`;
@@ -2914,7 +2920,7 @@ function renderIdxTable(){ const el = $('idxMtf'); if (!el) return; if (!ON.mtfb
 function makeBoard(el, H, Z, key, name, onSize){ let st = null;
   const save = () => { try{ localStorage.setItem(key, JSON.stringify({l:parseFloat(el.style.left), t:parseFloat(el.style.top), fs:parseFloat(el.style.fontSize) || null})); }catch(e){} };
   const place = (l, t) => { const w = wrap.getBoundingClientRect(), r = el.getBoundingClientRect(); el.style.transform = 'none'; el.style.right = 'auto'; el.style.bottom = 'auto';
-    el.style.left = clamp(l, 0, Math.max(0, w.width - Math.min(r.width, w.width))) + 'px'; el.style.top = clamp(t, 0, Math.max(0, w.height - 40)) + 'px'; };
+    el.style.left = clamp(l, 0, Math.max(0, w.width - Math.min(r.width, w.width))) + 'px'; el.style.top = clamp(t, 0, Math.max(0, w.height - Math.min(r.height, w.height))) + 'px'; };
   try{ const q = JSON.parse(localStorage.getItem(key) || 'null'); if (q){ if (q.fs){ el.style.fontSize = q.fs + 'px'; el.dataset.sized = 1; } if (q.l != null && !isNaN(q.l)) requestAnimationFrame(() => { el.style.transform = 'none'; place(q.l, q.t); }); } }catch(e){}
   const down = mode => e => { if (e.target.classList.contains('bx')) return; e.preventDefault(); e.stopPropagation(); const r = el.getBoundingClientRect(), w = wrap.getBoundingClientRect();
     st = {mode, x:e.clientX, y:e.clientY, l:r.left - w.left, t:r.top - w.top, w0:r.width, fs:parseFloat(getComputedStyle(el).fontSize) || 11}; e.target.setPointerCapture(e.pointerId); };
@@ -2922,7 +2928,9 @@ function makeBoard(el, H, Z, key, name, onSize){ let st = null;
     if (st.mode === 'm') place(st.l + dx, st.t + dy); else { if (!el.style.left){ place(st.l, st.t); } el.style.fontSize = clamp(st.fs*(st.w0 + (dx + dy)/2)/st.w0, 7, 24).toFixed(1) + 'px'; el.dataset.sized = 1; } };
   const up = () => { if (st){ st = null; save(); } };
   for (const [h, m] of [[H, 'm'], [Z, 'r']]){ h.addEventListener('pointerdown', down(m)); h.addEventListener('pointermove', move); h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up); }
-  window.addEventListener('resize', () => { if (el.style.left) place(parseFloat(el.style.left), parseFloat(el.style.top)); });
+  const refit = () => { if (el.style.display === 'none') return; const w = wrap.getBoundingClientRect(), r = el.getBoundingClientRect();
+    if (el.style.left) place(parseFloat(el.style.left), parseFloat(el.style.top)); else if (r.right > w.right + 1 || r.bottom > w.bottom + 1 || r.left < w.left - 1) place(r.left - w.left, r.top - w.top); };
+  window.addEventListener('resize', () => setTimeout(refit, 50)); setInterval(refit, 3000);
   H.addEventListener('dblclick', () => { for (const k of ['left', 'top', 'right', 'bottom', 'transform', 'fontSize']) el.style[k] = ''; delete el.dataset.sized; try{ localStorage.removeItem(key); }catch(e){} if (onSize) onSize(); toast(name + ' back to its place'); });
 }
 makeBoard($('idxMtf'), $('idxMtfH'), $('idxMtfR'), 'idxMtfBox', 'Trend board');
@@ -3772,7 +3780,8 @@ window.addEventListener('keydown', e => {
 function closeMenus(){ document.querySelectorAll('.menu').forEach(m => m.classList.remove('open')); }
 function toggleMenu(id, btn){
   const m = $(id), open = !m.classList.contains('open'); closeMenus(); if (!open) return;
-  const r = btn.getBoundingClientRect(); m.style.left = Math.min(r.left, window.innerWidth - 240) + 'px'; m.style.top = (r.bottom + 4) + 'px'; m.classList.add('open');
+  const r = btn.getBoundingClientRect(); m.style.top = (r.bottom + 4) + 'px'; m.style.left = '8px'; m.style.maxHeight = Math.max(200, window.innerHeight - r.bottom - 16) + 'px'; m.classList.add('open');
+  m.style.left = clamp(r.left, 8, Math.max(8, window.innerWidth - m.offsetWidth - 8)) + 'px';
 }
 $('indBtn').onclick = e => { e.stopPropagation(); toggleMenu('indMenu', $('indBtn')); };
 $('setBtn').onclick = e => { e.stopPropagation(); toggleMenu('setMenu', $('setBtn')); };
