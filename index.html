@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Live Footprint XRay</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -14,7 +14,7 @@
 <style>
   :root{--bg:#07090e;--panel:#0f141d;--line:#1d2533;--txt:#d3dae6;--dim:#6b7689;--buy:#1fd38a;--sell:#ff4d5e;--acc:#4fb3ff;--gold:#ffb02e;--inbg:#0a0e15;--mbg:#111827;--line2:#263043;--ovl:rgba(13,18,27,.95);--hov:#1a2333}
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:13px/1.3 -apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
+  html,body{margin:0;height:100%;height:100dvh;background:var(--bg);color:var(--txt);font:13px/1.3 -apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
   .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
   #top{display:flex;gap:6px;align-items:center;padding:6px 8px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:relative;z-index:20}
   #top input,#top select,#top button,.menu input,.menu select{background:var(--inbg);color:var(--txt);border:1px solid var(--line);border-radius:7px;padding:5px 8px;font:inherit;font-size:13px}
@@ -36,7 +36,7 @@
   .menu input[type=checkbox]{width:16px;height:16px;accent-color:var(--acc)}
   #setMenu label{justify-content:space-between;cursor:default}
   #setMenu input[type=number]{width:100px}
-  #wrap{position:absolute;left:0;right:0;bottom:0}
+  #wrap{position:absolute;left:0;right:0;bottom:env(safe-area-inset-bottom,0px)}
   #cv{display:block;width:100%;height:100%;touch-action:none}
   /* XRay panel */
   #xp{position:absolute;display:none;flex-direction:column;background:var(--ovl);border:1px solid var(--line2);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.65);overflow:hidden;z-index:8;touch-action:none}
@@ -230,7 +230,7 @@
 <div id="top">
   <select id="mkt" title="Data source"><option value="spot">Binance Spot</option><option value="fut">Binance Futures</option><option value="bys">Bybit Spot</option><option value="byl">Bybit Futures</option><option value="fx">Forex (Dukascopy)</option></select>
   <input id="sym" value="BTCUSDT" title="Search symbol" readonly>
-  <select id="tf"><option value="60" selected>1m</option><option value="180">3m</option><option value="300">5m</option><option value="900">15m</option><option value="1800">30m</option><option value="3600">1h</option><option value="14400">4h</option></select>
+  <select id="tf"><option value="60" selected>1m</option><option value="180">3m</option><option value="300">5m</option><option value="900">15m</option><option value="1800">30m</option><option value="3600">1h</option><option value="14400">4h</option><option value="86400">1D</option><option value="604800">1W</option><option value="2592000">1M</option></select>
   <button id="indBtn">Indicators<span id="indCount">4</span></button>
   <button id="hubBtn" title="Analysis hub: layouts, chart type, compare, object tree…">☰ Hub</button>
   <button id="aiBtn" title="AI read of the order flow">✦ AI<small>Beta</small></button>
@@ -470,9 +470,11 @@ const setStatus = (t, c) => { if ($('stxt').textContent !== t) $('stxt').textCon
 const setText = (el, t) => { if (el.textContent !== t) el.textContent = t; };
 
 // ───────── aggregation ─────────
+const WEEK = 604800000, MONTH = 2592000000;
+const cStart = t => { const tf = S.tfMs; if (tf === WEEK) return Math.floor((t - 345600000)/tf)*tf + 345600000; if (tf === MONTH){ const d = new Date(t); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1); } return Math.floor(t/tf)*tf; };
 function addTrade(tr){
   const [T, p, q, isSell] = tr;
-  const t0 = Math.floor(T/S.tfMs)*S.tfMs;
+  const t0 = cStart(T);
   let c = S.candles[S.candles.length-1];
   if (!c || t0 > c.t){ c = {t:t0, o:p, h:p, l:p, c:p, buy:0, sell:0, n:0, lv:new Map()}; S.candles.push(c);
     if (S.candles.length > MAX_CANDLES){ S.candles.shift(); if (lens) lens.ci -= 1; } }
@@ -487,7 +489,7 @@ function addTrade(tr){
 // 1-minute candles from the exchange give long history; their volume is spread across the
 // candle's price range and counted as buying (green) or selling (red). Marked as estimated.
 function addKline(m){
-  const [t, o, h, l, c, v, bq] = m, t0 = Math.floor(t/S.tfMs)*S.tfMs;
+  const [t, o, h, l, c, v, bq] = m, t0 = cStart(t);
   let C = S.candles[S.candles.length-1];
   if (!C || t0 > C.t){ C = {t:t0, o, h, l, c, buy:0, sell:0, n:0, lv:new Map(), est:true}; S.candles.push(C);
     if (S.candles.length > MAX_CANDLES){ S.candles.shift(); if (lens) lens.ci -= 1; } }
@@ -519,12 +521,23 @@ function rebuild(){
   // live trades (5) > real trade history (4) > Dukascopy ticks (3) > Dukascopy 1m (2) > exchange 1m (1)
   const H = S.ht || [], L = [S.k1, S.dk, S.dt, H, S.trades], own = new Map();
   for (let r = 0; r < 5; r++) for (const it of L[r]){ const k = Math.floor(it[0]/60000); if ((own.get(k) || 0) < r + 1) own.set(k, r + 1); }
+  // deep history: candles at the chart timeframe. They cover every candle before the detailed data starts (also a candle the
+  // detailed data only partly covers, e.g. the first day / week) and any time after the detailed data ends.
+  let khP = null;
+  if (S.kh && S.kh.length && S.khTf === S.tfMs){ let f0 = Infinity, f1 = -Infinity; for (const Lr of L) if (Lr.length){ f0 = Math.min(f0, Lr[0][0]); f1 = Math.max(f1, Lr[Lr.length - 1][0]); }
+    const ko = S.khOff || 0, add = []; khP = new Set();
+    for (const r of S.kh){ const P = cStart(r[0]), firstFull = f0 === Infinity ? Infinity : (cStart(f0) === f0 ? f0 : cStart(f0) + 1);
+      if (P < firstFull || P > f1){ khP.add(P); const q = [r[0], r[1] - ko, r[2] - ko, r[3] - ko, r[4] - ko, r[5], r[6]]; q.kh = true; add.push(q); } }
+    if (khP.size){ L[0] = S.k1.length ? [...add, ...S.k1].sort((a, b) => a[0] - b[0]) : add; } else khP = null;
+    S.khShow = add.length; }
   const ix = [0, 0, 0, 0, 0], off = S.off;
   for (;;){
     let b = -1, bt = Infinity;
     for (let r = 0; r < 5; r++) if (ix[r] < L[r].length && L[r][ix[r]][0] < bt){ bt = L[r][ix[r]][0]; b = r; }
     if (b < 0) break;
     const it = L[b][ix[b]++];
+    if (it.kh){ addKline(it); continue; }
+    if (khP && khP.has(cStart(it[0]))) continue;   // that candle comes from the deep history
     if (own.get(Math.floor(it[0]/60000)) !== b + 1) continue;
     if (b <= 1) addKline(it);
     else if (b === 2){ addTrade([it[0], it[1], it[2]/it[1], it[3], 1]); const c = S.candles[S.candles.length - 1]; if (c) c.est = true; }
@@ -849,7 +862,7 @@ async function connectFx(sym, my){
   S.dk = D.k1.map(r => [r[0], r[1], r[2], r[3], r[4], r[5]*sc]);
   S.dt = D.tk.map(t => [t[0], t[1], 1, t[3]]);
   if (S.dt.length) S.fxPrev = S.dt[S.dt.length-1][1];
-  S.duka = true; rebuild(); lens = null;
+  S.duka = true; rebuild(); lens = null; loadDeep();
   if (finnhubKey()){ setStatus(`${sym} · connecting live (Finnhub)…`, COL.gold); openWS(SRC.fx, sym, my); }
   else setStatus(`${sym} · Dukascopy (updates hourly) — add a Finnhub key in ⚙ for live`, COL.gold);
 }
@@ -880,7 +893,7 @@ async function connect(){
   try{ localStorage.setItem('fpLast', JSON.stringify({sym:$('sym').value, mkt:$('mkt').value, tf:$('tf').value})); }catch(e){}
   cmp.data = new Map(); if (cmp.on) setTimeout(loadCompare, 4000);
   if (S.ws){ S.ws.onclose = null; S.ws.close(); S.ws = null; }
-  S.trades = []; S.candles = []; S.dk = []; S.dt = []; S.ht = []; S.off = 0; S.duka = false; S.wsBuf = []; S.lastId = -1; seen.clear(); lens = null; pinned = null; setFollow(true);
+  S.trades = []; S.candles = []; S.dk = []; S.dt = []; S.ht = []; S.kh = []; S.khTf = 0; S.off = 0; S.duka = false; S.wsBuf = []; S.lastId = -1; seen.clear(); lens = null; pinned = null; setFollow(true);
   S.tfMs = +$('tf').value*1000;
   let sym = $('sym').value.trim().toUpperCase().replace(/[\/\-\s_.]/g, '');
   if (FX_SET.has(sym) && ($('mkt').value === 'fx' || !/^X(AU|AG)/.test(sym))){ $('mkt').value = 'fx'; $('sym').value = sym; return connectFx(sym, my); }
@@ -996,7 +1009,53 @@ async function loadTradeHistory(src, sym, my){
   htStat(`Real trade history: ✓ ${got.join(', ')} · ${out.length.toLocaleString()} real trades`);
   if (S.src) setStatus(liveLabel(sym, S.src), COL.buy);
 }
+// ── deep history: up to ~2000 candles at the chart timeframe (exchange candles, or Dukascopy hours for forex) ──
+const KIV = {300000:['5m', '5'], 900000:['15m', '15'], 1800000:['30m', '30'], 3600000:['1h', '60'], 14400000:['4h', '240'], 86400000:['1d', 'D'], 604800000:['1w', 'W'], 2592000000:['1M', 'M']};
+async function dukaYears(dsym, div, my){   // one Dukascopy file per year of daily candles, from 2003
+  const y1 = new Date().getUTCFullYear(), tasks = [];
+  for (let y = 2003; y <= y1; y++){ const t0 = Date.UTC(y, 0, 1), path = `${dsym}/${y}/BID_candles_day_1.bi5`; tasks.push(async () => { const raw = await dukaFile(path); return raw ? dukaRows(raw, t0, div) : []; }); }
+  const res = await pool(tasks, 6, (a, b) => { if (my === S.sess) dkStat(`Dukascopy: loading daily history ${a}/${b} years…`); });
+  if (res.length && res.every(r => r && r.err)) throw res[0].err;
+  return res.filter(r => Array.isArray(r)).flat().sort((a, b) => a[0] - b[0]);
+}
+async function loadDeep(){
+  const src = S.src, sym = S.sym, my = S.sess, tf = S.tfMs; if (!src || RP.on || tf < 300000) { S.kh = []; S.khTf = tf; return; }
+  const want = tf >= 86400000 ? 9000 : tf >= 3600000 ? 2000 : 1500; let rows = [];
+  try{
+    const dsym = src.kind === 'fx' ? sym : DUKA_MAP[sym];
+    if (tf >= 86400000 && dsym && dukaRelay()){   // gold, silver, forex: every day since 2003
+      rows = await dukaYears(dsym, src.kind === 'fx' ? (S.fxDiv || fxDivGuess(sym)) : 1000, my);
+      if (my !== S.sess || tf !== S.tfMs) return; S.khOff = 0;
+      if (rows.length) dkStat(`Dukascopy: ✓ ${rows.length.toLocaleString()} daily candles since ${new Date(rows[0][0]).getUTCFullYear()}`);
+    }
+    if (!rows.length && (src.kind === 'bn' || src.kind === 'by') && KIV[tf]){
+      let end = Date.now();
+      for (let pg = 0; pg < Math.ceil(want/1000) + 1 && rows.length < want; pg++){
+        let part;
+        if (src.kind === 'bn') part = (await getJSON(src, `${src.pre}/klines?symbol=${sym}&interval=${KIV[tf][0]}&limit=1000&endTime=${end}`)).map(k => [+k[0], +k[1], +k[2], +k[3], +k[4], +k[7], +k[10]]);
+        else { const j = await getJSON(src, `/v5/market/kline?category=${src.cat}&symbol=${sym}&interval=${KIV[tf][1]}&limit=1000&end=${end}`); part = ((j.result && j.result.list) || []).map(k => [+k[0], +k[1], +k[2], +k[3], +k[4], +k[6]]); }
+        if (my !== S.sess || tf !== S.tfMs) return;
+        part.sort((a, b) => a[0] - b[0]); if (!part.length) break;
+        rows = part.filter(r => !rows.length || r[0] < rows[0][0]).concat(rows); end = part[0][0] - 1; if (part.length < 900) break; }
+      S.khOff = S.off;   // exchange prices: same shift as the 1-minute candles
+    } else if (!rows.length && src.kind === 'fx' && tf >= 3600000 && dukaRelay() && S.fxDiv){
+      const d = new Date(), from = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - (tf >= 14400000 ? 14 : 4), 1);
+      rows = (await rpDuka({dsym:sym, div:S.fxDiv}, from, Date.now())).map(r => [r[0], r[1], r[2], r[3], r[4], r[5]]);
+      if (my !== S.sess || tf !== S.tfMs) return; S.khOff = 0;
+    } else if (!rows.length){ S.kh = []; S.khTf = tf; return; }
+  }catch(e){ console.warn('deep history', e); return; }
+  if (my !== S.sess || tf !== S.tfMs || !rows.length) return;
+  S.kh = rows; S.khTf = tf; S.khAt = Date.now(); rebuild();
+}
+// when the trade stream is quiet (thin market, blocked socket), refresh the newest candles from the exchange every 30 s
+setInterval(async () => {
+  if (!S.src || RP.on || document.hidden || S.src.kind === 'fx') return; const lastTr = S.trades.length ? S.trades[S.trades.length - 1][0] : 0;
+  if (Date.now() - lastTr < 30000) return; const my = S.sess, src = S.src, sym = S.sym;
+  try{ const lastT = S.k1.length ? S.k1[S.k1.length - 1][0] : Date.now() - 3600000;
+    const rows = await fetchK1(src, sym, {start: Math.floor(lastT/60000)*60000}); if (my === S.sess && rows.length){ mergeK1(rows); rebuild(); } }catch(e){}
+}, 30000);
 async function backgroundHistory(src, sym, info, my){
+  loadDeep();
   const pagesK = clamp(Math.ceil((+$('days').value || 3)*1440/1000), 1, 20);
   try{
     for (let pg = 1; pg < pagesK && my === S.sess && S.k1.length; pg++){
@@ -1024,7 +1083,7 @@ async function backgroundHistory(src, sym, info, my){
     for (const tr of S.trades) tr[1] -= off;
     if (lens) lens.cp -= off;
     if (!V.auto){ V.lo -= off; V.hi -= off; }
-    S.off += off;
+    S.off += off; if (S.kh && S.kh.length && S.khOff != null) S.khOff += off;
     S.dk = D.k1.map(r => [r[0], r[1], r[2], r[3], r[4], r[5]*cal.sc]);
     S.dt = D.tk.map(t => [t[0], t[1], t[2]*cal.st, t[3]]);
     S.duka = true; rebuild();
@@ -1306,10 +1365,10 @@ function draw(){
   ctx.font = 'bold 11px ui-monospace,monospace'; ctx.textAlign = 'left';
   drawTags(PW); ctx.font = 'bold 11px ui-monospace,monospace'; ctx.textAlign = 'left';
   ctx.fillStyle = lc; ctx.fillRect(PW, ly - 9, AX, 18); ctx.fillStyle = '#03121f'; ctx.fillText(P(last.c), PW + 6, ly);
-  if (!RP.on){ const now = Date.now(), left = Math.max(0, (Math.floor(now/S.tfMs) + 1)*S.tfMs - now), sec = Math.floor(left/1000);
-    const hh = Math.floor(sec/3600), mm = Math.floor(sec%3600/60), ss = sec%60, z = n => String(n).padStart(2, '0');
+  if (!RP.on){ const now = Date.now(), nx = S.tfMs === MONTH ? (d => Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1))(new Date(now)) : cStart(now) + S.tfMs, left = Math.max(0, nx - now), sec = Math.floor(left/1000);
+    const dd = Math.floor(sec/86400), hh = Math.floor(sec%86400/3600), mm = Math.floor(sec%3600/60), ss = sec%60, z = n => String(n).padStart(2, '0');
     ctx.fillStyle = TH.tag; ctx.fillRect(PW, ly + 9, AX, 16); ctx.fillStyle = TH.txt; ctx.font = '11px ui-monospace,monospace';
-    ctx.fillText((hh ? z(hh) + ':' : '') + z(mm) + ':' + z(ss), PW + 6, ly + 17); ctx.font = 'bold 11px ui-monospace,monospace'; }
+    ctx.fillText(dd ? dd + 'd ' + z(hh) + 'h' : (hh ? z(hh) + ':' : '') + z(mm) + ':' + z(ss), PW + 6, ly + 17); ctx.font = 'bold 11px ui-monospace,monospace'; }
   if (hover.in && hover.y < PH - VH && hover.x < PW){
     const hp = V.hi - (hover.y - TOP)*ppp();
     ctx.fillStyle = TH.tag; ctx.fillRect(PW, hover.y - 9, AX, 18); ctx.fillStyle = TH.txt; ctx.fillText(P(hp), PW + 6, hover.y);
@@ -1317,8 +1376,22 @@ function draw(){
   // time axis
   ctx.fillStyle = TH.axis; ctx.fillRect(0, PH, W, TH_H);
   ctx.font = '11px ui-monospace,monospace'; ctx.textAlign = 'center'; ctx.fillStyle = COL.dim;
-  const every = Math.max(1, Math.ceil(80/V.cw));
-  for (let i = a; i <= b; i++) if (Math.floor(C[i].t/S.tfMs) % every === 0) ctx.fillText(tStr(C[i].t), xF(i), PH + TH_H/2);
+  // labels: time of day, the date where a new day / month starts (bold), and a full date + time tag under the crosshair
+  { const every = Math.max(1, Math.ceil(88/V.cw)), M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], daily = S.tfMs >= 14400000;
+    const dk = t => { const d = new Date(t); return d.getFullYear()*400 + d.getMonth()*32 + d.getDate(); };
+    let lastX = -1e9; const lab = [];
+    for (let i = Math.max(1, a); i <= b; i++){ const t = C[i].t, d = new Date(t), newDay = dk(t) !== dk(C[i - 1].t), newMon = d.getMonth() !== new Date(C[i - 1].t).getMonth();
+      const newYear = d.getFullYear() !== new Date(C[i - 1].t).getFullYear();
+      if (S.tfMs >= WEEK){ if (newYear) lab.push([i, String(d.getFullYear()), true]); else if (newMon && S.tfMs === WEEK) lab.push([i, M[d.getMonth()], false]); continue; }
+      if (daily ? newMon || (newDay && Math.floor(t/S.tfMs) % every === 0) : newDay) lab.push([i, newYear ? String(d.getFullYear()) : newMon && daily ? M[d.getMonth()] : d.getDate() + ' ' + M[d.getMonth()], newYear || !daily]); }
+    if (!daily) for (let i = a; i <= b; i++) if (Math.floor(C[i].t/S.tfMs) % every === 0) lab.push([i, tStr(C[i].t), false]);
+    lab.sort((p, q) => p[0] - q[0] || (q[2] - p[2]));
+    for (const [i, txt, bold] of lab){ const x = xF(i); if (x - lastX < (bold ? 60 : 70) && !bold) continue; if (bold && x - lastX < 40) continue;
+      ctx.font = bold ? 'bold 11px ui-monospace,monospace' : '11px ui-monospace,monospace'; ctx.fillStyle = bold ? TH.txt : COL.dim; ctx.fillText(txt, x, PH + TH_H/2); lastX = x; }
+    if (hover.in && hover.x < PW){ const ci = clamp(Math.round(iAt(hover.x)), 0, C.length - 1), t = C[ci] ? C[ci].t : null;
+      if (t != null){ const d = new Date(t), txt = d.toLocaleDateString([], {weekday:'short', day:'numeric', month:'short', year:'2-digit'}) + '  ' + tStr(t);
+        ctx.font = 'bold 11px ui-monospace,monospace'; const w = ctx.measureText(txt).width + 14, x = clamp(xF(ci) - w/2, 0, PW - w);
+        ctx.fillStyle = TH.tag; ctx.fillRect(x, PH + 1, w, TH_H - 2); ctx.fillStyle = TH.txt; ctx.textAlign = 'left'; ctx.fillText(txt, x + 7, PH + TH_H/2); ctx.textAlign = 'center'; } } }
 
   drawPanel();
   mainHover();
@@ -3415,7 +3488,7 @@ const rpLoad = (src, from, to) => src.kind === 'duka' ? rpDuka(src, from, to) : 
 async function startHistReplay(t, quiet){
   const src = rpSource(); if (!src) return toast('Connect a symbol first, then start the replay');
   if (src.kind === 'duka' && !dukaRelay()) return toast('History for forex / gold comes through your relay — paste its URL in ⚙ first');
-  t = Math.floor(t/S.tfMs)*S.tfMs; const tok = ++RP.tok;
+  t = cStart(t); const tok = ++RP.tok;
   if (RP.on) stopReplay(true);
   $('rpModal').classList.remove('open'); if (!quiet) toast(`Loading ${src.name} history for ${new Date(t).toISOString().slice(0, 10)}…`);
   RP.loadingMsg = true; $('rpBar').style.display = 'flex'; $('rpT').textContent = 'loading history…';
@@ -3448,8 +3521,8 @@ function rpStep(){
   if (!RP.on) return;
   if (RP.mode === 'hist'){
     if (RP.k >= RP.rows.length){ if (RP.end){ if (RP.timer) rpPlay(); toast('That is all the history up to today — ✕ to go back to live'); } else rpMore(); return; }
-    const t0 = Math.floor(RP.rows[RP.k][0]/S.tfMs)*S.tfMs;
-    while (RP.k < RP.rows.length && Math.floor(RP.rows[RP.k][0]/S.tfMs)*S.tfMs === t0) addKline(RP.rows[RP.k++]);
+    const t0 = cStart(RP.rows[RP.k][0]);
+    while (RP.k < RP.rows.length && cStart(RP.rows[RP.k][0]) === t0) addKline(RP.rows[RP.k++]);
     if (RP.rows.length - RP.k < 400) rpMore();
     derivedDirty = dirty = true; rpUI(); return; }
   if (RP.n >= RP.full.length){ stopReplay(); toast('Replay reached the live candle'); return; }
@@ -4095,7 +4168,7 @@ setInterval(() => { dirty = true; }, 1000);  // bar-close countdown
 $('go').onclick = connect;
 
 $('tf').onchange = e => { const was = RP.on && RP.mode === 'hist' && S.candles.length ? S.candles[S.candles.length - 1].t : null; if (RP.on) stopReplay(true);
-  S.tfMs = +e.target.value*1000; lens = null; rebuild(); if (was) startHistReplay(was, true); };
+  S.tfMs = +e.target.value*1000; lens = null; rebuild(); if (was) startHistReplay(was, true); else loadDeep(); };
 $('mode').onchange = e => { S.mode = e.target.value; dirty = true; };
 $('big').onchange = e => { S.bigTh = +e.target.value || 0; dirty = true; };
 $('np').onchange = e => { S.nPrints = clamp(+e.target.value || 0, 0, 30); derivedDirty = dirty = true; };
